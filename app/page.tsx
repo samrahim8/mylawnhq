@@ -118,7 +118,7 @@ export default function LandingPage() {
             <span className="font-display font-semibold text-base sm:text-lg text-[#1a1a1a]">LawnHQ</span>
           </Link>
           <nav className="flex items-center gap-2 sm:gap-6">
-            <Link href="/home" className="text-[10px] sm:text-sm font-bold sm:font-medium text-[#525252] hover:text-[#1a1a1a] transition-colors tracking-wide uppercase">
+            <Link href="/dashboard" className="text-[10px] sm:text-sm font-bold sm:font-medium text-[#525252] hover:text-[#1a1a1a] transition-colors tracking-wide uppercase">
               Demo
             </Link>
             <Link href="/login" className="text-[10px] sm:text-sm font-bold sm:font-medium text-[#525252] hover:text-[#1a1a1a] transition-colors tracking-wide uppercase">
