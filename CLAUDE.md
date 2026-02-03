@@ -94,3 +94,6 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Google OAuth** — Added "Continue with Google" button to login and signup pages
 - **Moved to Vercel** — Migrated hosting from Netlify to Vercel with auto-deploy on push to main
 - **Security fixes** — Removed hardcoded credentials from docs, added zip code validation, generic auth error messages
+- **Demo access** — Opened app routes for public demo, pointed Demo link to /dashboard
+- **Mobile UX improvements** — Improved layout and responsiveness for dashboard, activity modal, recent activities, and chat
+- **Vercel GitHub connection** — Switched Vercel deploy from samrahim88 personal account to mylawnhq org
