@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   {
@@ -92,6 +93,14 @@ interface SidebarProps {
 
 function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLinkClick?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <>
@@ -201,7 +210,16 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
 
       {/* Footer */}
       <div className={`p-3 border-t border-[#e5e5e5] ${!isExpanded && "hidden"}`}>
-        <p className="text-xs text-[#737373] text-center">© 2025 LawnHQ</p>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[#525252] hover:bg-[#f8f6f3] hover:text-[#1a1a1a] transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span className="font-medium text-sm">Log out</span>
+        </button>
+        <p className="text-xs text-[#737373] text-center mt-2">© 2025 LawnHQ</p>
       </div>
     </>
   );
