@@ -224,7 +224,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               onKeyDown={handleKeyDown}
               placeholder="Ask about your lawn..."
               rows={1}
-              className="flex-1 bg-transparent text-neutral-900 placeholder-neutral-400 outline-none resize-none max-h-32"
+              className="flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none max-h-32"
               style={{ minHeight: "24px" }}
             />
             <button

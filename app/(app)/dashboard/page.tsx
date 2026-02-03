@@ -187,9 +187,9 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="h-full flex flex-col overflow-hidden p-2 sm:p-3 lg:p-4">
-      {/* Header - Fixed height, responsive */}
-      <div className="flex-shrink-0 bg-white rounded-lg border border-[#e5e5e5] shadow-sm p-3 sm:p-4 mb-2 sm:mb-3">
+    <div className="h-full flex flex-col overflow-y-auto md:overflow-hidden p-2 sm:p-3 lg:p-4">
+      {/* Header - Scrollable on mobile, fixed on desktop */}
+      <div className="md:flex-shrink-0 bg-white rounded-lg border border-[#e5e5e5] shadow-sm p-3 sm:p-4 mb-2 sm:mb-3">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-4">
           <div className="flex-shrink-0 text-center md:text-left">
             <h1 className="text-base sm:text-lg lg:text-xl font-bold text-[#1a1a1a]">
@@ -294,8 +294,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Photo Carousel - Fixed height, responsive */}
-      <div className="flex-shrink-0 mb-2 sm:mb-3">
+      {/* Photo Carousel - Scrollable on mobile, fixed on desktop */}
+      <div className="md:flex-shrink-0 mb-2 sm:mb-3">
         <PhotoCarousel
           photos={photos}
           onAddPhoto={addPhoto}

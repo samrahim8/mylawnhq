@@ -27,7 +27,7 @@ export default function AppLayout({
     if (canShowPrompt) {
       const timer = setTimeout(() => {
         setShowA2HSModal(true);
-      }, 5000);
+      }, 15000);
       return () => clearTimeout(timer);
     }
   }, [canShowPrompt]);

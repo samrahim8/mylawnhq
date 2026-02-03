@@ -195,7 +195,7 @@ export default function LandingPage() {
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="When should I fertilize my bermuda lawn?"
+                    placeholder="When should I fertilize?"
                     className="flex-1 border border-[#e5e5e5] rounded-lg px-3 py-2.5 text-sm text-[#525252] placeholder-[#a3a3a3] outline-none focus:border-[#7a8b6e]"
                   />
                   <button type="submit" className="w-10 h-10 bg-[#7a8b6e] hover:bg-[#6a7b5e] rounded-lg flex items-center justify-center transition-colors">

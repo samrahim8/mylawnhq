@@ -69,7 +69,53 @@ export default function RecentActivities({
 
     if (activity.product) details.push(activity.product);
     if (activity.duration) details.push(`${activity.duration} min`);
-    if (activity.height) details.push(`Height: ${activity.height}`);
+    if (activity.height) details.push(`${activity.height}`);
+
+    return details.length > 0 ? details.join(" • ") : null;
+  };
+
+  const getAdditionalDetails = (activity: CalendarActivity) => {
+    const details: string[] = [];
+
+    // Mowing specific
+    if (activity.method) {
+      const methodLabels: Record<string, string> = {
+        bagged: "Bagged",
+        mulched: "Mulched",
+        "side-discharge": "Side Discharge",
+      };
+      details.push(methodLabels[activity.method] || activity.method);
+    }
+
+    // Watering specific
+    if (activity.zones) details.push(`Zones: ${activity.zones}`);
+    if (activity.amount) details.push(activity.amount);
+
+    // Fertilizing specific
+    if (activity.applicationRate) {
+      const rateLabels: Record<string, string> = {
+        light: "Light Rate",
+        normal: "Normal Rate",
+        heavy: "Heavy Rate",
+      };
+      details.push(rateLabels[activity.applicationRate] || activity.applicationRate);
+    }
+    if (activity.npk) details.push(`NPK: ${activity.npk}`);
+
+    // Seeding specific
+    if (activity.grassType) details.push(activity.grassType);
+    if (activity.seedAmount) details.push(activity.seedAmount);
+    if (activity.germinationWindow) details.push(`Germination: ${activity.germinationWindow}`);
+
+    // Weed/Pest control specific
+    if (activity.treatmentType) {
+      const treatmentLabels: Record<string, string> = {
+        spot: "Spot Treatment",
+        broadcast: "Broadcast",
+      };
+      details.push(treatmentLabels[activity.treatmentType] || activity.treatmentType);
+    }
+    if (activity.target) details.push(`Target: ${activity.target}`);
 
     return details.length > 0 ? details.join(" • ") : null;
   };
@@ -122,8 +168,6 @@ export default function RecentActivities({
       ) : (
         <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-0 min-h-0 scrollbar-hide">
           {visibleActivities.map((activity, index) => {
-            const detailsLine = getDetailsLine(activity);
-
             return (
               <article
                 key={activity.id}
@@ -132,8 +176,8 @@ export default function RecentActivities({
                 }`}
                 onClick={() => onEditActivity?.(activity)}
               >
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="text-sm sm:text-base lg:text-lg flex-shrink-0" role="img" aria-hidden="true">
+                <div className="flex items-start gap-1.5 sm:gap-2">
+                  <span className="text-sm sm:text-base lg:text-lg flex-shrink-0 mt-0.5" role="img" aria-hidden="true">
                     {getActivityIcon(activity.type)}
                   </span>
 
@@ -141,14 +185,29 @@ export default function RecentActivities({
                     <p className="text-[11px] sm:text-xs lg:text-sm font-semibold text-[#2d3748]">
                       {getActivityLabel(activity.type)}
                     </p>
-                    {detailsLine && (
+                    {activity.product && (
                       <p className="text-[10px] sm:text-[11px] text-[#4a5568] truncate">
-                        {detailsLine}
+                        {activity.product}
                       </p>
                     )}
                     {activity.area && (
-                      <p className="text-[10px] sm:text-[11px] text-[#a3a3a3] truncate">
-                        📍 {activity.area}
+                      <p className="text-[10px] sm:text-[11px] text-[#a3a3a3]">
+                        Area: {activity.area}
+                      </p>
+                    )}
+                    {(activity.amount || activity.duration) && (
+                      <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-[#a3a3a3]">
+                        {activity.duration && (
+                          <span className="flex-shrink-0">{activity.duration} min</span>
+                        )}
+                        {activity.amount && (
+                          <span className="flex-shrink-0">{activity.amount}</span>
+                        )}
+                      </div>
+                    )}
+                    {activity.notes && (
+                      <p className="text-[10px] sm:text-[11px] text-[#a3a3a3] italic truncate">
+                        {activity.notes}
                       </p>
                     )}
                   </div>

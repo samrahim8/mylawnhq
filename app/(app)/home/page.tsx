@@ -263,7 +263,7 @@ function HomePageContent() {
               }}
               placeholder="How can I help you today?"
               rows={3}
-              className="w-full px-4 py-4 pr-14 text-sm sm:text-base text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none bg-transparent resize-none"
+              className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none bg-transparent resize-none"
             />
             <button
               type="submit"
@@ -279,11 +279,11 @@ function HomePageContent() {
       </div>
 
       {/* Quick Action Buttons */}
-      <div className="flex-shrink-0 flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 max-w-2xl mx-auto">
+      <div className="flex-shrink-0 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3 mb-6 sm:mb-8 max-w-md sm:max-w-2xl mx-auto px-4 sm:px-0">
         <button
           type="button"
           onClick={handleOpenActivityModal}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -293,7 +293,7 @@ function HomePageContent() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -310,7 +310,7 @@ function HomePageContent() {
         <button
           type="button"
           onClick={() => setIsTodoModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -319,7 +319,7 @@ function HomePageContent() {
         </button>
         <Link
           href="/spreader"
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />

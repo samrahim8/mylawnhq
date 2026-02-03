@@ -142,7 +142,7 @@ export default function ActivityModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -150,10 +150,10 @@ export default function ActivityModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#e5e5e5]">
-          <h2 className="text-xl font-semibold text-[#1a1a1a]">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e5e5e5] flex-shrink-0">
+          <h2 className="text-lg sm:text-xl font-semibold text-[#1a1a1a]">
             {isEditing ? "Edit Activity" : "Log Activity"}
           </h2>
           <button
@@ -177,39 +177,39 @@ export default function ActivityModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
           {/* Date Picker */}
           <div>
-            <label className="block text-sm font-medium text-[#525252] mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
               Date
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
             />
           </div>
 
           {/* Activity Type */}
           <div>
-            <label className="block text-sm font-medium text-[#525252] mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
               Activity Type
             </label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               {ACTIVITY_TYPES.map((type) => (
                 <button
                   key={type.value}
                   type="button"
                   onClick={() => setActivityType(type.value)}
-                  className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-colors ${
+                  className={`flex flex-col items-center gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg border transition-colors ${
                     activityType === type.value
                       ? "border-[#7a8b6e] bg-[#f0f4ed] text-[#7a8b6e]"
                       : "border-[#e5e5e5] hover:border-[#a3a3a3] text-[#525252]"
                   }`}
                 >
-                  <span className="text-xl">{type.icon}</span>
-                  <span className="text-xs font-medium">{type.label}</span>
+                  <span className="text-lg sm:text-xl">{type.icon}</span>
+                  <span className="text-[10px] sm:text-xs font-medium">{type.label}</span>
                 </button>
               ))}
             </div>
@@ -217,16 +217,16 @@ export default function ActivityModal({
 
           {/* Area of Lawn */}
           <div>
-            <label className="block text-sm font-medium text-[#525252] mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
               Area of Lawn
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2">
               {AREA_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setArea(option.value)}
-                  className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg border text-xs sm:text-sm font-medium transition-colors ${
                     area === option.value
                       ? "border-[#7a8b6e] bg-[#f0f4ed] text-[#7a8b6e]"
                       : "border-[#e5e5e5] hover:border-[#a3a3a3] text-[#525252]"
@@ -241,7 +241,7 @@ export default function ActivityModal({
           {/* Product Used / Water Amount - Dynamic based on activity type */}
           {activityType === "water" ? (
             <div>
-              <label className="block text-sm font-medium text-[#525252] mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
                 Water Amount (optional)
               </label>
               <input
@@ -249,12 +249,12 @@ export default function ActivityModal({
                 value={waterAmount}
                 onChange={(e) => setWaterAmount(e.target.value)}
                 placeholder="e.g., 30 minutes, 1 inch"
-                className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
               />
             </div>
           ) : (
             <div className="relative">
-              <label className="block text-sm font-medium text-[#525252] mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
                 Product Used (optional)
               </label>
               <input
@@ -267,20 +267,20 @@ export default function ActivityModal({
                 }}
                 onFocus={() => setShowProductDropdown(true)}
                 placeholder="e.g., Scotts Turf Builder"
-                className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
               />
               {/* Product Dropdown */}
               {showProductDropdown && filteredProducts.length > 0 && (
                 <div
                   ref={dropdownRef}
-                  className="absolute z-10 w-full mt-1 bg-white border border-[#e5e5e5] rounded-lg shadow-lg max-h-40 overflow-auto"
+                  className="absolute z-10 w-full mt-1 bg-white border border-[#e5e5e5] rounded-lg shadow-lg max-h-32 overflow-auto"
                 >
                   {filteredProducts.map((p) => (
                     <button
                       key={p}
                       type="button"
                       onClick={() => selectProduct(p)}
-                      className="w-full px-4 py-2 text-left text-sm text-[#525252] hover:bg-[#f5f5f5] transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 text-left text-sm text-[#525252] hover:bg-[#f5f5f5] transition-colors"
                     >
                       {p}
                     </button>
@@ -292,30 +292,30 @@ export default function ActivityModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-[#525252] mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
               Notes (optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional details..."
-              rows={3}
-              className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent resize-none"
+              rows={2}
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent resize-none"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#525252] font-medium hover:bg-[#f5f5f5] transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-[#525252] text-sm font-medium hover:bg-[#f5f5f5] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] rounded-lg text-white font-medium transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] rounded-lg text-white text-sm font-medium transition-colors"
             >
               {isEditing ? "Save Changes" : "Log Activity"}
             </button>

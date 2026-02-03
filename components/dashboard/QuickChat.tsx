@@ -30,7 +30,7 @@ export default function QuickChat() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Ask about lawn care..."
-            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-[#e5e5e5] rounded-lg text-[11px] sm:text-xs text-[#1a1a1a] placeholder-[#a3a3a3] outline-none focus:border-[#7a8b6e]"
+            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-[#e5e5e5] rounded-lg text-base sm:text-xs text-[#1a1a1a] placeholder-[#a3a3a3] outline-none focus:border-[#7a8b6e]"
           />
           <Link
             href={`/chat${message ? `?q=${encodeURIComponent(message)}` : ""}`}
