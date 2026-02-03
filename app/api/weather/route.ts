@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const zip = searchParams.get("zip");
 
-  if (!zip) {
-    return NextResponse.json({ error: "Zip code is required" }, { status: 400 });
+  if (!zip || !/^\d{5}$/.test(zip)) {
+    return NextResponse.json({ error: "Valid 5-digit zip code is required" }, { status: 400 });
   }
 
   // If no API key, return mock data

@@ -12,10 +12,10 @@ git pull
 npm install
 ```
 
-3. Create the `.env.local` file in the project root with this content:
+3. Create the `.env.local` file in the project root. Ask Sam for the Supabase keys:
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://rjeqfqrqcdrznyojhumk.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqZXFmcXJxY2Ryem55b2podW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNDk5OTAsImV4cCI6MjA4NTYyNTk5MH0.6qTtAR2nHLDTVzsTHGZU9s_qGAyDoKVE7jsA8bFJV1g
+NEXT_PUBLIC_SUPABASE_URL=<ask Sam>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<ask Sam>
 ```
 
 4. Start the dev server:
