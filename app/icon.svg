@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grass1" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#228B22"/>
+      <stop offset="100%" style="stop-color:#7CFC00"/>
+    </linearGradient>
+    <linearGradient id="grass2" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#006400"/>
+      <stop offset="100%" style="stop-color:#32CD32"/>
+    </linearGradient>
+    <linearGradient id="grass3" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#2E8B57"/>
+      <stop offset="100%" style="stop-color:#98FB98"/>
+    </linearGradient>
+  </defs>
+  <!-- Left blade -->
+  <path d="M25 95 Q20 60 15 25 Q17 24 20 25 Q28 55 35 95 Z" fill="url(#grass1)"/>
+  <!-- Left-center blade -->
+  <path d="M35 95 Q32 50 28 15 Q31 13 34 15 Q42 50 48 95 Z" fill="url(#grass2)"/>
+  <!-- Center blade (tallest) -->
+  <path d="M45 95 Q47 45 50 5 Q53 4 56 5 Q55 50 55 95 Z" fill="url(#grass3)"/>
+  <!-- Right-center blade -->
+  <path d="M52 95 Q58 50 68 15 Q71 13 74 15 Q66 55 62 95 Z" fill="url(#grass2)"/>
+  <!-- Right blade -->
+  <path d="M65 95 Q72 55 80 25 Q83 24 85 25 Q80 60 75 95 Z" fill="url(#grass1)"/>
+  <!-- Small left blade -->
+  <path d="M18 95 Q12 70 8 45 Q11 44 13 45 Q20 68 28 95 Z" fill="url(#grass2)"/>
+  <!-- Small right blade -->
+  <path d="M72 95 Q80 70 88 50 Q90 49 92 50 Q86 72 82 95 Z" fill="url(#grass1)"/>
+</svg>

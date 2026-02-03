@@ -1,0 +1,27 @@
+{
+  "name": "LawnHQ - AI Lawn Care Assistant",
+  "short_name": "LawnHQ",
+  "description": "AI lawn care, personalized to your grass type and zip code. Expert guidance, 24/7.",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#f8f6f3",
+  "theme_color": "#7a8b6e",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"],
+  "prefer_related_applications": false
+}
