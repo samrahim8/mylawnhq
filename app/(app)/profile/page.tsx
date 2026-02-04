@@ -55,7 +55,7 @@ export default function ProfilePage() {
   const unselectedClass = "bg-white border-neutral-200 text-neutral-600 hover:border-[#7a8b6e]/50";
 
   return (
-    <div className="min-h-screen overflow-y-auto pb-8">
+    <div className="min-h-full pb-8">
       <div className="p-4 sm:p-6 max-w-2xl mx-auto">
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 sm:p-6">
           <div className="mb-5">
