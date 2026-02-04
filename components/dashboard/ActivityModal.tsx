@@ -177,7 +177,7 @@ export default function ActivityModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-5 overflow-y-auto flex-1">
           {/* Date Picker */}
           <div>
             <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
@@ -295,12 +295,12 @@ export default function ActivityModal({
             <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
               Notes (optional)
             </label>
-            <textarea
+            <input
+              type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional details..."
-              rows={2}
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent resize-none"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
             />
           </div>
 
