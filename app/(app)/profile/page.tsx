@@ -52,20 +52,20 @@ export default function ProfilePage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">
+      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-neutral-900 mb-1">
             Profile Setup
           </h1>
-          <p className="text-neutral-600">
-            Tell us about your lawn so we can provide personalized recommendations.
+          <p className="text-sm text-neutral-600">
+            Tell us about your lawn for personalized recommendations.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Zip Code */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
               Zip Code *
             </label>
             <input
@@ -75,25 +75,22 @@ export default function ProfilePage() {
                 setFormData({ ...formData, zipCode: e.target.value })
               }
               placeholder="Enter your zip code"
-              className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 outline-none focus:border-neutral-900"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm placeholder-neutral-400 outline-none focus:border-neutral-900"
               required
               maxLength={10}
             />
-            <p className="mt-1 text-xs text-neutral-400">
-              Used for local weather and growing conditions
-            </p>
           </div>
 
           {/* Grass Type */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
               Grass Type *
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { value: "bermuda", label: "Bermuda", desc: "Warm-season, drought-tolerant" },
-                { value: "zoysia", label: "Zoysia", desc: "Dense, low maintenance" },
-                { value: "mixed", label: "Mixed", desc: "Combination of types" },
+                { value: "bermuda", label: "Bermuda", desc: "Drought-tolerant" },
+                { value: "zoysia", label: "Zoysia", desc: "Low maintenance" },
+                { value: "mixed", label: "Mixed", desc: "Combination" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -104,14 +101,14 @@ export default function ProfilePage() {
                       grassType: option.value as "zoysia" | "bermuda" | "mixed",
                     })
                   }
-                  className={`p-4 rounded-lg border text-left transition-all ${
+                  className={`px-3 py-2 rounded-lg border text-left transition-all ${
                     formData.grassType === option.value
                       ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
                       : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
                   }`}
                 >
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                  <p className="font-medium text-sm">{option.label}</p>
+                  <p className="text-xs text-neutral-400">{option.desc}</p>
                 </button>
               ))}
             </div>
@@ -119,13 +116,13 @@ export default function ProfilePage() {
 
           {/* Lawn Size */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
               Lawn Size
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { value: "small", label: "Small", desc: "< 2,500 sq ft" },
-                { value: "medium", label: "Medium", desc: "2,500 - 10,000 sq ft" },
+                { value: "medium", label: "Medium", desc: "2,500 - 10k sq ft" },
                 { value: "large", label: "Large", desc: "> 10,000 sq ft" },
               ].map((option) => (
                 <button
@@ -137,14 +134,14 @@ export default function ProfilePage() {
                       lawnSize: option.value as "small" | "medium" | "large",
                     })
                   }
-                  className={`p-4 rounded-lg border text-left transition-all ${
+                  className={`px-3 py-2 rounded-lg border text-left transition-all ${
                     formData.lawnSize === option.value
                       ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
                       : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
                   }`}
                 >
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                  <p className="font-medium text-sm">{option.label}</p>
+                  <p className="text-xs text-neutral-400">{option.desc}</p>
                 </button>
               ))}
             </div>
@@ -152,14 +149,14 @@ export default function ProfilePage() {
 
           {/* Sun Exposure */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
               Sun Exposure
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { value: "full", label: "Full Sun", desc: "6+ hours direct sun" },
-                { value: "partial", label: "Partial", desc: "3-6 hours sun" },
-                { value: "shade", label: "Shade", desc: "< 3 hours sun" },
+                { value: "full", label: "Full Sun", desc: "6+ hours" },
+                { value: "partial", label: "Partial", desc: "3-6 hours" },
+                { value: "shade", label: "Shade", desc: "< 3 hours" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -170,14 +167,14 @@ export default function ProfilePage() {
                       sunExposure: option.value as "full" | "partial" | "shade",
                     })
                   }
-                  className={`p-4 rounded-lg border text-left transition-all ${
+                  className={`px-3 py-2 rounded-lg border text-left transition-all ${
                     formData.sunExposure === option.value
                       ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
                       : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
                   }`}
                 >
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                  <p className="font-medium text-sm">{option.label}</p>
+                  <p className="text-xs text-neutral-400">{option.desc}</p>
                 </button>
               ))}
             </div>
@@ -185,8 +182,8 @@ export default function ProfilePage() {
 
           {/* Irrigation System */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Irrigation System (optional)
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              Irrigation System
             </label>
             <select
               value={formData.irrigationSystem}
@@ -196,7 +193,7 @@ export default function ProfilePage() {
                   irrigationSystem: e.target.value as "" | "none" | "manual" | "in-ground" | "drip",
                 })
               }
-              className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 outline-none focus:border-neutral-900"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-neutral-900"
             >
               <option value="">Select irrigation system</option>
               <option value="none">None</option>
@@ -204,21 +201,18 @@ export default function ProfilePage() {
               <option value="in-ground">In-ground sprinkler system</option>
               <option value="drip">Drip irrigation</option>
             </select>
-            <p className="mt-1 text-xs text-neutral-400">
-              Helps us recommend watering schedules
-            </p>
           </div>
 
           {/* Lawn Goal */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Lawn Goal (optional)
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              Lawn Goal
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { value: "low-maintenance", label: "Low Maintenance", desc: "Minimal effort, good enough" },
-                { value: "healthy-green", label: "Healthy Green", desc: "Regular care, nice lawn" },
-                { value: "golf-course", label: "Golf-Course", desc: "Premium quality, pristine" },
+                { value: "low-maintenance", label: "Low Maintenance", desc: "Minimal effort" },
+                { value: "healthy-green", label: "Healthy Green", desc: "Regular care" },
+                { value: "golf-course", label: "Golf-Course", desc: "Premium quality" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -229,14 +223,14 @@ export default function ProfilePage() {
                       lawnGoal: option.value as "low-maintenance" | "healthy-green" | "golf-course",
                     })
                   }
-                  className={`p-4 rounded-lg border text-left transition-all ${
+                  className={`px-3 py-2 rounded-lg border text-left transition-all ${
                     formData.lawnGoal === option.value
                       ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
                       : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
                   }`}
                 >
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                  <p className="font-medium text-sm">{option.label}</p>
+                  <p className="text-xs text-neutral-400">{option.desc}</p>
                 </button>
               ))}
             </div>
@@ -244,12 +238,12 @@ export default function ProfilePage() {
 
           {/* Lawn Age */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Lawn Age (optional)
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              Lawn Age
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {[
-                { value: "new", label: "New", desc: "Less than 1 year old" },
+                { value: "new", label: "New", desc: "< 1 year old" },
                 { value: "established", label: "Established", desc: "1+ years old" },
               ].map((option) => (
                 <button
@@ -261,14 +255,14 @@ export default function ProfilePage() {
                       lawnAge: option.value as "new" | "established",
                     })
                   }
-                  className={`p-4 rounded-lg border text-left transition-all ${
+                  className={`px-3 py-2 rounded-lg border text-left transition-all ${
                     formData.lawnAge === option.value
                       ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
                       : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
                   }`}
                 >
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                  <p className="font-medium text-sm">{option.label}</p>
+                  <p className="text-xs text-neutral-400">{option.desc}</p>
                 </button>
               ))}
             </div>
@@ -276,20 +270,17 @@ export default function ProfilePage() {
 
           {/* Known Issues (multi-select) */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Known Issues (optional)
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              Known Issues
             </label>
-            <p className="text-xs text-neutral-400 mb-3">
-              Select all that apply to your lawn
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {[
-                { value: "weeds", label: "Weeds", desc: "Unwanted plants" },
-                { value: "bare-spots", label: "Bare Spots", desc: "Patchy areas" },
-                { value: "fungus", label: "Fungus", desc: "Disease/mold" },
-                { value: "pests", label: "Pests", desc: "Insects/grubs" },
-                { value: "shade-damage", label: "Shade Damage", desc: "Thin/weak areas" },
-                { value: "none", label: "None", desc: "No issues" },
+                { value: "weeds", label: "Weeds" },
+                { value: "bare-spots", label: "Bare Spots" },
+                { value: "fungus", label: "Fungus" },
+                { value: "pests", label: "Pests" },
+                { value: "shade-damage", label: "Shade Damage" },
+                { value: "none", label: "None" },
               ].map((option) => {
                 const isSelected = formData.knownIssues.includes(option.value);
                 const isNone = option.value === "none";
@@ -321,15 +312,15 @@ export default function ProfilePage() {
                     key={option.value}
                     type="button"
                     onClick={handleToggle}
-                    className={`p-4 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
                       isSelected
                         ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
                         : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
                     }`}
                   >
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-center gap-2">
                       <div
-                        className={`w-4 h-4 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                        className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                           isSelected
                             ? "border-neutral-900 bg-neutral-900"
                             : "border-neutral-400"
@@ -337,7 +328,7 @@ export default function ProfilePage() {
                       >
                         {isSelected && (
                           <svg
-                            className="w-3 h-3 text-white"
+                            className="w-2.5 h-2.5 text-white"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
@@ -349,10 +340,7 @@ export default function ProfilePage() {
                           </svg>
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium">{option.label}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{option.desc}</p>
-                      </div>
+                      <p className="font-medium text-sm">{option.label}</p>
                     </div>
                   </button>
                 );
@@ -360,17 +348,17 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Soil Type (optional) */}
+          {/* Soil Type */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Soil Type (optional)
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              Soil Type
             </label>
             <select
               value={formData.soilType}
               onChange={(e) =>
                 setFormData({ ...formData, soilType: e.target.value })
               }
-              className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 outline-none focus:border-neutral-900"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-neutral-900"
             >
               <option value="">Select soil type</option>
               <option value="clay">Clay</option>
@@ -381,17 +369,17 @@ export default function ProfilePage() {
             </select>
           </div>
 
-          {/* Spreader Type (optional) */}
+          {/* Spreader Type */}
           <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Spreader Type (optional)
+            <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              Spreader Type
             </label>
             <select
               value={formData.spreaderType}
               onChange={(e) =>
                 setFormData({ ...formData, spreaderType: e.target.value })
               }
-              className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 outline-none focus:border-neutral-900"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-neutral-900"
             >
               <option value="">Select spreader</option>
               <optgroup label="The Andersons">
@@ -453,16 +441,13 @@ export default function ProfilePage() {
                 <option value="none">No Spreader</option>
               </optgroup>
             </select>
-            <p className="mt-1 text-xs text-neutral-400">
-              Used for fertilizer and seed application rate settings
-            </p>
           </div>
 
           {/* Submit */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-3 pt-3">
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-medium rounded-lg transition-colors"
+              className="flex-1 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {isSetUp ? "Update Profile" : "Save Profile"}
             </button>
@@ -470,7 +455,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}
-                className="px-6 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-medium rounded-lg transition-colors"
+                className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-sm font-medium rounded-lg transition-colors"
               >
                 Cancel
               </button>
