@@ -22,6 +22,12 @@ const config: Config = {
           800: "#166534",
           900: "#14532d",
         },
+        // Sandbox design tokens
+        lawn: "#4A6741",
+        terracotta: "#C4785A",
+        cream: "#F5F2EB",
+        "deep-brown": "#2D2A26",
+        ochre: "#D4A857",
       },
       fontFamily: {
         display: ["Space Grotesk", "system-ui", "sans-serif"],

@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "LawnHQ",
-  description: "AI lawn care, personalized to your grass type and zip code.",
+  title: "LawnHQ - The Smartest Way to Care for Your Lawn",
+  description: "Get your free 90-day lawn care plan. Personalized to your grass, your climate, your goals.",
 };
 
 export default function SandboxLayout({
@@ -9,7 +9,7 @@ export default function SandboxLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-cream">
       {children}
     </div>
   );
