@@ -99,7 +99,9 @@ function HomePageContent() {
   const [editingActivity, setEditingActivity] = useState<CalendarActivity | null>(null);
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isChatFocused, setIsChatFocused] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // If there's an initial query from the landing page, auto-redirect to chat
   useEffect(() => {
@@ -254,18 +256,30 @@ function HomePageContent() {
 
           {/* Chat Input */}
           <form onSubmit={handleChatSubmit} className="relative">
+            {/* Custom placeholder with blinking cursor */}
+            {!chatInput && !isChatFocused && (
+              <div
+                className="absolute left-4 top-4 text-base text-[#a3a3a3] pointer-events-none flex items-center"
+                onClick={() => textareaRef.current?.focus()}
+              >
+                <span>Talk to me, grass whisperer.</span>
+                <span className="ml-0.5 w-0.5 h-5 bg-[#7a8b6e] animate-pulse" />
+              </div>
+            )}
             <textarea
+              ref={textareaRef}
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
+              onFocus={() => setIsChatFocused(true)}
+              onBlur={() => setIsChatFocused(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleChatSubmit(e);
                 }
               }}
-              placeholder="Talk to me, grass whisperer."
               rows={3}
-              className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none bg-transparent resize-none"
+              className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] focus:outline-none bg-transparent resize-none"
             />
             <button
               type="submit"
