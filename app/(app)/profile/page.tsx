@@ -186,29 +186,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Irrigation System */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
-                Irrigation System
-              </label>
-              <select
-                value={formData.irrigationSystem}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    irrigationSystem: e.target.value as "" | "none" | "manual" | "in-ground" | "drip",
-                  })
-                }
-                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
-              >
-                <option value="">Select irrigation system</option>
-                <option value="none">None</option>
-                <option value="manual">Manual (hose/sprinkler)</option>
-                <option value="in-ground">In-ground sprinkler system</option>
-                <option value="drip">Drip irrigation</option>
-              </select>
-            </div>
-
             {/* Lawn Goal */}
             <div>
               <label className="block text-sm font-medium text-neutral-600 mb-1.5">
@@ -240,6 +217,103 @@ export default function ProfilePage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Spreader Type */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+                Spreader Type
+              </label>
+              <select
+                value={formData.spreaderType}
+                onChange={(e) =>
+                  setFormData({ ...formData, spreaderType: e.target.value })
+                }
+                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
+              >
+                <option value="">Select spreader</option>
+                <optgroup label="The Andersons">
+                  <option value="andersons-lco-1000">The Andersons LCO-1000</option>
+                  <option value="andersons-pacer-pro">The Andersons Pacer Pro</option>
+                  <option value="andersons-yard-star-2150">The Andersons Yard Star 2150</option>
+                  <option value="andersons-2000">The Andersons Model 2000</option>
+                  <option value="andersons-sr">The Andersons SR</option>
+                </optgroup>
+                <optgroup label="Agri-Fab">
+                  <option value="agri-fab-broadcast">Agri-Fab Broadcast (1-10)</option>
+                  <option value="agri-fab-rotary">Agri-Fab Rotary</option>
+                </optgroup>
+                <optgroup label="Brinly">
+                  <option value="brinly-broadcast">Brinly 20 Series Push Broadcast (0-30)</option>
+                </optgroup>
+                <optgroup label="Chapin">
+                  <option value="chapin-broadcast">Chapin Broadcast (0-30)</option>
+                </optgroup>
+                <optgroup label="Craftsman">
+                  <option value="craftsman-broadcast">Craftsman Broadcast (1-10)</option>
+                </optgroup>
+                <optgroup label="EarthWay">
+                  <option value="earthway-3400-hand">EarthWay 3400 Hand Spreader (1-3)</option>
+                  <option value="earthway-broadcast">EarthWay Broadcast (0-30)</option>
+                  <option value="earthway-drop">Earthway Drop</option>
+                  <option value="earthway-rotary">Earthway Rotary</option>
+                </optgroup>
+                <optgroup label="Echo">
+                  <option value="echo-broadcast">Echo Broadcast</option>
+                </optgroup>
+                <optgroup label="Lesco">
+                  <option value="lesco-broadcast">Lesco Broadcast</option>
+                  <option value="lesco-rotary-numbers">Lesco Rotary (numbers)</option>
+                  <option value="lesco-rotary-letters">Lesco Rotary (letters)</option>
+                </optgroup>
+                <optgroup label="Precision">
+                  <option value="precision-broadcast">Precision Broadcast (1-10)</option>
+                </optgroup>
+                <optgroup label="Prizelawn">
+                  <option value="prizelawn-bf1-cbr">Prizelawn BF1/CBR/III/CBR IV</option>
+                  <option value="prizelawn-lf-ii">Prizelawn LF II</option>
+                </optgroup>
+                <optgroup label="Scotts">
+                  <option value="scotts-broadcast">Scotts Broadcast (2-15)</option>
+                  <option value="scotts-hand-held-broadcast">Scotts Hand-Held Broadcast</option>
+                  <option value="scotts-wizz">Scotts Wizz Hand Broadcast Spreader</option>
+                  <option value="scotts-rotary-consumer">Scotts Rotary (Consumer)</option>
+                  <option value="scotts-drop-consumer">Scotts Drop (Consumer)</option>
+                  <option value="scotts-easygreen">Scotts EasyGreen (Consumer)</option>
+                  <option value="scotts-rba-pro-rotary">Scotts RBA Pro Rotary</option>
+                </optgroup>
+                <optgroup label="Spyker">
+                  <option value="spyker-broadcast">Spyker Broadcast</option>
+                  <option value="spyker-rotary">Spyker Rotary</option>
+                </optgroup>
+                <optgroup label="Other">
+                  <option value="other">Other Spreader</option>
+                  <option value="none">No Spreader</option>
+                </optgroup>
+              </select>
+            </div>
+
+            {/* Irrigation System */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+                Irrigation System
+              </label>
+              <select
+                value={formData.irrigationSystem}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    irrigationSystem: e.target.value as "" | "none" | "manual" | "in-ground" | "drip",
+                  })
+                }
+                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
+              >
+                <option value="">Select irrigation system</option>
+                <option value="none">None</option>
+                <option value="manual">Manual (hose/sprinkler)</option>
+                <option value="in-ground">In-ground sprinkler system</option>
+                <option value="drip">Drip irrigation</option>
+              </select>
             </div>
 
             {/* Lawn Age */}
@@ -372,80 +446,6 @@ export default function ProfilePage() {
                 <option value="loam">Loam</option>
                 <option value="silt">Silt</option>
                 <option value="unknown">Not sure</option>
-              </select>
-            </div>
-
-            {/* Spreader Type */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
-                Spreader Type
-              </label>
-              <select
-                value={formData.spreaderType}
-                onChange={(e) =>
-                  setFormData({ ...formData, spreaderType: e.target.value })
-                }
-                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
-              >
-                <option value="">Select spreader</option>
-                <optgroup label="The Andersons">
-                  <option value="andersons-lco-1000">The Andersons LCO-1000</option>
-                  <option value="andersons-pacer-pro">The Andersons Pacer Pro</option>
-                  <option value="andersons-yard-star-2150">The Andersons Yard Star 2150</option>
-                  <option value="andersons-2000">The Andersons Model 2000</option>
-                  <option value="andersons-sr">The Andersons SR</option>
-                </optgroup>
-                <optgroup label="Agri-Fab">
-                  <option value="agri-fab-broadcast">Agri-Fab Broadcast (1-10)</option>
-                  <option value="agri-fab-rotary">Agri-Fab Rotary</option>
-                </optgroup>
-                <optgroup label="Brinly">
-                  <option value="brinly-broadcast">Brinly 20 Series Push Broadcast (0-30)</option>
-                </optgroup>
-                <optgroup label="Chapin">
-                  <option value="chapin-broadcast">Chapin Broadcast (0-30)</option>
-                </optgroup>
-                <optgroup label="Craftsman">
-                  <option value="craftsman-broadcast">Craftsman Broadcast (1-10)</option>
-                </optgroup>
-                <optgroup label="EarthWay">
-                  <option value="earthway-3400-hand">EarthWay 3400 Hand Spreader (1-3)</option>
-                  <option value="earthway-broadcast">EarthWay Broadcast (0-30)</option>
-                  <option value="earthway-drop">Earthway Drop</option>
-                  <option value="earthway-rotary">Earthway Rotary</option>
-                </optgroup>
-                <optgroup label="Echo">
-                  <option value="echo-broadcast">Echo Broadcast</option>
-                </optgroup>
-                <optgroup label="Lesco">
-                  <option value="lesco-broadcast">Lesco Broadcast</option>
-                  <option value="lesco-rotary-numbers">Lesco Rotary (numbers)</option>
-                  <option value="lesco-rotary-letters">Lesco Rotary (letters)</option>
-                </optgroup>
-                <optgroup label="Precision">
-                  <option value="precision-broadcast">Precision Broadcast (1-10)</option>
-                </optgroup>
-                <optgroup label="Prizelawn">
-                  <option value="prizelawn-bf1-cbr">Prizelawn BF1/CBR/III/CBR IV</option>
-                  <option value="prizelawn-lf-ii">Prizelawn LF II</option>
-                </optgroup>
-                <optgroup label="Scotts">
-                  <option value="scotts-broadcast">Scotts Broadcast (2-15)</option>
-                  <option value="scotts-hand-held-broadcast">Scotts Hand-Held Broadcast</option>
-                  <option value="scotts-wizz">Scotts Wizz Hand Broadcast Spreader</option>
-                  <option value="scotts-rotary-consumer">Scotts Rotary (Consumer)</option>
-                  <option value="scotts-drop-consumer">Scotts Drop (Consumer)</option>
-                  <option value="scotts-easygreen">Scotts EasyGreen (Consumer)</option>
-                  <option value="scotts-rba-pro-rotary">Scotts RBA Pro Rotary</option>
-                </optgroup>
-                <optgroup label="Spyker">
-                  <option value="spyker-broadcast">Spyker Broadcast</option>
-                  <option value="spyker-rotary">Spyker Rotary</option>
-                </optgroup>
-                <optgroup label="Other">
-                  <option value="other">Other Spreader</option>
-                  <option value="none">No Spreader</option>
-                </optgroup>
               </select>
             </div>
 
