@@ -15,6 +15,10 @@ export default function ProfilePage() {
     soilType: "",
     sunExposure: "full" as "full" | "partial" | "shade",
     spreaderType: "",
+    irrigationSystem: "" as "" | "none" | "manual" | "in-ground" | "drip",
+    lawnGoal: "" as "" | "low-maintenance" | "healthy-green" | "golf-course",
+    lawnAge: "" as "" | "new" | "established",
+    knownIssues: [] as string[],
   });
 
   useEffect(() => {
@@ -26,13 +30,23 @@ export default function ProfilePage() {
         soilType: profile.soilType || "",
         sunExposure: profile.sunExposure || "full",
         spreaderType: profile.spreaderType || "",
+        irrigationSystem: profile.irrigationSystem || "",
+        lawnGoal: profile.lawnGoal || "",
+        lawnAge: profile.lawnAge || "",
+        knownIssues: profile.knownIssues || [],
       });
     }
   }, [profile]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveProfile(formData);
+    // Convert empty strings to undefined for optional fields
+    saveProfile({
+      ...formData,
+      irrigationSystem: formData.irrigationSystem || undefined,
+      lawnGoal: formData.lawnGoal || undefined,
+      lawnAge: formData.lawnAge || undefined,
+    });
     router.push("/dashboard");
   };
 
@@ -166,6 +180,183 @@ export default function ProfilePage() {
                   <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Irrigation System */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
+              Irrigation System (optional)
+            </label>
+            <select
+              value={formData.irrigationSystem}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  irrigationSystem: e.target.value as "" | "none" | "manual" | "in-ground" | "drip",
+                })
+              }
+              className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 outline-none focus:border-neutral-900"
+            >
+              <option value="">Select irrigation system</option>
+              <option value="none">None</option>
+              <option value="manual">Manual (hose/sprinkler)</option>
+              <option value="in-ground">In-ground sprinkler system</option>
+              <option value="drip">Drip irrigation</option>
+            </select>
+            <p className="mt-1 text-xs text-neutral-400">
+              Helps us recommend watering schedules
+            </p>
+          </div>
+
+          {/* Lawn Goal */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
+              Lawn Goal (optional)
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: "low-maintenance", label: "Low Maintenance", desc: "Minimal effort, good enough" },
+                { value: "healthy-green", label: "Healthy Green", desc: "Regular care, nice lawn" },
+                { value: "golf-course", label: "Golf-Course", desc: "Premium quality, pristine" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      lawnGoal: option.value as "low-maintenance" | "healthy-green" | "golf-course",
+                    })
+                  }
+                  className={`p-4 rounded-lg border text-left transition-all ${
+                    formData.lawnGoal === option.value
+                      ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
+                      : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
+                  }`}
+                >
+                  <p className="font-medium">{option.label}</p>
+                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Lawn Age */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
+              Lawn Age (optional)
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: "new", label: "New", desc: "Less than 1 year old" },
+                { value: "established", label: "Established", desc: "1+ years old" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      lawnAge: option.value as "new" | "established",
+                    })
+                  }
+                  className={`p-4 rounded-lg border text-left transition-all ${
+                    formData.lawnAge === option.value
+                      ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
+                      : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
+                  }`}
+                >
+                  <p className="font-medium">{option.label}</p>
+                  <p className="text-xs text-neutral-400 mt-1">{option.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Known Issues (multi-select) */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
+              Known Issues (optional)
+            </label>
+            <p className="text-xs text-neutral-400 mb-3">
+              Select all that apply to your lawn
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[
+                { value: "weeds", label: "Weeds", desc: "Unwanted plants" },
+                { value: "bare-spots", label: "Bare Spots", desc: "Patchy areas" },
+                { value: "fungus", label: "Fungus", desc: "Disease/mold" },
+                { value: "pests", label: "Pests", desc: "Insects/grubs" },
+                { value: "shade-damage", label: "Shade Damage", desc: "Thin/weak areas" },
+                { value: "none", label: "None", desc: "No issues" },
+              ].map((option) => {
+                const isSelected = formData.knownIssues.includes(option.value);
+                const isNone = option.value === "none";
+
+                const handleToggle = () => {
+                  if (isNone) {
+                    setFormData({
+                      ...formData,
+                      knownIssues: isSelected ? [] : ["none"],
+                    });
+                  } else {
+                    const withoutNone = formData.knownIssues.filter((i) => i !== "none");
+                    if (isSelected) {
+                      setFormData({
+                        ...formData,
+                        knownIssues: withoutNone.filter((i) => i !== option.value),
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        knownIssues: [...withoutNone, option.value],
+                      });
+                    }
+                  }
+                };
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={handleToggle}
+                    className={`p-4 rounded-lg border text-left transition-all ${
+                      isSelected
+                        ? "bg-neutral-900/10 border-neutral-900 text-neutral-900"
+                        : "bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-neutral-400"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <div
+                        className={`w-4 h-4 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                          isSelected
+                            ? "border-neutral-900 bg-neutral-900"
+                            : "border-neutral-400"
+                        }`}
+                      >
+                        {isSelected && (
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{option.label}</p>
+                        <p className="text-xs text-neutral-400 mt-0.5">{option.desc}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

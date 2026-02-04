@@ -5,6 +5,10 @@ export interface UserProfile {
   soilType?: string;
   sunExposure?: "full" | "partial" | "shade";
   spreaderType?: string;
+  irrigationSystem?: "none" | "manual" | "in-ground" | "drip";
+  lawnGoal?: "low-maintenance" | "healthy-green" | "golf-course";
+  lawnAge?: "new" | "established";
+  knownIssues?: string[];
   createdAt: string;
   updatedAt: string;
 }

@@ -9,6 +9,7 @@ const defaultProfile: UserProfile = {
   zipCode: "",
   grassType: "bermuda",
   lawnSize: "medium",
+  knownIssues: [],
   createdAt: "",
   updatedAt: "",
 };
