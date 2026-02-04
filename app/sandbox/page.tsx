@@ -14,7 +14,7 @@ export default function SandboxHero() {
       setError("Please enter a valid 5-digit zip code");
       return;
     }
-    router.push(`/sandbox/onboarding?zip=${zip}`);
+    router.push(`/sandbox/path?zip=${zip}`);
   };
 
   return (
@@ -145,18 +145,6 @@ export default function SandboxHero() {
                 </button>
               </form>
 
-              <div className="flex items-center gap-3 my-5">
-                <div className="flex-1 h-px bg-deep-brown/10" />
-                <span className="text-xs text-deep-brown/40">or</span>
-                <div className="flex-1 h-px bg-deep-brown/10" />
-              </div>
-
-              <button
-                onClick={() => router.push(`/sandbox/expert${zip ? `?zip=${zip}` : ""}`)}
-                className="w-full text-center text-sm text-deep-brown/60 hover:text-deep-brown transition-colors"
-              >
-                &ldquo;I already know my lawn&rdquo; &rarr;
-              </button>
             </div>
           </div>
         </div>
