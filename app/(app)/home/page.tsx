@@ -31,8 +31,8 @@ interface Tab {
 const tabs: Tab[] = [
   {
     id: "activities",
-    label: "Recent Activities",
-    mobileLabel: "Recent",
+    label: "The Log",
+    mobileLabel: "The Log",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -51,8 +51,8 @@ const tabs: Tab[] = [
   },
   {
     id: "todos",
-    label: "To Do List",
-    mobileLabel: "Tasks",
+    label: "To Do",
+    mobileLabel: "To Do",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -61,7 +61,7 @@ const tabs: Tab[] = [
   },
   {
     id: "weather",
-    label: "Weather Forecast",
+    label: "Weather",
     mobileLabel: "Weather",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,8 +71,8 @@ const tabs: Tab[] = [
   },
   {
     id: "soil",
-    label: "Soil Temperature",
-    mobileLabel: "Soil",
+    label: "Soil Temp",
+    mobileLabel: "Soil Temp",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -222,7 +222,7 @@ function HomePageContent() {
           </svg>
         </div>
         <h1 className="font-display text-xl sm:text-2xl lg:text-3xl font-semibold text-[#1a1a1a]">
-          What would you like to work on today{firstName !== "there" ? `, ${firstName}` : ""}?
+          Let&apos;s make your neighbors jealous
         </h1>
       </div>
 
@@ -241,7 +241,7 @@ function HomePageContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span className="text-sm text-white">
-                  Setup your profile to unlock all features!
+                  Unlock the full toolkit — your grass will thank you.
                 </span>
               </div>
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -261,7 +261,7 @@ function HomePageContent() {
                   handleChatSubmit(e);
                 }
               }}
-              placeholder="How can I help you today?"
+              placeholder="Talk to me, grass whisperer."
               rows={3}
               className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none bg-transparent resize-none"
             />
@@ -288,7 +288,7 @@ function HomePageContent() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          Log Activity
+          Log it
         </button>
         <button
           type="button"
@@ -298,7 +298,7 @@ function HomePageContent() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          Upload Photo
+          Pic of Proof
         </button>
         <input
           ref={fileInputRef}
@@ -324,7 +324,7 @@ function HomePageContent() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
-          Spreader Calc
+          Spreader Math
         </Link>
       </div>
 
