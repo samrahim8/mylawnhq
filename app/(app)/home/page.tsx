@@ -229,8 +229,8 @@ function HomePageContent() {
       {/* Chat Input Section */}
       <div className="flex-shrink-0 max-w-2xl mx-auto w-full mb-4 sm:mb-6">
         <div className="bg-white rounded-2xl border border-[#e5e5e5] shadow-sm overflow-hidden">
-          {/* Burnt Orange Banner - shown when user hasn't uploaded yard photos */}
-          {!hasAllYardPhotos && (
+          {/* Burnt Orange Banner */}
+          {!hasAllYardPhotos ? (
             <button
               type="button"
               onClick={() => setIsPhotoModalOpen(true)}
@@ -240,7 +240,7 @@ function HomePageContent() {
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="text-sm text-white">
+                <span className="text-sm text-white font-semibold">
                   Unlock the full toolkit — your grass will thank you.
                 </span>
               </div>
@@ -248,6 +248,8 @@ function HomePageContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </button>
+          ) : (
+            <div className="w-full h-2 bg-[#c17f59]" />
           )}
 
           {/* Chat Input */}
