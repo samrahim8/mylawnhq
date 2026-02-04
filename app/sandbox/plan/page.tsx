@@ -31,6 +31,7 @@ function PlanFlow() {
   const [loadingStepIdx, setLoadingStepIdx] = useState(0);
   const [plan, setPlan] = useState<PlanMonth[]>([]);
   const [expandedMonths, setExpandedMonths] = useState<Record<number, boolean>>({ 0: true });
+  const [expandedWeeks, setExpandedWeeks] = useState<Record<string, boolean>>({ "0-0": true });
   const [rawPlanText, setRawPlanText] = useState("");
   const hasFetched = useRef(false);
 
@@ -199,6 +200,11 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
 
   const toggleMonth = (idx: number) => {
     setExpandedMonths((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
+  const toggleWeek = (monthIdx: number, weekIdx: number) => {
+    const key = `${monthIdx}-${weekIdx}`;
+    setExpandedWeeks((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Loading state
@@ -461,27 +467,46 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                   {/* Weeks */}
                   {expandedMonths[idx] && (
                     <div className="bg-white border border-t-0 border-deep-brown/10 rounded-b-xl divide-y divide-deep-brown/5">
-                      {month.weeks.map((week, widx) => (
-                        <div key={widx} className="px-5 py-5">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs font-bold text-terracotta uppercase tracking-widest">
-                              {week.label}
-                            </span>
-                            <div className="flex-1 h-px bg-deep-brown/5" />
-                          </div>
-                          <ul className="space-y-3">
-                            {week.tasks.map((task, tidx) => (
-                              <li
-                                key={tidx}
-                                className="flex items-start gap-3 text-sm text-deep-brown/80 leading-relaxed"
+                      {month.weeks.map((week, widx) => {
+                        const weekKey = `${idx}-${widx}`;
+                        const isWeekOpen = !!expandedWeeks[weekKey];
+                        return (
+                          <div key={widx}>
+                            <button
+                              onClick={() => toggleWeek(idx, widx)}
+                              className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-cream/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="text-xs font-bold text-terracotta uppercase tracking-widest">
+                                  {week.label}
+                                </span>
+                                <span className="text-xs text-deep-brown/40">
+                                  {week.tasks.length} tasks
+                                </span>
+                              </div>
+                              <svg
+                                className={`w-4 h-4 text-deep-brown/30 transition-transform ${isWeekOpen ? "rotate-180" : ""}`}
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                               >
-                                <div className="w-[18px] h-[18px] mt-0.5 rounded border-2 border-deep-brown/15 flex-shrink-0 hover:border-lawn/40 transition-colors cursor-pointer" />
-                                <span>{task}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            {isWeekOpen && (
+                              <ul className="px-5 pb-4 space-y-3">
+                                {week.tasks.map((task, tidx) => (
+                                  <li
+                                    key={tidx}
+                                    className="flex items-start gap-3 text-sm text-deep-brown/80 leading-relaxed"
+                                  >
+                                    <div className="w-[18px] h-[18px] mt-0.5 rounded border-2 border-deep-brown/15 flex-shrink-0 hover:border-lawn/40 transition-colors cursor-pointer" />
+                                    <span>{task}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
