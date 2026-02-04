@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Sidebar from "@/components/layout/Sidebar";
+import ScrollIndicator from "@/components/layout/ScrollIndicator";
 import AddToHomeScreenModal from "@/components/pwa/AddToHomeScreenModal";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
@@ -13,6 +14,7 @@ export default function AppLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showA2HSModal, setShowA2HSModal] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   const {
     canShowPrompt,
@@ -59,7 +61,8 @@ export default function AppLayout({
           </Link>
         </div>
 
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main ref={mainRef} className="flex-1 overflow-auto">{children}</main>
+        <ScrollIndicator containerRef={mainRef} />
       </div>
 
       <AddToHomeScreenModal

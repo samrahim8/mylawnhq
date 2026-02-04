@@ -208,25 +208,20 @@ export default function SpreaderPage() {
 
       {/* Lawn Size Override */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-neutral-600">
-              Lawn size:{" "}
-              <span className="font-medium text-neutral-900">
-                {customSqFt || lawnSqFt.toLocaleString()} sq ft
-              </span>
-              {!customSqFt && (
-                <span className="text-neutral-400 ml-1">(from profile)</span>
-              )}
-            </p>
-          </div>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-neutral-600 whitespace-nowrap">
+            Lawn size:{" "}
+            <span className="font-medium text-neutral-900">
+              {customSqFt || lawnSqFt.toLocaleString()} sq ft
+            </span>
+          </p>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={customSqFt}
               onChange={(e) => setCustomSqFt(e.target.value)}
-              placeholder="Custom sq ft"
-              className="w-32 px-3 py-1.5 text-sm bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:border-neutral-400"
+              placeholder={lawnSqFt.toString()}
+              className="w-20 sm:w-28 px-2 sm:px-3 py-1.5 text-sm bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:border-neutral-400"
             />
             {customSqFt && (
               <button
@@ -252,23 +247,23 @@ export default function SpreaderPage() {
               </p>
 
               {/* Low/High Rate Display */}
-              <div className="grid grid-cols-2 gap-6 max-w-md mx-auto">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 max-w-md mx-auto">
                 {/* Low Rate */}
                 <button
                   onClick={() => setSelectedRate("low")}
-                  className={`bg-[#f0f4ed] rounded-xl p-6 transition-all ${
+                  className={`bg-[#f0f4ed] rounded-xl p-4 sm:p-6 transition-all ${
                     selectedRate === "low"
                       ? "border-2 border-[#7a8b6e] ring-2 ring-[#7a8b6e]/20 shadow-lg"
                       : "border border-[#7a8b6e]/30 hover:border-[#7a8b6e]/50"
                   }`}
                 >
-                  <p className="text-sm font-medium text-[#7a8b6e] uppercase tracking-wide mb-2">
+                  <p className="text-xs sm:text-sm font-medium text-[#7a8b6e] uppercase tracking-wide mb-2 whitespace-nowrap">
                     Low Rate
                   </p>
-                  <div className="text-5xl font-bold text-[#5a6950] mb-2">
+                  <div className="text-4xl sm:text-5xl font-bold text-[#5a6950] mb-2">
                     {result.spreaderSettingLow}
                   </div>
-                  <p className="text-sm text-[#7a8b6e]">
+                  <p className="text-xs sm:text-sm text-[#7a8b6e]">
                     {result.lbsPer1000sqftLow} lbs/1000 sq ft
                   </p>
                   {selectedRate === "low" && (
@@ -279,19 +274,19 @@ export default function SpreaderPage() {
                 {/* High Rate */}
                 <button
                   onClick={() => setSelectedRate("high")}
-                  className={`bg-[#fdf6f3] rounded-xl p-6 transition-all ${
+                  className={`bg-[#fdf6f3] rounded-xl p-4 sm:p-6 transition-all ${
                     selectedRate === "high"
                       ? "border-2 border-[#c17f59] ring-2 ring-[#c17f59]/20 shadow-lg"
                       : "border border-[#c17f59]/30 hover:border-[#c17f59]/50"
                   }`}
                 >
-                  <p className="text-sm font-medium text-[#c17f59] uppercase tracking-wide mb-2">
+                  <p className="text-xs sm:text-sm font-medium text-[#c17f59] uppercase tracking-wide mb-2 whitespace-nowrap">
                     High Rate
                   </p>
-                  <div className="text-5xl font-bold text-[#a3674a] mb-2">
+                  <div className="text-4xl sm:text-5xl font-bold text-[#a3674a] mb-2">
                     {result.spreaderSettingHigh}
                   </div>
-                  <p className="text-sm text-[#c17f59]">
+                  <p className="text-xs sm:text-sm text-[#c17f59]">
                     {result.lbsPer1000sqftHigh} lbs/1000 sq ft
                   </p>
                   {selectedRate === "high" && (
