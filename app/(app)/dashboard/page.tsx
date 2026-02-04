@@ -187,9 +187,9 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="h-full flex flex-col overflow-y-auto md:overflow-hidden p-2 sm:p-3 lg:p-4">
-      {/* Header - Scrollable on mobile, fixed on desktop */}
-      <div className="md:flex-shrink-0 bg-white rounded-lg border border-[#e5e5e5] shadow-sm p-3 sm:p-4 mb-2 sm:mb-3">
+    <div className="min-h-full md:h-full flex flex-col md:overflow-hidden p-2 sm:p-3 lg:p-4">
+      {/* Header */}
+      <div className="flex-shrink-0 bg-white rounded-lg border border-[#e5e5e5] shadow-sm p-3 sm:p-4 mb-2 sm:mb-3">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-4">
           <div className="flex-shrink-0 text-center md:text-left">
             <h1 className="text-base sm:text-lg lg:text-xl font-bold text-[#1a1a1a]">
@@ -294,8 +294,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Photo Carousel - Scrollable on mobile, fixed on desktop */}
-      <div className="md:flex-shrink-0 mb-2 sm:mb-3">
+      {/* Photo Carousel */}
+      <div className="flex-shrink-0 mb-2 sm:mb-3">
         <PhotoCarousel
           photos={photos}
           onAddPhoto={addPhoto}
@@ -306,8 +306,8 @@ export default function DashboardPage() {
 
       {/* Dashboard Content - Mobile accordion or Desktop grid */}
       {isMobile ? (
-        /* Mobile: Scrollable accordion */
-        <div className="flex-1 overflow-y-auto min-h-0 pb-4">
+        /* Mobile: Single scroll context - no nested overflow */}
+        <div className="flex-shrink-0 pb-4">
           <MobileAccordion items={accordionItems} defaultExpandedId="weather" />
         </div>
       ) : (
