@@ -241,7 +241,7 @@ function HomePageContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span className="text-sm text-white">
-                  Upload photos of your yard to unlock all features!
+                  Setup your profile to unlock all features!
                 </span>
               </div>
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
