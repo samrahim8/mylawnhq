@@ -5,6 +5,7 @@ import { ChatMessage } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
 import { useCalendar } from "@/hooks/useCalendar";
 import { useWeather } from "@/hooks/useWeather";
+import { useChatContext } from "@/contexts/ChatContext";
 
 interface ChatInterfaceProps {
   initialMessage?: string;
@@ -14,19 +15,41 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   const { profile } = useProfile();
   const { activities } = useCalendar();
   const { weather } = useWeather(profile?.zipCode);
+  const {
+    currentSession,
+    currentSessionId,
+    createSession,
+    updateSession,
+    isLoaded,
+  } = useChatContext();
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const initialMessageProcessed = useRef(false);
+  const sessionInitialized = useRef(false);
 
+  // Load messages from current session when it changes
   useEffect(() => {
-    if (initialMessage && !initialMessageProcessed.current && messages.length === 0) {
+    if (currentSession) {
+      setMessages(currentSession.messages);
+      sessionInitialized.current = true;
+    } else if (isLoaded && !currentSessionId) {
+      // No session selected, start fresh
+      setMessages([]);
+      sessionInitialized.current = false;
+    }
+  }, [currentSession, currentSessionId, isLoaded]);
+
+  // Handle initial message from URL query
+  useEffect(() => {
+    if (initialMessage && !initialMessageProcessed.current && isLoaded && messages.length === 0) {
       initialMessageProcessed.current = true;
       handleSend(initialMessage);
     }
-  }, [initialMessage]);
+  }, [initialMessage, isLoaded, messages.length]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,6 +67,12 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
 
+    // Create a new session if we don't have one
+    let sessionId = currentSessionId;
+    if (!sessionId) {
+      sessionId = createSession();
+    }
+
     const isTodayPrompt = text.toLowerCase().includes("what should i do today");
 
     const userMessage: ChatMessage = {
@@ -53,9 +82,13 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
       timestamp: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+
+    // Save immediately with user message
+    updateSession(sessionId, newMessages);
 
     // Reset textarea height
     if (textareaRef.current) {
@@ -69,7 +102,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
         weatherContext?: typeof weather;
         activitiesContext?: typeof activities;
       } = {
-        messages: [...messages, userMessage].map((m) => ({
+        messages: newMessages.map((m) => ({
           role: m.role,
           content: m.content,
         })),
@@ -100,7 +133,9 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
         timestamp: new Date().toISOString(),
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      const updatedMessages = [...newMessages, assistantMessage];
+      setMessages(updatedMessages);
+      updateSession(sessionId, updatedMessages);
     } catch (error) {
       console.error("Chat error:", error);
       const errorMessage: ChatMessage = {
@@ -109,7 +144,9 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
         content: "I apologize, but I encountered an error. Please try again.",
         timestamp: new Date().toISOString(),
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      const updatedMessages = [...newMessages, errorMessage];
+      setMessages(updatedMessages);
+      updateSession(sessionId, updatedMessages);
     } finally {
       setIsLoading(false);
     }
@@ -183,53 +220,34 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {messages.map((message) => (
-                <div key={message.id} className="flex gap-4">
-                  {/* Avatar */}
-                  <div className="flex-shrink-0">
-                    {message.role === "assistant" ? (
-                      <div className="w-8 h-8 bg-[#6b7a5d] rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  {/* Message content */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-neutral-900 mb-1">
-                      {message.role === "assistant" ? "LawnHQ" : "You"}
-                    </p>
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] ${
+                      message.role === "user"
+                        ? "bg-[#6b7a5d] text-white rounded-2xl rounded-br-md px-4 py-3"
+                        : "bg-neutral-100 text-neutral-900 rounded-2xl rounded-bl-md px-4 py-3"
+                    }`}
+                  >
                     {message.role === "assistant" ? (
                       <div
-                        className="text-neutral-700 leading-relaxed prose prose-neutral prose-sm max-w-none"
+                        className="leading-relaxed prose prose-sm max-w-none prose-p:text-neutral-700 prose-headings:text-neutral-900"
                         dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
                       />
                     ) : (
-                      <p className="text-neutral-700 leading-relaxed">{message.content}</p>
+                      <p className="leading-relaxed">{message.content}</p>
                     )}
                   </div>
                 </div>
               ))}
               {isLoading && (
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-[#6b7a5d] rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-neutral-900 mb-1">LawnHQ</p>
-                    <div className="flex gap-1 py-2">
+                <div className="flex justify-start">
+                  <div className="bg-neutral-100 rounded-2xl rounded-bl-md px-4 py-3">
+                    <div className="flex gap-1">
                       <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                       <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />

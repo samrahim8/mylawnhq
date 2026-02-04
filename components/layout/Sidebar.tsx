@@ -3,28 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-const navItems = [
-  {
-    name: "Home",
-    href: "/home",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
-  },
-  {
-    name: "Chat",
-    href: "/chat",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-    ),
-    hasAdd: true,
-  },
-];
+import { useChatContext } from "@/contexts/ChatContext";
 
 const resourceItems = [
   {
@@ -85,12 +64,25 @@ interface SidebarProps {
 function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLinkClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { recentSessions, createSession, setCurrentSessionId } = useChatContext();
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  };
+
+  const handleNewChat = () => {
+    createSession();
+    router.push("/chat");
+    onLinkClick?.();
+  };
+
+  const handleSelectChat = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    router.push("/chat");
+    onLinkClick?.();
   };
 
   return (
@@ -111,36 +103,81 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
 
       {/* Main Navigation */}
       <nav className={`flex-1 p-2 space-y-1 overflow-hidden ${!isExpanded && "px-1"}`}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
+        {/* Home Link */}
+        <Link
+          href="/home"
+          onClick={onLinkClick}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+            pathname === "/home"
+              ? "bg-[#7a8b6e] text-white"
+              : "text-[#525252] hover:bg-[#f8f6f3] hover:text-[#1a1a1a]"
+          } ${!isExpanded && "justify-center px-2"}`}
+          title={!isExpanded ? "Home" : undefined}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span className={`font-medium text-sm whitespace-nowrap ${!isExpanded && "hidden"}`}>
+            Home
+          </span>
+        </Link>
+
+        {/* Chat Link with New Chat button */}
+        <div>
+          <div
+            className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
+              pathname === "/chat"
+                ? "bg-[#7a8b6e] text-white"
+                : "text-[#525252] hover:bg-[#f8f6f3] hover:text-[#1a1a1a]"
+            } ${!isExpanded && "justify-center px-2"}`}
+          >
             <Link
-              key={item.name}
-              href={item.href}
+              href="/chat"
               onClick={onLinkClick}
-              className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
-                isActive
-                  ? "bg-[#7a8b6e] text-white"
-                  : "text-[#525252] hover:bg-[#f8f6f3] hover:text-[#1a1a1a]"
-              } ${!isExpanded && "justify-center px-2"}`}
-              title={!isExpanded ? item.name : undefined}
+              className={`flex items-center gap-2 flex-1 ${!isExpanded && "justify-center"}`}
+              title={!isExpanded ? "Chat" : undefined}
             >
-              <div className={`flex items-center gap-2 ${!isExpanded && "gap-0"}`}>
-                {item.icon}
-                <span className={`font-medium text-sm whitespace-nowrap ${!isExpanded && "hidden"}`}>
-                  {item.name}
-                </span>
-              </div>
-              {item.hasAdd && isExpanded && (
-                <button className={`p-1 rounded-lg ${isActive ? "hover:bg-[#6a7b5e]" : "hover:bg-[#e5e5e5]"}`}>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-              )}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span className={`font-medium text-sm whitespace-nowrap ${!isExpanded && "hidden"}`}>
+                Chat
+              </span>
             </Link>
-          );
-        })}
+            {isExpanded && (
+              <button
+                onClick={handleNewChat}
+                className={`p-1 rounded-lg ${pathname === "/chat" ? "hover:bg-[#6a7b5e]" : "hover:bg-[#e5e5e5]"}`}
+                title="New chat"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Recent Chat History */}
+          {isExpanded && recentSessions.length > 0 && (
+            <div className="mt-1 ml-2 space-y-0.5">
+              {recentSessions.map((session) => (
+                <button
+                  key={session.id}
+                  onClick={() => handleSelectChat(session.id)}
+                  className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors truncate ${
+                    session.isActive
+                      ? "bg-[#e8ebe5] text-[#5a6950]"
+                      : "text-[#737373] hover:bg-[#f8f6f3] hover:text-[#525252]"
+                  }`}
+                  title={session.title}
+                >
+                  <span className="block truncate">{session.title}</span>
+                  <span className="text-[10px] text-[#a3a3a3]">{session.date}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Resources Section */}
         <div className="pt-4">

@@ -6,6 +6,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import ScrollIndicator from "@/components/layout/ScrollIndicator";
 import AddToHomeScreenModal from "@/components/pwa/AddToHomeScreenModal";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { ChatProvider } from "@/contexts/ChatContext";
 
 export default function AppLayout({
   children,
@@ -35,6 +36,7 @@ export default function AppLayout({
   }, [canShowPrompt]);
 
   return (
+    <ChatProvider>
     <div className="flex h-screen h-[100dvh] overflow-hidden bg-[#f8f6f3]">
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -77,5 +79,6 @@ export default function AppLayout({
         onNativeInstall={triggerNativeInstall}
       />
     </div>
+    </ChatProvider>
   );
 }
