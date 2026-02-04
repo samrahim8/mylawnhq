@@ -152,8 +152,8 @@ export default function ActivityModal({
       {/* Modal */}
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e5e5e5] flex-shrink-0">
-          <h2 className="text-lg sm:text-xl font-semibold text-[#1a1a1a]">
+        <div className="flex items-center justify-between px-4 py-3 sm:p-6 border-b border-[#e5e5e5] flex-shrink-0">
+          <h2 className="text-base sm:text-xl font-semibold text-[#1a1a1a]">
             {isEditing ? "Edit Activity" : "Log Activity"}
           </h2>
           <button
@@ -177,23 +177,23 @@ export default function ActivityModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-5 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2.5 sm:space-y-5 overflow-y-auto flex-1">
           {/* Date Picker */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
               Date
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-1.5 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
             />
           </div>
 
           {/* Activity Type */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
               Activity Type
             </label>
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
@@ -202,13 +202,13 @@ export default function ActivityModal({
                   key={type.value}
                   type="button"
                   onClick={() => setActivityType(type.value)}
-                  className={`flex flex-col items-center gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg border transition-colors ${
+                  className={`flex flex-col items-center gap-0.5 sm:gap-1 p-1.5 sm:p-3 rounded-lg border transition-colors ${
                     activityType === type.value
                       ? "border-[#7a8b6e] bg-[#f0f4ed] text-[#7a8b6e]"
                       : "border-[#e5e5e5] hover:border-[#a3a3a3] text-[#525252]"
                   }`}
                 >
-                  <span className="text-lg sm:text-xl">{type.icon}</span>
+                  <span className="text-base sm:text-xl">{type.icon}</span>
                   <span className="text-[10px] sm:text-xs font-medium">{type.label}</span>
                 </button>
               ))}
@@ -217,7 +217,7 @@ export default function ActivityModal({
 
           {/* Area of Lawn */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
               Area of Lawn
             </label>
             <div className="flex gap-1.5 sm:gap-2">
@@ -241,7 +241,7 @@ export default function ActivityModal({
           {/* Product Used / Water Amount - Dynamic based on activity type */}
           {activityType === "water" ? (
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
                 Water Amount (optional)
               </label>
               <input
@@ -249,12 +249,12 @@ export default function ActivityModal({
                 value={waterAmount}
                 onChange={(e) => setWaterAmount(e.target.value)}
                 placeholder="e.g., 30 minutes, 1 inch"
-                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-1.5 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
               />
             </div>
           ) : (
             <div className="relative">
-              <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
                 Product Used (optional)
               </label>
               <input
@@ -267,7 +267,7 @@ export default function ActivityModal({
                 }}
                 onFocus={() => setShowProductDropdown(true)}
                 placeholder="e.g., Scotts Turf Builder"
-                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-1.5 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
               />
               {/* Product Dropdown */}
               {showProductDropdown && filteredProducts.length > 0 && (
@@ -292,7 +292,7 @@ export default function ActivityModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1.5 sm:mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
               Notes (optional)
             </label>
             <input
@@ -300,7 +300,7 @@ export default function ActivityModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional details..."
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-1.5 sm:py-2.5 border border-[#e5e5e5] rounded-lg text-base sm:text-sm text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
             />
           </div>
 
