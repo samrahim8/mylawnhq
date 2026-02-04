@@ -4,6 +4,7 @@ export interface UserProfile {
   lawnSize: "small" | "medium" | "large";
   soilType?: string;
   sunExposure?: "full" | "partial" | "shade";
+  mowerType?: "rotary" | "reel" | "riding";
   spreaderType?: string;
   irrigationSystem?: "none" | "manual" | "in-ground" | "drip";
   lawnGoal?: "low-maintenance" | "healthy-green" | "golf-course";

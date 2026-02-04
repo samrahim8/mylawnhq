@@ -14,6 +14,7 @@ export default function ProfilePage() {
     lawnSize: "medium" as "small" | "medium" | "large",
     soilType: "",
     sunExposure: "full" as "full" | "partial" | "shade",
+    mowerType: "" as "" | "rotary" | "reel" | "riding",
     spreaderType: "",
     irrigationSystem: "" as "" | "none" | "manual" | "in-ground" | "drip",
     lawnGoal: "" as "" | "low-maintenance" | "healthy-green" | "golf-course",
@@ -29,6 +30,7 @@ export default function ProfilePage() {
         lawnSize: profile.lawnSize || "medium",
         soilType: profile.soilType || "",
         sunExposure: profile.sunExposure || "full",
+        mowerType: profile.mowerType || "",
         spreaderType: profile.spreaderType || "",
         irrigationSystem: profile.irrigationSystem || "",
         lawnGoal: profile.lawnGoal || "",
@@ -43,6 +45,7 @@ export default function ProfilePage() {
     // Convert empty strings to undefined for optional fields
     saveProfile({
       ...formData,
+      mowerType: formData.mowerType || undefined,
       irrigationSystem: formData.irrigationSystem || undefined,
       lawnGoal: formData.lawnGoal || undefined,
       lawnAge: formData.lawnAge || undefined,
@@ -208,6 +211,39 @@ export default function ProfilePage() {
                     }
                     className={`px-3 py-2 rounded-lg border text-left transition-all ${
                       formData.lawnGoal === option.value
+                        ? selectedClass
+                        : unselectedClass
+                    }`}
+                  >
+                    <p className="font-medium text-sm">{option.label}</p>
+                    <p className="text-xs text-neutral-400">{option.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Mower Type */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+                Mower Type
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: "rotary", label: "Rotary", desc: "Standard push/self-propelled" },
+                  { value: "reel", label: "Reel", desc: "Cylinder/manual mower" },
+                  { value: "riding", label: "Riding", desc: "Sit-down mower" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        mowerType: option.value as "rotary" | "reel" | "riding",
+                      })
+                    }
+                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                      formData.mowerType === option.value
                         ? selectedClass
                         : unselectedClass
                     }`}
