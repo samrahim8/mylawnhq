@@ -35,6 +35,15 @@ function PlanFlow() {
   const [rawPlanText, setRawPlanText] = useState("");
   const hasFetched = useRef(false);
 
+  // Conversion funnel state
+  const [conversionStep, setConversionStep] = useState<"photos" | "analyzing" | "diagnosis" | "email">("photos");
+  const [photos, setPhotos] = useState<Record<string, string>>({});
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisStepIdx, setAnalysisStepIdx] = useState(0);
+
   const parsePlan = useCallback((text: string): PlanMonth[] => {
     const months: PlanMonth[] = [];
     let currentMonth: PlanMonth | null = null;
@@ -521,74 +530,315 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
           </div>
         )}
 
-        {/* Download bar (sticky on mobile) */}
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <button
-            onClick={downloadPDF}
-            className="flex items-center gap-2 bg-deep-brown text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-deep-brown/90 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Download PDF
-          </button>
-          <button
-            onClick={() => {
-              const params = new URLSearchParams(searchParams.toString());
-              router.push(`/sandbox/save?${params.toString()}`);
-            }}
-            className="bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors"
-          >
-            Save My Plan &rarr;
-          </button>
-        </div>
-
-        {/* Photo prompt - the sticky hook */}
+        {/* ─── Conversion Funnel ─── */}
         <div className="mt-12 bg-white rounded-xl border border-deep-brown/10 p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+
+          {/* Stage 1: Photo Upload */}
+          {conversionStep === "photos" && (
+            <div>
+              <div className="text-center mb-6">
+                <h3 className="font-display text-xl font-bold text-deep-brown">
+                  Your plan is 70% personalized
+                </h3>
+                <div className="w-full bg-deep-brown/10 rounded-full h-2 mt-3 mb-4">
+                  <div className="h-2 bg-lawn rounded-full transition-all duration-500" style={{ width: "70%" }} />
+                </div>
+                <p className="text-sm text-deep-brown/70 leading-relaxed">
+                  Upload photos of your lawn to complete your plan. We&rsquo;ll spot issues and add targeted fixes.
+                </p>
+                <p className="mt-1 text-xs text-deep-brown/40">
+                  Takes 30 seconds. Makes your plan 10x better.
+                </p>
+              </div>
+
+              {/* 2x2 Photo Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {([
+                  { id: "front", label: "Front Yard" },
+                  { id: "back", label: "Back Yard" },
+                  { id: "left-side", label: "Left Side" },
+                  { id: "right-side", label: "Right Side" },
+                ] as const).map((area) => (
+                  <div key={area.id} className="relative">
+                    {photos[area.id] ? (
+                      <div className="relative aspect-square rounded-lg overflow-hidden border border-lawn/30">
+                        <img src={photos[area.id]} alt={area.label} className="w-full h-full object-cover" />
+                        <div className="absolute top-2 right-2 w-6 h-6 bg-lawn rounded-full flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <button
+                          onClick={() => setPhotos((prev) => { const next = { ...prev }; delete next[area.id]; return next; })}
+                          className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] font-medium px-2 py-1 rounded hover:bg-black/70 transition-colors"
+                        >
+                          Retake
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              setPhotos((prev) => ({ ...prev, [area.id]: reader.result as string }));
+                            };
+                            reader.readAsDataURL(file);
+                            e.target.value = "";
+                          }}
+                        />
+                        <div className="aspect-square rounded-lg border-2 border-dashed border-deep-brown/15 hover:border-lawn/40 flex flex-col items-center justify-center gap-2 transition-colors">
+                          <svg className="w-7 h-7 text-deep-brown/25" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-xs text-deep-brown/40 font-medium">{area.label}</span>
+                        </div>
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center text-xs text-deep-brown/40 mb-4">
+                {Object.keys(photos).length}/4 photos added
+              </div>
+
+              <button
+                onClick={() => {
+                  setConversionStep("analyzing");
+                  setAnalysisProgress(0);
+                  setAnalysisStepIdx(0);
+                  const analysisSteps = 4;
+                  const stepTimer = setInterval(() => {
+                    setAnalysisStepIdx((prev) => {
+                      if (prev >= analysisSteps) { clearInterval(stepTimer); return prev; }
+                      return prev + 1;
+                    });
+                  }, 700);
+                  const progressTimer = setInterval(() => {
+                    setAnalysisProgress((prev) => {
+                      if (prev >= 100) { clearInterval(progressTimer); return 100; }
+                      return prev + Math.random() * 15 + 10;
+                    });
+                  }, 400);
+                  setTimeout(() => {
+                    clearInterval(stepTimer);
+                    clearInterval(progressTimer);
+                    setAnalysisProgress(100);
+                    setAnalysisStepIdx(analysisSteps);
+                    setTimeout(() => setConversionStep("diagnosis"), 500);
+                  }, 3000);
+                }}
+                disabled={Object.keys(photos).length === 0}
+                className="w-full bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Analyze My Lawn
+              </button>
+
+              <button
+                onClick={() => setConversionStep("email")}
+                className="mt-3 w-full text-center text-xs text-deep-brown/40 hover:text-deep-brown/60 transition-colors"
+              >
+                I&rsquo;ll do this later &rarr;
+              </button>
             </div>
-            <div className="flex-1">
-              <h3 className="font-display font-bold text-deep-brown">
-                Your First Task
+          )}
+
+          {/* Stage 2: Analyzing */}
+          {conversionStep === "analyzing" && (
+            <div className="text-center">
+              <div className="text-4xl mb-4">&#128269;</div>
+              <h3 className="font-display text-xl font-bold text-deep-brown mb-4">
+                Analyzing your lawn...
               </h3>
-              <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                Snap a photo of your lawn. Our AI will spot problems you might not
-                see&mdash;weeds, fungus, bare spots&mdash;and add targeted fixes to
-                your plan.
-              </p>
-              <p className="mt-1 text-xs text-deep-brown/40">
-                Takes 10 seconds. Makes your plan 10x better.
-              </p>
-              <div className="mt-4 flex items-center gap-3">
-                <label className="cursor-pointer">
-                  <input type="file" accept="image/*" capture="environment" className="hidden" />
-                  <div className="bg-terracotta text-white font-semibold py-2.5 px-5 rounded-lg text-sm hover:bg-terracotta/90 transition-colors">
-                    Take Photo
+              <div className="w-full bg-deep-brown/10 rounded-full h-2 mb-6">
+                <div
+                  className="h-2 bg-lawn rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(analysisProgress, 100)}%` }}
+                />
+              </div>
+              <div className="text-left space-y-3">
+                {["Scanning for weeds...", "Checking grass health...", "Identifying bare spots...", "Analyzing soil conditions..."].map((step, i) => (
+                  <div key={i} className="flex items-center gap-3 text-sm">
+                    {i < analysisStepIdx ? (
+                      <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : i === analysisStepIdx ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-lawn border-t-transparent animate-spin flex-shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border-2 border-deep-brown/20 flex-shrink-0" />
+                    )}
+                    <span className={i <= analysisStepIdx ? "text-deep-brown" : "text-deep-brown/40"}>
+                      {step}
+                    </span>
                   </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="file" accept="image/*" className="hidden" />
-                  <div className="border border-deep-brown/15 text-deep-brown/70 font-medium py-2.5 px-5 rounded-lg text-sm hover:border-deep-brown/30 transition-colors">
-                    Upload
-                  </div>
-                </label>
+                ))}
               </div>
             </div>
-          </div>
-          <button
-            onClick={() => {
-              const params = new URLSearchParams(searchParams.toString());
-              router.push(`/sandbox/save?${params.toString()}`);
-            }}
-            className="mt-4 w-full text-center text-xs text-deep-brown/40 hover:text-deep-brown/60 transition-colors"
-          >
-            I&rsquo;ll do this later &rarr;
-          </button>
+          )}
+
+          {/* Stage 3: Diagnosis */}
+          {conversionStep === "diagnosis" && (
+            <div>
+              <div className="text-center mb-6">
+                <h3 className="font-display text-xl font-bold text-deep-brown">
+                  Lawn Diagnosis
+                </h3>
+                <div className="w-full bg-deep-brown/10 rounded-full h-2 mt-3 mb-2">
+                  <div className="h-2 bg-lawn rounded-full transition-all duration-500" style={{ width: "100%" }} />
+                </div>
+                <p className="text-xs text-lawn font-medium">Your plan is 100% personalized</p>
+              </div>
+
+              {/* Uploaded photo thumbnails */}
+              {Object.keys(photos).length > 0 && (
+                <div className="flex gap-2 mb-6 justify-center">
+                  {Object.entries(photos).map(([id, src]) => (
+                    <div key={id} className="w-16 h-16 rounded-lg overflow-hidden border border-deep-brown/10">
+                      <img src={src} alt={id} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Findings */}
+              <div className="space-y-4 mb-6">
+                <div className="border border-terracotta/20 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-display font-bold text-sm text-deep-brown">Possible crabgrass detected</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full">
+                      High
+                    </span>
+                  </div>
+                  <p className="text-xs text-deep-brown/60 leading-relaxed">
+                    We spotted patches consistent with crabgrass in your front yard. Pre-emergent treatment has been added to your plan.
+                  </p>
+                </div>
+                <div className="border border-ochre/20 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-display font-bold text-sm text-deep-brown">Thin coverage in back yard</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-ochre/10 text-ochre px-2 py-0.5 rounded-full">
+                      Medium
+                    </span>
+                  </div>
+                  <p className="text-xs text-deep-brown/60 leading-relaxed">
+                    The back yard shows signs of thin turf density. Overseeding and soil amendment recommendations have been added.
+                  </p>
+                </div>
+                <div className="border border-lawn/20 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-display font-bold text-sm text-deep-brown">Overall health: Good</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-lawn/10 text-lawn px-2 py-0.5 rounded-full">
+                      Positive
+                    </span>
+                  </div>
+                  <p className="text-xs text-deep-brown/60 leading-relaxed">
+                    Your lawn&rsquo;s overall health looks solid. With the targeted fixes above, you&rsquo;re on track for great results.
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm text-deep-brown/60 text-center mb-6">
+                We&rsquo;ve added <strong>3 targeted fixes</strong> to your plan based on these findings.
+              </p>
+
+              <button
+                onClick={() => setConversionStep("email")}
+                className="w-full bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors"
+              >
+                Create free account to save your plan + diagnosis
+              </button>
+            </div>
+          )}
+
+          {/* Stage 4: Email Gate */}
+          {conversionStep === "email" && !emailSubmitted && (
+            <div className="text-center">
+              <h3 className="font-display text-xl font-bold text-deep-brown mb-2">
+                {Object.keys(photos).length > 0 ? "Save your plan + diagnosis" : "Save your personalized plan"}
+              </h3>
+              <p className="text-sm text-deep-brown/50 mb-6">
+                Enter your email to keep your plan and get reminders.
+              </p>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setEmailError("");
+                  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    setEmailError("Please enter a valid email address.");
+                    return;
+                  }
+                  setEmailSubmitted(true);
+                }}
+                className="max-w-sm mx-auto"
+              >
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
+                  placeholder="you@email.com"
+                  className="w-full border border-deep-brown/15 rounded-lg px-4 py-3 text-sm text-deep-brown placeholder:text-deep-brown/30 focus:outline-none focus:ring-2 focus:ring-lawn/40 focus:border-lawn/40 mb-2"
+                />
+                {emailError && (
+                  <p className="text-xs text-red-500 mb-2 text-left">{emailError}</p>
+                )}
+                <button
+                  type="submit"
+                  className="w-full bg-terracotta text-white font-bold py-3 px-6 rounded-lg text-sm uppercase tracking-wide hover:bg-terracotta/90 transition-colors"
+                >
+                  Save My Plan
+                </button>
+              </form>
+
+              <ul className="mt-6 space-y-2 text-left max-w-sm mx-auto">
+                {["Save your plan", "Get reminders when tasks are due", "Track progress over time"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-deep-brown/60">
+                    <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Email submitted confirmation */}
+          {conversionStep === "email" && emailSubmitted && (
+            <div className="text-center py-4">
+              <div className="w-14 h-14 bg-lawn/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="font-display text-xl font-bold text-deep-brown mb-2">
+                Plan saved!
+              </h3>
+              <p className="text-sm text-deep-brown/50 mb-6">
+                We&rsquo;ll send your plan and reminders to <strong>{email}</strong>.
+              </p>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set("email", email);
+                  router.push(`/sandbox/save?${params.toString()}`);
+                }}
+                className="bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors"
+              >
+                Continue to your dashboard &rarr;
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
