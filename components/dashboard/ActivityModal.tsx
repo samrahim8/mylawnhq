@@ -142,7 +142,7 @@ export default function ActivityModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -150,7 +150,7 @@ export default function ActivityModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden mx-2">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 sm:p-6 border-b border-[#e5e5e5] flex-shrink-0">
           <h2 className="text-base sm:text-xl font-semibold text-[#1a1a1a]">
@@ -177,7 +177,7 @@ export default function ActivityModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2.5 sm:space-y-5 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-6 space-y-2 sm:space-y-5 overflow-x-hidden overflow-y-auto flex-1">
           {/* Date Picker */}
           <div>
             <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
@@ -196,20 +196,20 @@ export default function ActivityModal({
             <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
               Activity Type
             </label>
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-4 gap-1 sm:gap-2">
               {ACTIVITY_TYPES.map((type) => (
                 <button
                   key={type.value}
                   type="button"
                   onClick={() => setActivityType(type.value)}
-                  className={`flex flex-col items-center gap-0.5 sm:gap-1 p-1.5 sm:p-3 rounded-lg border transition-colors ${
+                  className={`flex flex-col items-center justify-center gap-0.5 p-1 sm:p-3 rounded-lg border transition-colors min-w-0 ${
                     activityType === type.value
                       ? "border-[#7a8b6e] bg-[#f0f4ed] text-[#7a8b6e]"
                       : "border-[#e5e5e5] hover:border-[#a3a3a3] text-[#525252]"
                   }`}
                 >
-                  <span className="text-base sm:text-xl">{type.icon}</span>
-                  <span className="text-[10px] sm:text-xs font-medium">{type.label}</span>
+                  <span className="text-sm sm:text-xl">{type.icon}</span>
+                  <span className="text-[9px] sm:text-xs font-medium leading-tight text-center truncate w-full">{type.label}</span>
                 </button>
               ))}
             </div>
@@ -220,13 +220,13 @@ export default function ActivityModal({
             <label className="block text-xs sm:text-sm font-medium text-[#525252] mb-1 sm:mb-2">
               Area of Lawn
             </label>
-            <div className="flex gap-1.5 sm:gap-2">
+            <div className="flex gap-1 sm:gap-2">
               {AREA_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setArea(option.value)}
-                  className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg border text-xs sm:text-sm font-medium transition-colors ${
+                  className={`flex-1 py-1.5 sm:py-2 px-1 sm:px-3 rounded-lg border text-xs sm:text-sm font-medium transition-colors min-w-0 ${
                     area === option.value
                       ? "border-[#7a8b6e] bg-[#f0f4ed] text-[#7a8b6e]"
                       : "border-[#e5e5e5] hover:border-[#a3a3a3] text-[#525252]"
