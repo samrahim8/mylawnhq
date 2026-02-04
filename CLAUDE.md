@@ -69,7 +69,17 @@ middleware.ts            # Route protection (redirects unauthenticated users to 
 ```
 
 ## Deployment
-Pushes to `main` auto-deploy to Vercel. No manual steps needed.
+- **Vercel team:** `team-7411` — ALWAYS deploy to this account.
+- **GitHub repo:** https://github.com/mylawnhq/mylawnhq — ALWAYS push to this repo.
+- Pushes to `main` auto-deploy to Vercel. No manual steps needed.
+
+## Git Author (IMPORTANT)
+**ALWAYS use the mylawnhq team account for git commits and pushes:**
+```
+git config user.email "team@mylawnhq.com"
+git config user.name "mylawnhq"
+```
+**NEVER use sam@samrahim.com** — Vercel will not auto-deploy from that author. All commits must use `team@mylawnhq.com` or deploys will silently fail.
 
 ## External Services
 - **Supabase Dashboard:** https://supabase.com/dashboard (project: rjeqfqrqcdrznyojhumk)
@@ -96,4 +106,9 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Security fixes** — Removed hardcoded credentials from docs, added zip code validation, generic auth error messages
 - **Demo access** — Opened app routes for public demo, pointed Demo link to /dashboard
 - **Mobile UX improvements** — Improved layout and responsiveness for dashboard, activity modal, recent activities, and chat
-- **Vercel GitHub connection** — Switched Vercel deploy from samrahim88 personal account to mylawnhq org
+- **Vercel GitHub connection** — Switched Vercel deploy from samrahim88 personal account to mylawnhq org. ALWAYS deploy to Vercel team `team-7411` and push to https://github.com/mylawnhq/mylawnhq
+
+### 2026-02-04
+- **Sandbox hero + onboarding flow** — Full /sandbox landing page with hero, zip code entry, 4-step novice onboarding, expert form, plan generation via /api/chat, email capture, and Pro upsell
+- **Middleware fix** — Early-return for /sandbox routes to skip Supabase auth
+- **Git author fix** — Set git author to team@mylawnhq.com for Vercel auto-deploys
