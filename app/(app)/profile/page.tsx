@@ -229,7 +229,7 @@ export default function ProfilePage() {
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { value: "rotary", label: "Rotary", desc: "Standard push/self-propelled" },
+                  { value: "rotary", label: "Rotary", desc: "Push/self-propelled" },
                   { value: "reel", label: "Reel", desc: "Cylinder/manual mower" },
                   { value: "riding", label: "Riding", desc: "Sit-down mower" },
                 ].map((option) => (
