@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users to login (except for public pages)
   const publicPaths = ["/", "/login", "/signup", "/home", "/chat", "/spreader", "/dashboard", "/profile"];
-  const isPublicPath = publicPaths.includes(request.nextUrl.pathname);
+  const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/sandbox");
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
