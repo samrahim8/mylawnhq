@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { WeatherData } from "@/types";
 
 interface WeatherWidgetProps {
@@ -26,7 +27,18 @@ export default function WeatherWidget({ weather, loading, compact }: WeatherWidg
   if (!weather) {
     return (
       <div className={wrapperClass}>
-        <p className="text-[#a3a3a3] text-xs sm:text-sm">Set up your profile to see weather data</p>
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
+          <p className="text-[11px] sm:text-xs font-medium text-[#525252] mb-1">Sun&apos;s out, guns out</p>
+          <p className="text-[10px] sm:text-[11px] text-[#a3a3a3] mb-2">
+            Let&apos;s get that profile created
+          </p>
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] text-white rounded-lg text-[11px] sm:text-xs font-medium transition-colors"
+          >
+            Let&apos;s Go
+          </Link>
+        </div>
       </div>
     );
   }
