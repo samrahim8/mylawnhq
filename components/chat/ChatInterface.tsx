@@ -18,7 +18,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const initialMessageProcessed = useRef(false);
 
   useEffect(() => {
@@ -32,11 +32,18 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [input]);
+
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
 
-    // Check if this is the "What should I do today?" prompt
     const isTodayPrompt = text.toLowerCase().includes("what should i do today");
 
     const userMessage: ChatMessage = {
@@ -50,8 +57,12 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
     setInput("");
     setIsLoading(true);
 
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+
     try {
-      // Build request body with optional weather and activities context
       const requestBody: {
         messages: { role: string; content: string }[];
         profile: typeof profile;
@@ -65,7 +76,6 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
         profile: profile || null,
       };
 
-      // Include weather and activities context for "What should I do today?" prompt
       if (isTodayPrompt) {
         if (weather) {
           requestBody.weatherContext = weather;
@@ -113,29 +123,24 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   };
 
   const formatMessage = (content: string) => {
-    // Simple markdown-like formatting
     return content
       .split("\n")
-      .map((line, i) => {
-        // Bold
+      .map((line) => {
         line = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-        // Headers
         if (line.startsWith("# ")) {
-          return `<h3 class="text-lg font-bold text-neutral-900 mt-4 mb-2">${line.slice(2)}</h3>`;
+          return `<h3 class="text-lg font-semibold text-neutral-900 mt-4 mb-2">${line.slice(2)}</h3>`;
         }
         if (line.startsWith("## ")) {
-          return `<h4 class="text-base font-semibold text-neutral-900 mt-3 mb-1">${line.slice(3)}</h4>`;
+          return `<h4 class="text-base font-medium text-neutral-900 mt-3 mb-1">${line.slice(3)}</h4>`;
         }
-        // List items
         if (line.match(/^\d+\./)) {
-          return `<p class="ml-4 text-neutral-600">${line}</p>`;
+          return `<p class="ml-4 my-1">${line}</p>`;
         }
         if (line.startsWith("- ") || line.startsWith("* ")) {
-          return `<p class="ml-4 text-neutral-600">• ${line.slice(2)}</p>`;
+          return `<p class="ml-4 my-1">• ${line.slice(2)}</p>`;
         }
-        // Regular paragraphs
         if (line.trim()) {
-          return `<p class="text-neutral-600">${line}</p>`;
+          return `<p class="my-1">${line}</p>`;
         }
         return "<br/>";
       })
@@ -143,97 +148,121 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full bg-white">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 min-h-0">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="text-5xl mb-4">🌿</div>
-            <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-              Your lawn guy&apos;s here.
-            </h2>
-            <p className="text-neutral-600 max-w-md mb-8">
-              Let&apos;s talk grass. No question&apos;s too basic.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-lg px-4">
-              {[
-                "My grass looks kinda yellow",
-                "When should I put down fertilizer?",
-                "What's this weed in my yard?",
-                "Is it too hot to mow today?",
-              ].map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => handleSend(suggestion)}
-                  className="p-3 text-center text-sm bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-600 transition-colors"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <>
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === "user"
-                      ? "bg-neutral-900 text-white rounded-br-md"
-                      : "bg-neutral-50 text-neutral-900 rounded-bl-md"
-                  }`}
-                >
-                  {message.role === "assistant" ? (
-                    <div
-                      className="space-y-1 prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
-                    />
-                  ) : (
-                    <p>{message.content}</p>
-                  )}
-                </div>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+              <div className="w-16 h-16 bg-[#6b7a5d] rounded-2xl flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
               </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-neutral-50 rounded-2xl rounded-bl-md px-4 py-3">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              <h1 className="text-3xl font-semibold text-neutral-900 mb-2">
+                Let&apos;s talk grass.
+              </h1>
+              <p className="text-neutral-500 mb-10">
+                No question too basic.
+              </p>
+              <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                {[
+                  "My grass looks kinda yellow",
+                  "When should I put down fertilizer?",
+                  "What's this weed in my yard?",
+                  "Is it too hot to mow today?",
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleSend(suggestion)}
+                    className="p-4 text-left text-sm bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-neutral-700 transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {messages.map((message) => (
+                <div key={message.id} className="flex gap-4">
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    {message.role === "assistant" ? (
+                      <div className="w-8 h-8 bg-[#6b7a5d] rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  {/* Message content */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-neutral-900 mb-1">
+                      {message.role === "assistant" ? "LawnHQ" : "You"}
+                    </p>
+                    {message.role === "assistant" ? (
+                      <div
+                        className="text-neutral-700 leading-relaxed prose prose-neutral prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
+                      />
+                    ) : (
+                      <p className="text-neutral-700 leading-relaxed">{message.content}</p>
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </>
-        )}
+              ))}
+              {isLoading && (
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-[#6b7a5d] rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-neutral-900 mb-1">LawnHQ</p>
+                    <div className="flex gap-1 py-2">
+                      <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Input area */}
-      <div className="p-3 md:p-4 border-t border-neutral-200 flex-shrink-0">
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-2 md:p-3">
-          <div className="flex items-end gap-3">
+      {/* Input area - fixed at bottom, centered */}
+      <div className="border-t border-neutral-100 bg-white">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="relative flex items-end bg-neutral-50 border border-neutral-200 rounded-2xl focus-within:border-neutral-400 focus-within:ring-1 focus-within:ring-neutral-400 transition-all">
             <textarea
-              ref={inputRef}
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="What's going on with your lawn?"
               rows={1}
-              className="flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none max-h-32"
-              style={{ minHeight: "24px" }}
+              className="flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none py-4 px-4 max-h-[200px]"
             />
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`m-2 p-2 rounded-xl transition-all ${
                 input.trim() && !isLoading
-                  ? "bg-neutral-900 hover:bg-neutral-800 text-white"
-                  : "bg-neutral-100 text-neutral-400 cursor-not-allowed"
+                  ? "bg-[#6b7a5d] hover:bg-[#5a6950] text-white"
+                  : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
               }`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,6 +270,9 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               </svg>
             </button>
           </div>
+          <p className="text-xs text-neutral-400 text-center mt-2">
+            LawnHQ can make mistakes. Consider checking important info.
+          </p>
         </div>
       </div>
     </div>
