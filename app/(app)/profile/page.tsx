@@ -50,7 +50,7 @@ export default function ProfilePage() {
       lawnGoal: formData.lawnGoal || undefined,
       lawnAge: formData.lawnAge || undefined,
     });
-    router.push("/dashboard");
+    router.push("/home");
   };
 
   // Selected button style with sage green
