@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
   const [formData, setFormData] = useState({
     zipCode: "",
-    grassType: "bermuda" as "zoysia" | "bermuda" | "mixed",
+    grassType: "bermuda" as "bermuda" | "zoysia" | "fescue-kbg" | "st-augustine",
     lawnSize: "medium" as "small" | "medium" | "large",
     soilType: "",
     sunExposure: "full" as "full" | "partial" | "shade",
@@ -86,11 +86,12 @@ export default function ProfilePage() {
             <label className="block text-sm font-medium text-neutral-600 mb-1.5">
               Grass Type *
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {[
-                { value: "bermuda", label: "Bermuda", desc: "Drought-tolerant" },
-                { value: "zoysia", label: "Zoysia", desc: "Low maintenance" },
-                { value: "mixed", label: "Mixed", desc: "Combination" },
+                { value: "bermuda", label: "Bermuda", desc: "Warm-season, drought-tolerant" },
+                { value: "zoysia", label: "Zoysia", desc: "Dense, low maintenance" },
+                { value: "fescue-kbg", label: "Fescue/KBG", desc: "Cool-season, shade-tolerant" },
+                { value: "st-augustine", label: "St. Augustine", desc: "Warm-season, shade-tolerant" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -98,7 +99,7 @@ export default function ProfilePage() {
                   onClick={() =>
                     setFormData({
                       ...formData,
-                      grassType: option.value as "zoysia" | "bermuda" | "mixed",
+                      grassType: option.value as "bermuda" | "zoysia" | "fescue-kbg" | "st-augustine",
                     })
                   }
                   className={`px-3 py-2 rounded-lg border text-left transition-all ${

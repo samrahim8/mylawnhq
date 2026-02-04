@@ -1,6 +1,6 @@
 export interface UserProfile {
   zipCode: string;
-  grassType: "zoysia" | "bermuda" | "mixed";
+  grassType: "bermuda" | "zoysia" | "fescue-kbg" | "st-augustine";
   lawnSize: "small" | "medium" | "large";
   soilType?: string;
   sunExposure?: "full" | "partial" | "shade";
