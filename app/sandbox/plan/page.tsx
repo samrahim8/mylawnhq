@@ -544,7 +544,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                   <div className="h-2 bg-lawn rounded-full transition-all duration-500" style={{ width: "70%" }} />
                 </div>
                 <p className="text-sm text-deep-brown/70 leading-relaxed">
-                  Upload photos of your lawn to complete your plan. We&rsquo;ll spot issues and add targeted fixes.
+                  Snap photos of your lawn to complete your plan. We&rsquo;ll spot issues and add targeted fixes.
                 </p>
                 <p className="mt-1 text-xs text-deep-brown/40">
                   Takes 30 seconds. Makes your plan 10x better.
@@ -576,31 +576,56 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                         </button>
                       </div>
                     ) : (
-                      <label className="cursor-pointer block">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                              setPhotos((prev) => ({ ...prev, [area.id]: reader.result as string }));
-                            };
-                            reader.readAsDataURL(file);
-                            e.target.value = "";
-                          }}
-                        />
-                        <div className="aspect-square rounded-lg border-2 border-dashed border-deep-brown/15 hover:border-lawn/40 flex flex-col items-center justify-center gap-2 transition-colors">
-                          <svg className="w-7 h-7 text-deep-brown/25" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span className="text-xs text-deep-brown/40 font-medium">{area.label}</span>
-                        </div>
-                      </label>
+                      <div className="aspect-square rounded-lg border-2 border-dashed border-deep-brown/15 flex flex-col items-center justify-center gap-1.5 px-2">
+                        <span className="text-xs text-deep-brown/50 font-semibold">{area.label}</span>
+                        {/* Primary: opens camera on mobile */}
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setPhotos((prev) => ({ ...prev, [area.id]: reader.result as string }));
+                              };
+                              reader.readAsDataURL(file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <div className="flex items-center gap-1.5 bg-terracotta text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-terracotta/90 transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Take Photo
+                          </div>
+                        </label>
+                        {/* Secondary: opens gallery/file picker */}
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setPhotos((prev) => ({ ...prev, [area.id]: reader.result as string }));
+                              };
+                              reader.readAsDataURL(file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <span className="text-[10px] text-deep-brown/35 hover:text-deep-brown/55 transition-colors underline underline-offset-2">
+                            or choose from gallery
+                          </span>
+                        </label>
+                      </div>
                     )}
                   </div>
                 ))}
