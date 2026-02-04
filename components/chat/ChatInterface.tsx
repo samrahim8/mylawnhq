@@ -150,17 +150,17 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="text-5xl mb-4">🌿</div>
             <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-              Welcome to LawnHQ Chat
+              Your lawn guy&apos;s here.
             </h2>
             <p className="text-neutral-600 max-w-md mb-8">
-              Ask me anything about lawn care!
+              Let&apos;s talk grass. No question&apos;s too basic.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-lg px-4">
               {[
-                "What should I do today?",
-                "How often should I water my lawn?",
-                "What's the best mowing height for my lawn?",
-                "How do I fix bare spots?",
+                "My grass looks kinda yellow",
+                "When should I put down fertilizer?",
+                "What's this weed in my yard?",
+                "Is it too hot to mow today?",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -222,7 +222,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about your lawn..."
+              placeholder="What's going on with your lawn?"
               rows={1}
               className="flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none max-h-32"
               style={{ minHeight: "24px" }}
