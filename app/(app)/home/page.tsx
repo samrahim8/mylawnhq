@@ -82,7 +82,7 @@ const tabs: Tab[] = [
 ];
 
 function HomePageContent() {
-  const { profile } = useProfile();
+  const { profile, isSetUp } = useProfile();
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
   const { activities, addActivity, deleteActivity, updateActivity } = useCalendar();
   const { weather, loading: weatherLoading } = useWeather(profile?.zipCode);
@@ -232,7 +232,7 @@ function HomePageContent() {
       <div className="flex-shrink-0 max-w-2xl mx-auto w-full mb-4 sm:mb-6">
         <div className="bg-white rounded-2xl border border-[#e5e5e5] shadow-sm overflow-hidden">
           {/* Burnt Orange Banner */}
-          {!hasAllYardPhotos ? (
+          {!isSetUp ? (
             <Link
               href="/profile"
               className="w-full flex items-center justify-between px-4 py-2.5 bg-[#c17f59] hover:bg-[#b06f49] transition-colors"
