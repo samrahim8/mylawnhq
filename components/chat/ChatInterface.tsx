@@ -143,9 +143,9 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 min-h-0">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="text-5xl mb-4">🌿</div>
@@ -155,7 +155,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
             <p className="text-neutral-600 max-w-md mb-8">
               Ask me anything about lawn care!
             </p>
-            <div className="grid grid-cols-2 gap-3 max-w-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-lg px-4">
               {[
                 "What should I do today?",
                 "How often should I water my lawn?",
@@ -214,8 +214,8 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
       </div>
 
       {/* Input area */}
-      <div className="p-4 border-t border-neutral-200">
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-3">
+      <div className="p-3 md:p-4 border-t border-neutral-200 flex-shrink-0">
+        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-2 md:p-3">
           <div className="flex items-end gap-3">
             <textarea
               ref={inputRef}

@@ -9,7 +9,7 @@ function ChatContent() {
   const initialQuestion = searchParams.get("q") || undefined;
 
   return (
-    <div className="h-[calc(100vh-0px)] flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       <ChatInterface initialMessage={initialQuestion} />
     </div>
   );
