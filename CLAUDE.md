@@ -47,14 +47,13 @@ app/
 │   ├── login/           # Login (email/password + Google OAuth)
 │   └── signup/          # Signup (email/password + Google OAuth)
 ├── (app)/               # Authenticated pages (protected by middleware)
-│   ├── dashboard/       # Main dashboard
 │   ├── chat/            # AI lawn care chat
 │   ├── profile/         # User profile
 │   ├── calendars/       # Lawn care calendar
 │   ├── tips/            # Lawn care tips
 │   ├── spreader/        # Spreader calculator
 │   ├── export/          # Data export
-│   └── home/            # Home page (authenticated)
+│   └── home/            # Home page (main app entry point)
 ├── api/
 │   ├── chat/            # Anthropic Claude chat endpoint
 │   └── weather/         # OpenWeatherMap weather endpoint
@@ -85,7 +84,7 @@ git config user.name "mylawnhq"
 - **Supabase Dashboard:** https://supabase.com/dashboard (project: rjeqfqrqcdrznyojhumk)
 - **Google OAuth:** Configured in Google Cloud Console (project: LawnHQ)
 - **Anthropic API:** Powers the AI chat feature
-- **OpenWeatherMap API:** Powers weather data on the dashboard
+- **OpenWeatherMap API:** Powers weather data
 
 ## Security Notes
 - Never commit `.env.local` or any API keys to the repo
@@ -112,3 +111,4 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Sandbox hero + onboarding flow** — Full /sandbox landing page with hero, zip code entry, 4-step novice onboarding, expert form, plan generation via /api/chat, email capture, and Pro upsell
 - **Middleware fix** — Early-return for /sandbox routes to skip Supabase auth
 - **Git author fix** — Set git author to team@mylawnhq.com for Vercel auto-deploys
+- **Removed dashboard** — Deleted /dashboard page and all components/dashboard/ components. Demo link and auth redirects now point to /home

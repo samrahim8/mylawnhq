@@ -11,13 +11,13 @@ import { useWeather } from "@/hooks/useWeather";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useProducts } from "@/hooks/useProducts";
 import YardPhotoModal from "@/components/home/YardPhotoModal";
-import RecentActivities from "@/components/dashboard/RecentActivities";
-import Calendar from "@/components/dashboard/Calendar";
-import TodoList from "@/components/dashboard/TodoList";
-import WeatherWidget from "@/components/dashboard/WeatherWidget";
-import SoilTemperature from "@/components/dashboard/SoilTemperature";
-import ActivityModal from "@/components/dashboard/ActivityModal";
-import TodoModal from "@/components/dashboard/TodoModal";
+import RecentActivities from "@/components/home/RecentActivities";
+import Calendar from "@/components/home/Calendar";
+import TodoList from "@/components/home/TodoList";
+import WeatherWidget from "@/components/home/WeatherWidget";
+import SoilTemperature from "@/components/home/SoilTemperature";
+import ActivityModal from "@/components/home/ActivityModal";
+import TodoModal from "@/components/home/TodoModal";
 
 type TabId = "activities" | "calendar" | "todos" | "weather" | "soil";
 
