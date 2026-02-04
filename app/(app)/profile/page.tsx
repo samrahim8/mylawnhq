@@ -21,6 +21,17 @@ export default function ProfilePage() {
     knownIssues: [] as string[],
   });
 
+  const [timeLeft, setTimeLeft] = useState(11);
+
+  // Countdown timer
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -58,13 +69,28 @@ export default function ProfilePage() {
     <div className="min-h-full pb-8">
       <div className="p-4 sm:p-6 max-w-2xl mx-auto">
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 sm:p-6">
-          <div className="mb-5">
+          <div className="mb-4">
             <h1 className="text-xl font-bold text-neutral-900 mb-1">
-              Profile Setup
+              10-Second Setup
             </h1>
             <p className="text-sm text-neutral-600">
-              Tell us about your lawn for personalized recommendations.
+              Personalized recommendations all season long.
             </p>
+          </div>
+
+          {/* Progress bar countdown */}
+          <div className="mb-5">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs text-neutral-500">
+                {timeLeft > 0 ? `${timeLeft}s` : "Take your time!"}
+              </span>
+            </div>
+            <div className="h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#7a8b6e] transition-all duration-1000 ease-linear"
+                style={{ width: `${(timeLeft / 11) * 100}%` }}
+              />
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
