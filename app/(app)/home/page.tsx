@@ -233,9 +233,8 @@ function HomePageContent() {
         <div className="bg-white rounded-2xl border border-[#e5e5e5] shadow-sm overflow-hidden">
           {/* Burnt Orange Banner */}
           {!hasAllYardPhotos ? (
-            <button
-              type="button"
-              onClick={() => setIsPhotoModalOpen(true)}
+            <Link
+              href="/profile"
               className="w-full flex items-center justify-between px-4 py-2.5 bg-[#c17f59] hover:bg-[#b06f49] transition-colors"
             >
               <div className="flex items-center gap-2">
@@ -249,7 +248,7 @@ function HomePageContent() {
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-            </button>
+            </Link>
           ) : (
             <div className="w-full h-2 bg-[#c17f59]" />
           )}
