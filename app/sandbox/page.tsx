@@ -86,9 +86,6 @@ export default function SandboxHero() {
               ))}
             </ul>
 
-            <p className="mt-6 text-sm text-deep-brown/50 font-medium">
-              Ready in 30 seconds.
-            </p>
 
             {/* Social proof - visible on mobile below the card, on desktop here */}
             <div className="hidden lg:flex items-center gap-3 mt-10 text-sm text-deep-brown/60">
@@ -106,11 +103,16 @@ export default function SandboxHero() {
           {/* Right column - CTA card */}
           <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
             <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-6 sm:p-8">
-              <div className="flex items-center gap-2 mb-6">
-                <span className="text-lawn text-lg">&#127793;</span>
-                <h2 className="font-display font-semibold text-deep-brown text-lg">
-                  Get Your Free Plan
-                </h2>
+              <div className="mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-lawn text-lg">&#127793;</span>
+                  <h2 className="font-display font-semibold text-deep-brown text-lg">
+                    30-Second Setup
+                  </h2>
+                </div>
+                <p className="mt-1 text-sm text-deep-brown/50">
+                  Enter your zip and we&rsquo;ll build your free plan.
+                </p>
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -118,7 +120,7 @@ export default function SandboxHero() {
                   htmlFor="zip"
                   className="block text-sm font-medium text-deep-brown/70 mb-2"
                 >
-                  Enter your zip code
+                  Zip code
                 </label>
                 <input
                   id="zip"
