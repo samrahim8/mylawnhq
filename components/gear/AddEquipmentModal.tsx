@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Equipment, EquipmentIdentificationResult, EQUIPMENT_TYPES, ChatImage } from "@/types";
 
-type Step = "input" | "capture" | "processing" | "confirm";
+type Step = "input" | "manual" | "processing" | "confirm";
 
 interface AddEquipmentModalProps {
   isOpen: boolean;
@@ -24,7 +24,13 @@ export default function AddEquipmentModal({
   const [error, setError] = useState<string | null>(null);
   const [isLookingUp, setIsLookingUp] = useState(false);
 
-  // Additional details (editable after lookup)
+  // Manual entry form state
+  const [manualBrand, setManualBrand] = useState("");
+  const [manualModel, setManualModel] = useState("");
+  const [manualType, setManualType] = useState<string>(EQUIPMENT_TYPES[0]);
+  const [manualUrl, setManualUrl] = useState("");
+
+  // Additional details (editable after lookup or manual)
   const [serialNumber, setSerialNumber] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [warrantyMonths, setWarrantyMonths] = useState<number | "">("");
@@ -63,6 +69,10 @@ export default function AddEquipmentModal({
     setResult(null);
     setError(null);
     setIsLookingUp(false);
+    setManualBrand("");
+    setManualModel("");
+    setManualType(EQUIPMENT_TYPES[0]);
+    setManualUrl("");
     setSerialNumber("");
     setPurchaseDate("");
     setWarrantyMonths("");
@@ -97,7 +107,7 @@ export default function AddEquipmentModal({
         setWarrantyMonths(data.result.warrantyMonths || "");
         setStep("confirm");
       } else {
-        setError(data.error || "Couldn't identify that equipment. Try a photo instead.");
+        setError(data.error || "Couldn't identify that equipment. Try a photo or enter manually.");
       }
     } catch {
       setError("Failed to connect. Please try again.");
@@ -183,6 +193,24 @@ export default function AddEquipmentModal({
     }
   };
 
+  const handleManualSave = () => {
+    if (!manualBrand.trim() || !manualModel.trim()) {
+      setError("Brand and model are required.");
+      return;
+    }
+
+    onSave({
+      brand: manualBrand.trim(),
+      model: manualModel.trim(),
+      type: manualType,
+      manualUrl: manualUrl.trim() || null,
+      serialNumber: serialNumber.trim() || undefined,
+      purchaseDate: purchaseDate || undefined,
+      warrantyMonths: typeof warrantyMonths === "number" ? warrantyMonths : undefined,
+    });
+    handleClose();
+  };
+
   const handleRetry = () => {
     setResult(null);
     setError(null);
@@ -210,6 +238,11 @@ export default function AddEquipmentModal({
             {step === "input" && (
               <p className="text-xs sm:text-sm text-[#737373] mt-0.5">
                 Enter the model or serial number
+              </p>
+            )}
+            {step === "manual" && (
+              <p className="text-xs sm:text-sm text-[#737373] mt-0.5">
+                Enter your equipment details
               </p>
             )}
           </div>
@@ -321,6 +354,19 @@ export default function AddEquipmentModal({
                 Take a photo of the model sticker for best results
               </p>
 
+              {/* Manual Entry Option */}
+              <div className="pt-2">
+                <button
+                  onClick={() => setStep("manual")}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[#737373] hover:text-[#525252] hover:bg-[#f8f6f3] rounded-lg text-sm font-medium transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Enter details manually
+                </button>
+              </div>
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -336,6 +382,148 @@ export default function AddEquipmentModal({
                 className="hidden"
                 onChange={handleFileChange}
               />
+            </div>
+          )}
+
+          {/* Step: Manual Entry */}
+          {step === "manual" && (
+            <div className="space-y-4">
+              <button
+                onClick={() => setStep("input")}
+                className="inline-flex items-center gap-1 text-sm text-[#8B9D82] hover:text-[#6a7b5e]"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Brand <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={manualBrand}
+                  onChange={(e) => setManualBrand(e.target.value)}
+                  placeholder="e.g., Honda, Toro, John Deere"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Model <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={manualModel}
+                  onChange={(e) => setManualModel(e.target.value)}
+                  placeholder="e.g., HRX217VKA"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Equipment Type
+                </label>
+                <select
+                  value={manualType}
+                  onChange={(e) => setManualType(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                >
+                  {EQUIPMENT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Owner&apos;s Manual URL (optional)
+                </label>
+                <input
+                  type="url"
+                  value={manualUrl}
+                  onChange={(e) => setManualUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#e5e5e5] pt-4 mt-4">
+                <p className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide mb-3">
+                  Additional Details (optional)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Serial Number
+                </label>
+                <input
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => setSerialNumber(e.target.value)}
+                  placeholder="e.g., MZCG-8677291"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Purchase Date
+                  </label>
+                  <input
+                    type="date"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Warranty (months)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="120"
+                    value={warrantyMonths}
+                    onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
+                    placeholder="e.g., 36"
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="flex-1 px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#525252] text-sm font-medium hover:bg-[#f5f5f5] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleManualSave}
+                  className="flex-1 px-4 py-2.5 bg-[#8B9D82] hover:bg-[#7a8b71] rounded-lg text-white text-sm font-medium transition-colors"
+                >
+                  Add Gear
+                </button>
+              </div>
             </div>
           )}
 
