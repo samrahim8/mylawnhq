@@ -52,7 +52,7 @@ export default function SandboxHero() {
               YOUR LAWN CALLED.<br className="hidden lg:block" /> IT WANTS A PLAN.
             </h1>
             <p className="mt-5 text-lg sm:text-xl text-deep-brown/70 leading-relaxed">
-              Ace, your AI lawn guy, analyzes your grass, climate, and goals — then builds your plan week by week.
+              Chip, your AI lawn guy, analyzes your grass, climate, and goals — then builds your plan week by week.
             </p>
 
             <ul className="mt-6 space-y-3">

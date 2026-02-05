@@ -17,7 +17,7 @@ function PathSelection() {
               How would you like to get started?
             </h1>
             <p className="mt-2 text-deep-brown/60">
-              Either way, Ace will build you a free 90-day plan.
+              Either way, Chip will build you a free 90-day plan.
             </p>
           </div>
 
@@ -36,7 +36,7 @@ function PathSelection() {
                     Guide me through it
                   </h2>
                   <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                    4 quick questions. Ace builds your plan. 30 seconds.
+                    4 quick questions. Chip builds your plan. 30 seconds.
                   </p>
                   <span className="inline-block mt-3 text-sm font-medium text-terracotta group-hover:underline">
                     Start quick setup &rarr;

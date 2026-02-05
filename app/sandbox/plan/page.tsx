@@ -7,7 +7,7 @@ import jsPDF from "jspdf";
 import { getSamplePlan, type PlanMonth } from "./samplePlan";
 
 const loadingSteps = [
-  "Ace is analyzing your climate zone",
+  "Chip is analyzing your climate zone",
   "Checking soil temperature data",
   "Building your fertilizer schedule",
   "Generating weekly tasks",
@@ -223,7 +223,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
         <div className="max-w-md w-full text-center">
           <div className="text-4xl mb-6">&#127793;</div>
           <h2 className="font-display text-xl font-bold text-deep-brown mb-6">
-            Ace is building your 90-day plan...
+            Chip is building your 90-day plan...
           </h2>
 
           <div className="w-full bg-deep-brown/10 rounded-full h-2 mb-8">
@@ -702,7 +702,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
             <div className="text-center">
               <div className="text-4xl mb-4">&#128269;</div>
               <h3 className="font-display text-xl font-bold text-deep-brown mb-4">
-                Ace is analyzing your lawn...
+                Chip is analyzing your lawn...
               </h3>
               <div className="w-full bg-deep-brown/10 rounded-full h-2 mb-6">
                 <div
@@ -736,7 +736,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
             <div>
               <div className="text-center mb-6">
                 <h3 className="font-display text-xl font-bold text-deep-brown">
-                  Ace found 3 issues
+                  Chip found 3 issues
                 </h3>
               </div>
 
