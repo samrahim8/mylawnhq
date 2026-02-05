@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useEquipment } from "@/hooks/useEquipment";
 import { useProfile } from "@/hooks/useProfile";
-import EquipmentGrid, { MowerIcon, SpreaderIcon } from "@/components/gear/EquipmentGrid";
+import EquipmentGrid, { SuggestedEquipment } from "@/components/gear/EquipmentGrid";
 import AddEquipmentModal from "@/components/gear/AddEquipmentModal";
 import { Equipment } from "@/types";
 
@@ -47,14 +47,6 @@ const SPREADER_TYPE_MAP: Record<string, { brand: string; model: string; equipmen
   "spyker-broadcast": { brand: "Spyker", model: "Broadcast", equipmentType: "Broadcast Spreader" },
   "spyker-rotary": { brand: "Spyker", model: "Rotary", equipmentType: "Broadcast Spreader" },
 };
-
-interface SuggestedEquipment {
-  type: "mower" | "spreader";
-  displayName: string;
-  equipmentType: string;
-  brand?: string;
-  model?: string;
-}
 
 export default function GearPage() {
   const { equipment, loading, addEquipment, deleteEquipment } = useEquipment();
@@ -153,57 +145,14 @@ export default function GearPage() {
 
   return (
     <div className="max-w-2xl mx-auto pt-8">
-      {/* Suggested Equipment from Profile */}
-      {suggestedEquipment.length > 0 && equipment.length === 0 && (
-        <div className="mb-6">
-          <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide mb-3">
-            From your profile
-          </p>
-          <div className="space-y-2">
-            {suggestedEquipment.map((item, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl border border-[#E5E5E5] p-3 sm:p-4 flex items-center gap-3 sm:gap-4"
-              >
-                {/* Icon */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#F5F3F0] rounded-xl flex items-center justify-center flex-shrink-0">
-                  {item.type === "mower" ? (
-                    <MowerIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B9D82]" />
-                  ) : (
-                    <SpreaderIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B9D82]" />
-                  )}
-                </div>
-
-                {/* Details */}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-[#3D3D3D] text-sm sm:text-base">{item.displayName}</h4>
-                  <p className="text-xs sm:text-sm text-[#A8A8A8]">{item.equipmentType}</p>
-                </div>
-
-                {/* Badge and button - stacked vertically */}
-                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                  <span className="px-2 py-0.5 bg-terracotta text-white text-xs font-medium rounded-full">
-                    Needs details
-                  </span>
-                  <button
-                    onClick={() => handleAddSuggested(item)}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white text-xs sm:text-sm font-medium rounded-lg transition-colors"
-                  >
-                    Complete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Equipment Grid */}
       <EquipmentGrid
         equipment={equipment}
         onAddClick={handleAddClick}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        suggestedEquipment={suggestedEquipment}
+        onAddSuggested={handleAddSuggested}
       />
 
       {/* Add Equipment Modal */}
