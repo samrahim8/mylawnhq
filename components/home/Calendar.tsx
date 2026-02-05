@@ -20,7 +20,9 @@ export default function Calendar({ activities, onOpenActivityModal, compact }: C
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isHoveringTooltip, setIsHoveringTooltip] = useState(false);
   const dayRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const hoveredDayRef = useRef<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -94,11 +96,26 @@ export default function Calendar({ activities, onOpenActivityModal, compact }: C
       left: rect.left + rect.width / 2,
     });
     setHoveredDay(day);
+    hoveredDayRef.current = day;
   };
 
   const handleMouseLeave = () => {
+    // Don't close if hovering over tooltip
+    if (isHoveringTooltip) return;
     setHoveredDay(null);
     setTooltipPosition(null);
+    hoveredDayRef.current = null;
+  };
+
+  const handleTooltipMouseEnter = () => {
+    setIsHoveringTooltip(true);
+  };
+
+  const handleTooltipMouseLeave = () => {
+    setIsHoveringTooltip(false);
+    setHoveredDay(null);
+    setTooltipPosition(null);
+    hoveredDayRef.current = null;
   };
 
   const hoveredActivities = hoveredDay ? hasActivity(hoveredDay) : [];
@@ -198,12 +215,14 @@ export default function Calendar({ activities, onOpenActivityModal, compact }: C
       {/* Activity Tooltip - rendered via Portal */}
       {mounted && hoveredDay && tooltipPosition && hoveredActivities.length > 0 && createPortal(
         <div
-          className="fixed z-[9999] pointer-events-none"
+          className="fixed z-[9999]"
           style={{
             top: tooltipPosition.top,
             left: tooltipPosition.left,
             transform: 'translate(-50%, -100%)',
           }}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={handleTooltipMouseLeave}
         >
           <div className="w-64 bg-white border border-[#e5e5e5] rounded-lg shadow-xl p-3 max-h-64 flex flex-col">
             <div className="text-xs sm:text-sm font-semibold text-[#1a1a1a] mb-2 border-b border-[#e5e5e5] pb-2 flex-shrink-0">

@@ -17,7 +17,7 @@ export default function RecentActivities({
   onDeleteActivity,
   onOpenActivityModal,
   onEditActivity,
-  maxVisible = 4,
+  maxVisible = 100,
   compact,
 }: RecentActivitiesProps) {
   const today = new Date();
