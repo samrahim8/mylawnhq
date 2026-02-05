@@ -239,7 +239,7 @@ export default function EquipmentGrid({
 }: EquipmentGridProps) {
   if (equipment.length === 0) {
     return (
-      <div className="bg-[#FAF8F5] min-h-screen -mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6">
+      <div className="bg-[#f8f6f3] min-h-screen -mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6">
         {/* Header Section */}
         <div className="text-center pt-8 pb-6">
           {/* Badge */}
