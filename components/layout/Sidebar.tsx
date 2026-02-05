@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -75,6 +76,11 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
   const pathname = usePathname();
   const router = useRouter();
   const { sessions, createSession, setCurrentSessionId, currentSessionId } = useChatContext();
+  const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
+
+  // Determine if we're on the chat page and should auto-show history
+  const isOnChatPage = pathname === "/chat" || pathname.startsWith("/chat/");
+  const showChatHistory = isExpanded && sessions.length > 0 && (isOnChatPage || isChatHistoryOpen);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -154,6 +160,23 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
                 Chat
               </span>
             </Link>
+            {/* Dropdown chevron - only show when NOT on chat page and has history */}
+            {isExpanded && !isOnChatPage && sessions.length > 0 && (
+              <button
+                onClick={() => setIsChatHistoryOpen(!isChatHistoryOpen)}
+                className="p-1 rounded-lg hover:bg-[#e5e5e5]"
+                title={isChatHistoryOpen ? "Hide chat history" : "Show chat history"}
+              >
+                <svg
+                  className={`w-3 h-3 transition-transform duration-200 ${isChatHistoryOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            )}
             {isExpanded && (
               <button
                 onClick={handleNewChat}
@@ -167,8 +190,8 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
             )}
           </div>
 
-          {/* Chat History */}
-          {isExpanded && sessions.length > 0 && (
+          {/* Chat History - auto-show on chat page, toggle on other pages */}
+          {showChatHistory && (
             <div className="mt-1 ml-2 space-y-0.5 max-h-[240px] overflow-y-auto scrollbar-thin">
               {sessions.map((session) => {
                 const isActive = session.id === currentSessionId;
