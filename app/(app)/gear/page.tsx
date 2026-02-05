@@ -42,6 +42,15 @@ export default function GearPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#3D3D3D]">Your Gear Shed</h1>
+        <p className="text-[#6B6B6B] mt-1">
+          Your equipment, all in one place. Manuals, maintenance reminders, and
+          recommendations — tailored to what you actually own.
+        </p>
+      </div>
+
       {/* Equipment Grid */}
       <EquipmentGrid
         equipment={equipment}
