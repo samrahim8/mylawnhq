@@ -86,7 +86,7 @@ export default function TodoList({ todos, onAdd, onToggle, onDelete, onOpenModal
       {todos.length === 0 ? (
         <div className="text-center flex-1 flex flex-col items-center justify-center">
           <p className="text-sm sm:text-base text-[#a3a3a3] mb-3">No tasks yet</p>
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
             {quickSuggestions.map((suggestion) => (
               <button
                 key={suggestion}
@@ -97,6 +97,15 @@ export default function TodoList({ todos, onAdd, onToggle, onDelete, onOpenModal
               </button>
             ))}
           </div>
+          <button
+            onClick={onOpenModal || (() => setIsAdding(true))}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white rounded-full text-xs font-medium transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Task
+          </button>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto min-h-0 space-y-1">
