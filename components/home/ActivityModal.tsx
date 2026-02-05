@@ -52,10 +52,81 @@ export default function ActivityModal({
   const productInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Common lawn care products for autocomplete
+  const COMMON_PRODUCTS = [
+    // Fertilizers
+    "Scotts Turf Builder",
+    "Scotts Turf Builder Winterguard",
+    "Scotts Turf Builder Summerguard",
+    "Scotts Turf Builder Starter",
+    "Scotts Green Max",
+    "Milorganite",
+    "Pennington UltraGreen",
+    "Pennington Lawn Fertilizer",
+    "Jonathan Green Green-Up",
+    "Jonathan Green Winter Survival",
+    "Lesco Professional Fertilizer",
+    "Simple Lawn Solutions",
+    "The Andersons PGF Complete",
+    "The Andersons Humic DG",
+    "Sunday Lawn Fertilizer",
+    "Ironite",
+    "Espoma Organic Lawn Food",
+    // Weed Control
+    "Scotts Weed & Feed",
+    "Scotts Halts Crabgrass Preventer",
+    "Spectracide Weed Stop",
+    "Ortho Weed B Gon",
+    "BioAdvanced Weed Killer",
+    "Tenacity Herbicide",
+    "Prodiamine 65 WDG",
+    "Dimension 2EW",
+    "Barricade",
+    "Celsius WG Herbicide",
+    "Certainty Herbicide",
+    "Speed Zone",
+    "Trimec Classic",
+    "2,4-D Amine",
+    "Roundup For Lawns",
+    // Pest Control
+    "BioAdvanced Grub Killer",
+    "Scotts GrubEx",
+    "Spectracide Triazicide",
+    "Sevin Insect Killer",
+    "Merit Insecticide",
+    "Acelepryn",
+    "Talstar P",
+    "Bifenthrin",
+    "Imidacloprid",
+    // Seeds
+    "Scotts Turf Builder Grass Seed",
+    "Pennington Smart Seed",
+    "Jonathan Green Black Beauty",
+    "Kentucky 31 Tall Fescue",
+    "Perennial Ryegrass",
+    "Kentucky Bluegrass",
+    "Bermuda Grass Seed",
+    "Zoysia Grass Seed",
+    "St. Augustine Plugs",
+    // Other
+    "Lime",
+    "Pelletized Lime",
+    "Sulfur",
+    "Gypsum",
+    "Humic Acid",
+    "Kelp Extract",
+    "Liquid Aeration",
+  ];
+
+  // Combine saved products with common products (removing duplicates)
+  const allProducts = [...new Set([...savedProducts, ...COMMON_PRODUCTS])];
+
   // Filter products based on input
-  const filteredProducts = savedProducts.filter((p) =>
-    p.toLowerCase().includes(product.toLowerCase())
-  );
+  const filteredProducts = product.trim()
+    ? allProducts.filter((p) =>
+        p.toLowerCase().includes(product.toLowerCase())
+      )
+    : [];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -209,7 +280,7 @@ export default function ActivityModal({
                   }`}
                 >
                   <span className="text-sm sm:text-xl">{type.icon}</span>
-                  <span className="text-[9px] sm:text-xs font-medium leading-tight text-center truncate w-full">{type.label}</span>
+                  <span className="text-[9px] sm:text-xs font-medium leading-tight text-center w-full">{type.label}</span>
                 </button>
               ))}
             </div>
