@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useRef } from "react";
+
 interface SoilTemperatureProps {
   temperature: number | null;
   trend: number[];
@@ -8,6 +10,8 @@ interface SoilTemperatureProps {
 }
 
 export default function SoilTemperature({ temperature, trend, loading, compact }: SoilTemperatureProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const getStatus = (temp: number) => {
     if (temp >= 55 && temp <= 85) return { text: "Optimal for growth", color: "text-[#7a8b6e]" };
     if (temp >= 45 && temp < 55) return { text: "Cool - slow growth", color: "text-[#a3a3a3]" };
@@ -110,27 +114,86 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
               {trendChange >= 0 ? "↗" : "↘"} {trendChange >= 0 ? "+" : ""}{trendChange}°F
             </span>
           </div>
-          <div className="relative h-5 sm:h-6 lg:h-8">
-            <svg viewBox="0 0 200 35" className="w-full h-full" preserveAspectRatio="none">
-              <polyline
-                points={points}
-                fill="none"
-                stroke="url(#soilGradient)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <defs>
-                <linearGradient id="soilGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#a3a3a3" />
-                  <stop offset="100%" stopColor="#7a8b6e" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="flex justify-between text-[9px] sm:text-[10px] text-[#525252] mt-0.5">
-              <span>Today</span>
-              <span>+7 days</span>
+          <div className="flex gap-1">
+            {/* Y-axis labels */}
+            <div className="flex flex-col justify-between text-[8px] sm:text-[9px] text-[#a3a3a3] h-12 sm:h-14 lg:h-16 pr-1">
+              <span>{maxTemp}°</span>
+              <span>{minTemp}°</span>
             </div>
+            {/* Chart area */}
+            <div
+              ref={chartRef}
+              className="relative flex-1 h-12 sm:h-14 lg:h-16 cursor-crosshair"
+              onMouseMove={(e) => {
+                if (!chartRef.current) return;
+                const rect = chartRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percent = x / rect.width;
+                const index = Math.round(percent * (trend.length - 1));
+                if (index >= 0 && index < trend.length) {
+                  setHoveredIndex(index);
+                }
+              }}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {/* Hover tooltip */}
+              {hoveredIndex !== null && (
+                <div
+                  className="absolute -top-6 transform -translate-x-1/2 bg-[#1a1a1a] text-white text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap z-10"
+                  style={{ left: `${(hoveredIndex / (trend.length - 1)) * 100}%` }}
+                >
+                  Day {hoveredIndex + 1}: {trend[hoveredIndex]}°F
+                </div>
+              )}
+              <svg viewBox="0 0 200 50" className="w-full h-full" preserveAspectRatio="none">
+                {/* Grid lines */}
+                <line x1="0" y1="0" x2="200" y2="0" stroke="#e5e5e5" strokeWidth="0.5" />
+                <line x1="0" y1="25" x2="200" y2="25" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" />
+                <line x1="0" y1="50" x2="200" y2="50" stroke="#e5e5e5" strokeWidth="0.5" />
+                {/* Trend line */}
+                <polyline
+                  points={trend
+                    .map((temp, i) => {
+                      const x = (i / (trend.length - 1)) * 200;
+                      const y = 50 - ((temp - minTemp) / range) * 45;
+                      return `${x},${y}`;
+                    })
+                    .join(" ")}
+                  fill="none"
+                  stroke="url(#soilGradient)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Data points */}
+                {trend.map((temp, i) => {
+                  const x = (i / (trend.length - 1)) * 200;
+                  const y = 50 - ((temp - minTemp) / range) * 45;
+                  return (
+                    <circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r={hoveredIndex === i ? 5 : 3}
+                      fill={hoveredIndex === i ? "#7a8b6e" : "#fff"}
+                      stroke="#7a8b6e"
+                      strokeWidth="1.5"
+                      className="transition-all duration-150"
+                    />
+                  );
+                })}
+                <defs>
+                  <linearGradient id="soilGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#a3a3a3" />
+                    <stop offset="100%" stopColor="#7a8b6e" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+          <div className="flex justify-between text-[9px] sm:text-[10px] text-[#525252] mt-0.5 pl-6">
+            <span>Today</span>
+            <span>+7 days</span>
           </div>
         </div>
       )}
