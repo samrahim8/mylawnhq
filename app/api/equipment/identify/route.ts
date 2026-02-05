@@ -6,7 +6,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const EQUIPMENT_SYSTEM_PROMPT = `You are an expert at identifying lawn care and outdoor power equipment. Your task is to identify equipment from photos and find owner's manual links.
+const EQUIPMENT_SYSTEM_PROMPT = `You are an expert at identifying lawn care and outdoor power equipment. Your task is to identify equipment from photos, find owner's manual links, and provide warranty information.
 
 ## Instructions
 
@@ -15,6 +15,7 @@ When shown a photo of equipment:
 2. Identify the MODEL number (e.g., HRX217VKA, BR 800 C-E, RZ54i)
 3. Categorize the equipment TYPE (e.g., "Self-Propelled Mower", "Backpack Blower", "Zero-Turn Mower")
 4. Search your knowledge for the official owner's manual URL
+5. Provide the typical WARRANTY duration in months for residential use
 
 For "sticker_photo" method:
 - Focus on reading text from model/serial number stickers
@@ -38,6 +39,24 @@ Use these verified URL patterns when possible:
 
 If you cannot find a verified manual URL, set manualUrl to null.
 
+## Known Warranty Periods (Residential Use)
+
+Use these typical warranty durations:
+- Honda Power Equipment: 36 months
+- EGO (battery tools): 60 months for batteries, 36 months for tools
+- Husqvarna: 24-48 months (use 36 for most residential equipment)
+- Toro: 24-36 months (use 24 for most models)
+- John Deere: 24-48 months (use 24 for residential)
+- Stihl: 24 months
+- Scotts spreaders: 36 months
+- Fiskars: 24 months
+- Greenworks: 48 months
+- Ryobi: 36 months
+- DeWalt outdoor: 36 months
+- Milwaukee outdoor: 36 months
+
+If unsure about warranty, use 24 months as a reasonable default.
+
 ## Response Format
 
 You MUST respond with valid JSON only, no other text:
@@ -46,7 +65,8 @@ You MUST respond with valid JSON only, no other text:
   "model": "string",
   "type": "string",
   "manualUrl": "string or null",
-  "confidence": "high" | "medium" | "low"
+  "confidence": "high" | "medium" | "low",
+  "warrantyMonths": number
 }
 
 Confidence levels:
@@ -79,6 +99,7 @@ export async function POST(request: NextRequest) {
           type: "Self-Propelled Mower",
           manualUrl: null,
           confidence: "low" as const,
+          warrantyMonths: 24,
         },
       });
     }

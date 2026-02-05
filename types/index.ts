@@ -158,6 +158,9 @@ export interface Equipment {
   model: string;
   type: string; // e.g., "Self-Propelled Mower", "Broadcast Spreader"
   manualUrl: string | null;
+  serialNumber?: string;
+  purchaseDate?: string; // ISO date string (YYYY-MM-DD)
+  warrantyMonths?: number; // Total warranty duration in months
   createdAt: string;
   updatedAt: string;
 }
@@ -168,6 +171,7 @@ export interface EquipmentIdentificationResult {
   type: string;
   manualUrl: string | null;
   confidence: "high" | "medium" | "low";
+  warrantyMonths?: number; // AI-fetched typical warranty for this product
 }
 
 export const EQUIPMENT_TYPES = [

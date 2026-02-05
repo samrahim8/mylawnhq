@@ -29,6 +29,9 @@ export default function AddEquipmentModal({
   const [manualModel, setManualModel] = useState("");
   const [manualType, setManualType] = useState<string>(EQUIPMENT_TYPES[0]);
   const [manualUrl, setManualUrl] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [warrantyMonths, setWarrantyMonths] = useState<number | "">(24);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +47,9 @@ export default function AddEquipmentModal({
     setManualModel("");
     setManualType(EQUIPMENT_TYPES[0] as string);
     setManualUrl("");
+    setSerialNumber("");
+    setPurchaseDate("");
+    setWarrantyMonths(24);
   };
 
   const handleClose = () => {
@@ -135,6 +141,9 @@ export default function AddEquipmentModal({
         model: result.model,
         type: result.type,
         manualUrl: result.manualUrl,
+        serialNumber: serialNumber.trim() || undefined,
+        purchaseDate: purchaseDate || undefined,
+        warrantyMonths: typeof warrantyMonths === "number" ? warrantyMonths : (result.warrantyMonths || undefined),
       });
       handleClose();
     }
@@ -151,6 +160,9 @@ export default function AddEquipmentModal({
       model: manualModel.trim(),
       type: manualType,
       manualUrl: manualUrl.trim() || null,
+      serialNumber: serialNumber.trim() || undefined,
+      purchaseDate: purchaseDate || undefined,
+      warrantyMonths: typeof warrantyMonths === "number" ? warrantyMonths : undefined,
     });
     handleClose();
   };
@@ -406,6 +418,57 @@ export default function AddEquipmentModal({
                 )}
               </div>
 
+              {/* Additional Details for AI-identified equipment */}
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">
+                  Add your details
+                </p>
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Serial Number
+                  </label>
+                  <input
+                    type="text"
+                    value={serialNumber}
+                    onChange={(e) => setSerialNumber(e.target.value)}
+                    placeholder="e.g., MZCG-8677291"
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                      Purchase Date
+                    </label>
+                    <input
+                      type="date"
+                      value={purchaseDate}
+                      onChange={(e) => setPurchaseDate(e.target.value)}
+                      className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                      Warranty (months)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="120"
+                      value={warrantyMonths === "" ? "" : (warrantyMonths || result.warrantyMonths || 24)}
+                      onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
+                      placeholder="24"
+                      className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                    />
+                    {result.warrantyMonths && warrantyMonths === 24 && (
+                      <p className="text-xs text-[#7a8b6e] mt-1">
+                        Typical for {result.brand}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex gap-3">
                 <button
                   onClick={handleRetry}
@@ -496,6 +559,54 @@ export default function AddEquipmentModal({
                   placeholder="https://..."
                   className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
                 />
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#e5e5e5] pt-4 mt-4">
+                <p className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide mb-3">
+                  Additional Details (optional)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Serial Number
+                </label>
+                <input
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => setSerialNumber(e.target.value)}
+                  placeholder="e.g., MZCG-8677291"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Purchase Date
+                  </label>
+                  <input
+                    type="date"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Warranty (months)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="120"
+                    value={warrantyMonths}
+                    onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
+                    placeholder="24"
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
