@@ -150,8 +150,8 @@ export default function RecentActivities({
       {/* Activities List */}
       {sortedActivities.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-          <p className="text-[11px] sm:text-xs font-medium text-[#525252] mb-1">Let&apos;s get it</p>
-          <p className="text-[10px] sm:text-[11px] text-[#a3a3a3] mb-2">
+          <p className="text-base sm:text-lg font-semibold text-[#525252] mb-1">Let&apos;s get it</p>
+          <p className="text-sm sm:text-base text-[#a3a3a3] mb-3">
             Your lawn&apos;s not gonna brag about itself
           </p>
           <button
