@@ -142,7 +142,7 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                   className="absolute -top-6 transform -translate-x-1/2 bg-[#1a1a1a] text-white text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap z-10"
                   style={{ left: `${(hoveredIndex / (trend.length - 1)) * 100}%` }}
                 >
-                  Day {hoveredIndex + 1}: {trend[hoveredIndex]}°F
+                  {trend[hoveredIndex]}°F
                 </div>
               )}
               <svg viewBox="0 0 200 50" className="w-full h-full" preserveAspectRatio="none">
@@ -160,12 +160,12 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                     })
                     .join(" ")}
                   fill="none"
-                  stroke="url(#soilGradient)"
+                  stroke="#7a8b6e"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                {/* Data points */}
+                {/* Small dots at each data point */}
                 {trend.map((temp, i) => {
                   const x = (i / (trend.length - 1)) * 200;
                   const y = 50 - ((temp - minTemp) / range) * 45;
@@ -174,26 +174,19 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                       key={i}
                       cx={x}
                       cy={y}
-                      r={hoveredIndex === i ? 5 : 3}
-                      fill={hoveredIndex === i ? "#7a8b6e" : "#fff"}
-                      stroke="#7a8b6e"
-                      strokeWidth="1.5"
-                      className="transition-all duration-150"
+                      r={hoveredIndex === i ? 3 : 1.5}
+                      fill="#7a8b6e"
                     />
                   );
                 })}
-                <defs>
-                  <linearGradient id="soilGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#a3a3a3" />
-                    <stop offset="100%" stopColor="#7a8b6e" />
-                  </linearGradient>
-                </defs>
               </svg>
             </div>
           </div>
-          <div className="flex justify-between text-[9px] sm:text-[10px] text-[#525252] mt-0.5 pl-6">
-            <span>Today</span>
-            <span>+7 days</span>
+          {/* X-axis day labels */}
+          <div className="flex justify-between text-[8px] sm:text-[9px] text-[#a3a3a3] mt-0.5 pl-6">
+            {["Today", "2", "3", "4", "5", "6", "7"].map((day, i) => (
+              <span key={i} className={hoveredIndex === i ? "text-[#1a1a1a] font-medium" : ""}>{day}</span>
+            ))}
           </div>
         </div>
       )}
