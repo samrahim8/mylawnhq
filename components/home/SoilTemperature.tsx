@@ -168,7 +168,7 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                     })
                     .join(" ")}
                   fill="none"
-                  stroke="#7a8b6e"
+                  stroke="#c17f59"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -183,7 +183,7 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                       cx={x}
                       cy={y}
                       r={hoveredIndex === i ? 3 : 1.5}
-                      fill="#7a8b6e"
+                      fill="#c17f59"
                     />
                   );
                 })}
