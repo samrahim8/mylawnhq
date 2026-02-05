@@ -84,13 +84,13 @@ export default function TodoList({ todos, onAdd, onToggle, onDelete, onOpenModal
       {/* Todo list */}
       {todos.length === 0 ? (
         <div className="text-center flex-1 flex flex-col items-center justify-center">
-          <p className="text-[11px] sm:text-xs text-[#a3a3a3] mb-1">No tasks yet</p>
-          <div className="flex flex-wrap gap-1 justify-center">
+          <p className="text-sm sm:text-base text-[#a3a3a3] mb-3">No tasks yet</p>
+          <div className="flex flex-wrap gap-2 justify-center">
             {quickSuggestions.map((suggestion) => (
               <button
                 key={suggestion}
                 onClick={() => onAdd(suggestion)}
-                className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] bg-[#f8f6f3] hover:bg-[#e5e5e5] rounded-full text-[#525252] transition-colors"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-[#f8f6f3] hover:bg-[#e5e5e5] rounded-full text-[#525252] transition-colors"
               >
                 {suggestion}
               </button>
