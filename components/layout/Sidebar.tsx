@@ -74,7 +74,7 @@ interface SidebarProps {
 function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLinkClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { recentSessions, createSession, setCurrentSessionId } = useChatContext();
+  const { sessions, createSession, setCurrentSessionId, currentSessionId } = useChatContext();
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -167,24 +167,36 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
             )}
           </div>
 
-          {/* Recent Chat History */}
-          {isExpanded && recentSessions.length > 0 && (
-            <div className="mt-1 ml-2 space-y-0.5 max-h-[200px] overflow-y-auto">
-              {recentSessions.map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => handleSelectChat(session.id)}
-                  className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors ${
-                    session.isActive
-                      ? "bg-[#e8ebe5] text-[#5a6950]"
-                      : "text-[#737373] hover:bg-[#f8f6f3] hover:text-[#525252]"
-                  }`}
-                  title={session.title}
-                >
-                  <span className="block truncate">{session.title}</span>
-                  <span className="text-[10px] text-[#a3a3a3]">{session.date}</span>
-                </button>
-              ))}
+          {/* Chat History */}
+          {isExpanded && sessions.length > 0 && (
+            <div className="mt-1 ml-2 space-y-0.5 max-h-[240px] overflow-y-auto scrollbar-thin">
+              {sessions.map((session) => {
+                const isActive = session.id === currentSessionId;
+                const date = new Date(session.updatedAt);
+                const now = new Date();
+                const diffMs = now.getTime() - date.getTime();
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                let dateLabel = "Today";
+                if (diffDays === 1) dateLabel = "Yesterday";
+                else if (diffDays > 1 && diffDays < 7) dateLabel = `${diffDays} days ago`;
+                else if (diffDays >= 7) dateLabel = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+                return (
+                  <button
+                    key={session.id}
+                    onClick={() => handleSelectChat(session.id)}
+                    className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors ${
+                      isActive
+                        ? "bg-[#e8ebe5] text-[#5a6950]"
+                        : "text-[#737373] hover:bg-[#f8f6f3] hover:text-[#525252]"
+                    }`}
+                    title={session.title}
+                  >
+                    <span className="block truncate">{session.title}</span>
+                    <span className="text-[10px] text-[#a3a3a3]">{dateLabel}</span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
