@@ -166,7 +166,7 @@ export default function RecentActivities({
           </button>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-0 min-h-0">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-0 min-h-0 max-h-[280px]">
           {visibleActivities.map((activity, index) => {
             return (
               <article
