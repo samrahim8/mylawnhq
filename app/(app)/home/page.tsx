@@ -421,14 +421,14 @@ function HomePageContent() {
             <button
               type="submit"
               disabled={!chatInput.trim() && chatImages.length === 0}
-              className={`absolute right-3 bottom-3 p-2.5 rounded-xl transition-colors ${
+              className={`absolute right-3 bottom-3 p-2 rounded-lg transition-colors ${
                 chatInput.trim() || chatImages.length > 0
                   ? "bg-[#7a8b6e] hover:bg-[#6a7b5e] text-white"
                   : "bg-[#e5e5e5] text-[#a3a3a3] cursor-not-allowed"
               }`}
               aria-label="Send message"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
             </button>
