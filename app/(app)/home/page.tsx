@@ -498,7 +498,7 @@ function HomePageContent() {
               className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-colors rounded-t-xl ${
                 activeTab === tab.id
                   ? "text-[#7a8b6e] bg-white border border-[#e5e5e5] border-b-0 relative z-10"
-                  : "text-[#525252] bg-[#e8e5e0] hover:text-[#1a1a1a] hover:bg-[#f0ece5] border border-transparent border-b-[#e5e5e5]"
+                  : "text-white bg-[#C17F59] hover:bg-[#b06f4a] border border-transparent border-b-[#e5e5e5]"
               }`}
             >
               {tab.icon}
