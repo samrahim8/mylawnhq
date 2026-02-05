@@ -315,7 +315,7 @@ export default function EquipmentGrid({
               {/* Bottom section - details row */}
               <div className="border-t border-[#E5E5E5] bg-[#FAFAFA] px-4 py-3 flex items-center">
                 <div className="flex-1 text-center">
-                  <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Serial</p>
+                  <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Serial / Model</p>
                   <p className="font-semibold text-[#3D3D3D] text-sm sm:text-base">
                     <span className="hidden sm:inline">MZCG-8677291</span>
                     <span className="sm:hidden">MZCG-867...</span>
@@ -382,7 +382,7 @@ export default function EquipmentGrid({
                     {/* Ghost details row */}
                     <div className="border-t border-dashed border-[#E5E5E5] px-4 py-3 flex items-center">
                       <div className="flex-1 text-center">
-                        <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Serial</p>
+                        <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Serial / Model</p>
                         <p className="text-[#D4D4D4]">&mdash;</p>
                       </div>
                       <div className="w-px h-8 bg-[#E5E5E5]" />
