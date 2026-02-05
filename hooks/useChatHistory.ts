@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ChatSession, ChatMessage } from "@/types";
 
 const STORAGE_KEY = "lawnhq_chat_sessions";
@@ -34,6 +34,7 @@ export function useChatHistory() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const sessionsRef = useRef<ChatSession[]>([]);
 
   // Load sessions from localStorage
   useEffect(() => {
@@ -51,6 +52,11 @@ export function useChatHistory() {
     setIsLoaded(true);
   }, []);
 
+  // Keep ref in sync with state for synchronous access
+  useEffect(() => {
+    sessionsRef.current = sessions;
+  }, [sessions]);
+
   // Save sessions to localStorage
   const saveSessions = useCallback((newSessions: ChatSession[]) => {
     if (typeof window === "undefined") return;
@@ -58,6 +64,7 @@ export function useChatHistory() {
     // Keep only the most recent sessions
     const trimmed = newSessions.slice(0, MAX_SESSIONS);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+    sessionsRef.current = trimmed; // Update ref synchronously
     setSessions(trimmed);
   }, []);
 
@@ -71,11 +78,11 @@ export function useChatHistory() {
       updatedAt: new Date().toISOString(),
     };
 
-    const newSessions = [newSession, ...sessions];
+    const newSessions = [newSession, ...sessionsRef.current];
     saveSessions(newSessions);
     setCurrentSessionId(newSession.id);
     return newSession.id;
-  }, [sessions, saveSessions]);
+  }, [saveSessions]);
 
   // Get the current session
   const currentSession = sessions.find((s) => s.id === currentSessionId) || null;
@@ -83,7 +90,8 @@ export function useChatHistory() {
   // Update a session with new messages
   const updateSession = useCallback(
     (sessionId: string, messages: ChatMessage[]) => {
-      const newSessions = sessions.map((session) => {
+      const currentSessions = sessionsRef.current;
+      const newSessions = currentSessions.map((session) => {
         if (session.id === sessionId) {
           return {
             ...session,
@@ -102,20 +110,20 @@ export function useChatHistory() {
 
       saveSessions(newSessions);
     },
-    [sessions, saveSessions]
+    [saveSessions]
   );
 
   // Delete a session
   const deleteSession = useCallback(
     (sessionId: string) => {
-      const newSessions = sessions.filter((s) => s.id !== sessionId);
+      const newSessions = sessionsRef.current.filter((s) => s.id !== sessionId);
       saveSessions(newSessions);
 
       if (currentSessionId === sessionId) {
         setCurrentSessionId(null);
       }
     },
-    [sessions, saveSessions, currentSessionId]
+    [saveSessions, currentSessionId]
   );
 
   // Get recent sessions for sidebar (4 most recent)
