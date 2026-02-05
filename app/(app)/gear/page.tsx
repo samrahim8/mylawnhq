@@ -163,31 +163,31 @@ export default function GearPage() {
             {suggestedEquipment.map((item, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl border border-[#E5E5E5] p-4 flex items-center gap-4"
+                className="bg-white rounded-xl border border-[#E5E5E5] p-3 sm:p-4 flex items-center gap-3 sm:gap-4"
               >
                 {/* Icon */}
-                <div className="w-12 h-12 bg-[#F5F3F0] rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#F5F3F0] rounded-xl flex items-center justify-center flex-shrink-0">
                   {item.type === "mower" ? (
-                    <MowerIcon className="w-7 h-7 text-[#8B9D82]" />
+                    <MowerIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B9D82]" />
                   ) : (
-                    <SpreaderIcon className="w-7 h-7 text-[#8B9D82]" />
+                    <SpreaderIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B9D82]" />
                   )}
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-[#3D3D3D]">{item.displayName}</h4>
-                  <p className="text-sm text-[#A8A8A8]">{item.equipmentType}</p>
+                  <h4 className="font-semibold text-[#3D3D3D] text-sm sm:text-base">{item.displayName}</h4>
+                  <p className="text-xs sm:text-sm text-[#A8A8A8]">{item.equipmentType}</p>
                 </div>
 
-                {/* Badge and button */}
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="px-2.5 py-1 bg-[#EA580C] text-white text-xs font-medium rounded-full">
+                {/* Badge and button - stacked vertically */}
+                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                  <span className="px-2 py-0.5 bg-terracotta text-white text-xs font-medium rounded-full">
                     Needs details
                   </span>
                   <button
                     onClick={() => handleAddSuggested(item)}
-                    className="px-4 py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white text-xs sm:text-sm font-medium rounded-lg transition-colors"
                   >
                     Complete
                   </button>
