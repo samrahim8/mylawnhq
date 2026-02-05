@@ -36,9 +36,7 @@ function PathSelection() {
                     Guide me through it
                   </h2>
                   <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                    Answer 4 quick questions and Ace will build your plan. Takes 30 seconds.
-                    Perfect if you&rsquo;re not sure about your grass type or
-                    where to start.
+                    4 quick questions. Ace builds your plan. 30 seconds.
                   </p>
                   <span className="inline-block mt-3 text-sm font-medium text-terracotta group-hover:underline">
                     Start quick setup &rarr;
@@ -61,8 +59,7 @@ function PathSelection() {
                     I already know my lawn
                   </h2>
                   <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                    Fill in the details yourself&mdash;grass type, equipment,
-                    issues, soil info. The more you share, the better your plan.
+                    Grass type, equipment, soil info. More detail = better plan.
                   </p>
                   <span className="inline-block mt-3 text-sm font-medium text-terracotta group-hover:underline">
                     Go to detailed form &rarr;
