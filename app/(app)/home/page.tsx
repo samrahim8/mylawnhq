@@ -8,6 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useTodos } from "@/hooks/useTodos";
 import { useCalendar } from "@/hooks/useCalendar";
 import { useWeather } from "@/hooks/useWeather";
+import { useSoilTemp } from "@/hooks/useSoilTemp";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useProducts } from "@/hooks/useProducts";
 import YardPhotoModal from "@/components/home/YardPhotoModal";
@@ -86,6 +87,7 @@ function HomePageContent() {
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
   const { activities, addActivity, deleteActivity, updateActivity } = useCalendar();
   const { weather, loading: weatherLoading } = useWeather(profile?.zipCode);
+  const { soilTemp, loading: soilTempLoading } = useSoilTemp(profile?.zipCode);
   const { photos, addPhoto } = usePhotos();
   const { products, addProduct } = useProducts();
 
@@ -119,9 +121,6 @@ function HomePageContent() {
   // Get first name for greeting
   const firstName = profile?.zipCode ? "there" : "there"; // Could be enhanced with actual user name
 
-  // Mock soil temperature data
-  const soilTemp = 68;
-  const soilTrend = [65, 66, 67, 66, 68, 67, 68];
 
   const handleOpenActivityModal = useCallback(() => {
     setEditingActivity(null);
@@ -208,7 +207,14 @@ function HomePageContent() {
       case "weather":
         return <WeatherWidget weather={weather} loading={weatherLoading} compact />;
       case "soil":
-        return <SoilTemperature temperature={soilTemp} trend={soilTrend} compact />;
+        return (
+          <SoilTemperature
+            temperature={soilTemp?.current ?? null}
+            trend={soilTemp?.trend ?? []}
+            loading={soilTempLoading}
+            compact
+          />
+        );
       default:
         return null;
     }
