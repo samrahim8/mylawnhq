@@ -106,11 +106,11 @@ export default function SandboxHero() {
                 <div className="flex items-center gap-2">
                   <span className="text-lawn text-lg">&#127793;</span>
                   <h2 className="font-display font-semibold text-deep-brown text-lg">
-                    Get Your Free Plan
+                    Takes 30 Seconds
                   </h2>
                 </div>
                 <p className="mt-1 text-sm text-deep-brown/50">
-                  Enter your zip and we&rsquo;ll build it in 30 seconds.
+                  Enter your zip and we&rsquo;ll build your plan.
                 </p>
               </div>
 
