@@ -22,6 +22,14 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
 
   const status = temperature !== null ? getStatus(temperature) : null;
 
+  // Get day of week labels starting from today
+  const getDayLabels = () => {
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const today = new Date().getDay();
+    return Array.from({ length: 7 }, (_, i) => days[(today + i) % 7]);
+  };
+  const dayLabels = getDayLabels();
+
   // Calculate trend line points for SVG
   const hasTrend = trend.length >= 2;
   const maxTemp = hasTrend ? Math.max(...trend) : 0;
@@ -145,17 +153,17 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                   {trend[hoveredIndex]}°F
                 </div>
               )}
-              <svg viewBox="0 0 200 50" className="w-full h-full" preserveAspectRatio="none">
+              <svg viewBox="0 0 200 60" className="w-full h-full" preserveAspectRatio="none">
                 {/* Grid lines */}
-                <line x1="0" y1="0" x2="200" y2="0" stroke="#e5e5e5" strokeWidth="0.5" />
-                <line x1="0" y1="25" x2="200" y2="25" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" />
-                <line x1="0" y1="50" x2="200" y2="50" stroke="#e5e5e5" strokeWidth="0.5" />
+                <line x1="0" y1="5" x2="200" y2="5" stroke="#e5e5e5" strokeWidth="0.5" />
+                <line x1="0" y1="30" x2="200" y2="30" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" />
+                <line x1="0" y1="55" x2="200" y2="55" stroke="#e5e5e5" strokeWidth="0.5" />
                 {/* Trend line */}
                 <polyline
                   points={trend
                     .map((temp, i) => {
                       const x = (i / (trend.length - 1)) * 200;
-                      const y = 50 - ((temp - minTemp) / range) * 45;
+                      const y = 55 - ((temp - minTemp) / range) * 45;
                       return `${x},${y}`;
                     })
                     .join(" ")}
@@ -168,7 +176,7 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                 {/* Small dots at each data point */}
                 {trend.map((temp, i) => {
                   const x = (i / (trend.length - 1)) * 200;
-                  const y = 50 - ((temp - minTemp) / range) * 45;
+                  const y = 55 - ((temp - minTemp) / range) * 45;
                   return (
                     <circle
                       key={i}
@@ -184,7 +192,7 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
           </div>
           {/* X-axis day labels */}
           <div className="flex justify-between text-[8px] sm:text-[9px] text-[#a3a3a3] mt-0.5 pl-6">
-            {["Today", "2", "3", "4", "5", "6", "7"].map((day, i) => (
+            {dayLabels.map((day, i) => (
               <span key={i} className={hoveredIndex === i ? "text-[#1a1a1a] font-medium" : ""}>{day}</span>
             ))}
           </div>
