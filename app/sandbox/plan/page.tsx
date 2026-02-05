@@ -547,7 +547,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                     { done: true, label: "Grass type matched" },
                     { done: true, label: "Schedule built" },
                     { done: false, label: "Weed scan", note: "needs photos" },
-                    { done: false, label: "Disease detection", note: "needs photos" },
+                    { done: false, label: "Damage & stress detection", note: "needs photos" },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm">
                       {item.done ? (
@@ -565,7 +565,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                   ))}
                 </div>
                 <p className="text-sm text-deep-brown/70 leading-relaxed text-center">
-                  Snap a few photos and we&rsquo;ll diagnose weeds, bare spots, and disease — then add targeted fixes to your plan.
+                  Snap a few photos and we&rsquo;ll diagnose weeds, dead spots, and disease — then add targeted fixes to your plan.
                 </p>
                 <p className="mt-1 text-xs text-deep-brown/40 text-center">
                   30 seconds. Like having a lawn pro walk your yard.
@@ -711,7 +711,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                 />
               </div>
               <div className="text-left space-y-3">
-                {["Scanning for crabgrass and dandelions...", "Checking grass color and density...", "Looking for bare or thin patches...", "Detecting signs of fungus..."].map((step, i) => (
+                {["Scanning for crabgrass and dandelions...", "Checking for brown or dead patches...", "Looking for bare or thin areas...", "Detecting signs of disease or stress..."].map((step, i) => (
                   <div key={i} className="flex items-center gap-3 text-sm">
                     {i < analysisStepIdx ? (
                       <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -775,15 +775,15 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                     The back yard shows signs of thin turf density. Overseeding and soil amendment recommendations have been added.
                   </p>
                 </div>
-                <div className="border border-lawn/20 rounded-lg p-4">
+                <div className="border border-ochre/20 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-display font-bold text-sm text-deep-brown">Overall health: Good</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-lawn/10 text-lawn px-2 py-0.5 rounded-full">
-                      Positive
+                    <span className="font-display font-bold text-sm text-deep-brown">Stressed grass near driveway</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-ochre/10 text-ochre px-2 py-0.5 rounded-full">
+                      Medium
                     </span>
                   </div>
                   <p className="text-xs text-deep-brown/60 leading-relaxed">
-                    Your lawn&rsquo;s overall health looks solid. With the targeted fixes above, you&rsquo;re on track for great results.
+                    We detected signs of heat stress or drought damage along hardscape edges. Deep watering recommendations have been added.
                   </p>
                 </div>
               </div>
