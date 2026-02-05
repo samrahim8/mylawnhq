@@ -150,3 +150,46 @@ export interface ApplicationResult {
   totalLbsNeeded?: number;
   bagsNeeded?: number;
 }
+
+// Equipment / My Gear Types
+export interface Equipment {
+  id: string;
+  brand: string;
+  model: string;
+  type: string; // e.g., "Self-Propelled Mower", "Broadcast Spreader"
+  manualUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EquipmentIdentificationResult {
+  brand: string;
+  model: string;
+  type: string;
+  manualUrl: string | null;
+  confidence: "high" | "medium" | "low";
+}
+
+export const EQUIPMENT_TYPES = [
+  "Push Mower",
+  "Self-Propelled Mower",
+  "Riding Mower",
+  "Zero-Turn Mower",
+  "Reel Mower",
+  "Broadcast Spreader",
+  "Drop Spreader",
+  "Hand Spreader",
+  "String Trimmer",
+  "Edger",
+  "Leaf Blower",
+  "Backpack Blower",
+  "Sprayer",
+  "Aerator",
+  "Dethatcher",
+  "Chainsaw",
+  "Hedge Trimmer",
+  "Pressure Washer",
+  "Other",
+] as const;
+
+export type EquipmentType = typeof EQUIPMENT_TYPES[number];

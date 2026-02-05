@@ -48,6 +48,7 @@ app/
 │   └── signup/          # Signup (email/password + Google OAuth)
 ├── (app)/               # Authenticated pages (protected by middleware)
 │   ├── chat/            # AI lawn care chat
+│   ├── gear/            # My Gear (equipment management)
 │   ├── profile/         # User profile
 │   ├── calendars/       # Lawn care calendar
 │   ├── tips/            # Lawn care tips
@@ -56,6 +57,7 @@ app/
 │   └── home/            # Home page (main app entry point)
 ├── api/
 │   ├── chat/            # Anthropic Claude chat endpoint
+│   ├── equipment/       # Equipment identification endpoint
 │   └── weather/         # OpenWeatherMap weather endpoint
 ├── auth/
 │   └── callback/        # OAuth callback handler (Google sign-in)
@@ -112,3 +114,8 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Middleware fix** — Early-return for /sandbox routes to skip Supabase auth
 - **Git author fix** — Set git author to team@mylawnhq.com for Vercel auto-deploys
 - **Removed dashboard** — Deleted /dashboard page and all components/dashboard/ components. Demo link and auth redirects now point to /home
+- **Photo upload in chat** — Added photo upload and camera capture buttons to home page and chat input
+- **Mobile chat fixes** — Fixed mobile chat input layout, sidebar chat history, and empty state sizing
+- **Tab styling** — Restyled tabs as folder-style with pill buttons and rounded corners
+- **Empty state font sizes** — Increased font size on empty activities and todo list states
+- **My Gear feature** — New /gear page to add and manage lawn equipment. Supports photo-based AI identification (full equipment or model sticker), manual entry, and automatic owner's manual lookup. Uses localStorage for storage. Added nav item to sidebar under Resources.
