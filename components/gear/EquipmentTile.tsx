@@ -169,8 +169,8 @@ export default function EquipmentTile({
 
         {/* Right side */}
         <div className="flex flex-col items-end gap-1.5 sm:gap-2 flex-shrink-0">
-          {/* Manual button */}
-          {equipment.manualUrl && (
+          {/* Manual button - always show, green if linked, grey if not */}
+          {equipment.manualUrl ? (
             <a
               href={equipment.manualUrl}
               target="_blank"
@@ -181,6 +181,11 @@ export default function EquipmentTile({
               <DocumentIcon className="w-4 h-4" />
               <span className="font-medium text-sm">Manual</span>
             </a>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-[#F5F3F0] rounded-lg text-[#A8A8A8]">
+              <DocumentIcon className="w-4 h-4" />
+              <span className="font-medium text-sm">Manual</span>
+            </div>
           )}
           {/* Warranty */}
           {warranty && (
