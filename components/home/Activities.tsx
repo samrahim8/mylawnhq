@@ -1,6 +1,17 @@
 "use client";
 
 import { CalendarActivity } from "@/types";
+import {
+  Scissors,
+  Droplet,
+  Sprout,
+  Wheat,
+  Flower2,
+  Bug,
+  Wind,
+  MoreHorizontal,
+  LucideIcon,
+} from "lucide-react";
 
 interface ActivitiesProps {
   activities: CalendarActivity[];
@@ -8,19 +19,22 @@ interface ActivitiesProps {
   onOpenActivityModal?: () => void;
 }
 
+const activityIcons: Record<string, LucideIcon> = {
+  mow: Scissors,
+  water: Droplet,
+  fertilize: Sprout,
+  aerate: Wind,
+  pest: Bug,
+  weedControl: Flower2,
+  seed: Wheat,
+  other: MoreHorizontal,
+};
+
 export default function Activities({ activities, onDeleteActivity, onOpenActivityModal }: ActivitiesProps) {
   const today = new Date();
 
-  const getActivityIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      mow: "✂️",
-      water: "💧",
-      fertilize: "🌱",
-      aerate: "🔄",
-      pest: "🐛",
-      other: "📝",
-    };
-    return icons[type] || "📝";
+  const getActivityIcon = (type: string): LucideIcon => {
+    return activityIcons[type] || MoreHorizontal;
   };
 
   const getActivityLabel = (type: string, isPast: boolean) => {
@@ -88,10 +102,11 @@ export default function Activities({ activities, onDeleteActivity, onOpenActivit
         <div className="space-y-2 flex-1 overflow-auto">
           {sortedActivities.map((activity) => {
             const { label, isPast } = getDateLabel(activity.date);
+            const Icon = getActivityIcon(activity.type);
             return (
               <div key={activity.id} className="flex items-center gap-2 text-sm group py-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#7a8b6e] flex-shrink-0" />
-                <span className="text-base">{getActivityIcon(activity.type)}</span>
+                <Icon size={16} strokeWidth={1.75} className="text-stone-500" />
                 <span className="text-[#525252] font-medium">{getActivityLabel(activity.type, isPast)}:</span>
                 <span className="text-[#a3a3a3] flex-1">{label}</span>
                 {onDeleteActivity && (

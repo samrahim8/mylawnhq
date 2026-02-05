@@ -19,6 +19,7 @@ import WeatherWidget from "@/components/home/WeatherWidget";
 import SoilTemperature from "@/components/home/SoilTemperature";
 import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
+import { Clock, Calendar as CalendarIcon, CheckSquare, Cloud, Thermometer, LucideIcon } from "lucide-react";
 
 type TabId = "activities" | "calendar" | "todos" | "weather" | "soil";
 
@@ -26,7 +27,7 @@ interface Tab {
   id: TabId;
   label: string;
   mobileLabel: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
 }
 
 const tabs: Tab[] = [
@@ -34,51 +35,31 @@ const tabs: Tab[] = [
     id: "activities",
     label: "The Log",
     mobileLabel: "The Log",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    icon: Clock,
   },
   {
     id: "calendar",
     label: "Calendar",
     mobileLabel: "Calendar",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: CalendarIcon,
   },
   {
     id: "todos",
     label: "To Do",
     mobileLabel: "To Do",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-      </svg>
-    ),
+    icon: CheckSquare,
   },
   {
     id: "weather",
     label: "Weather",
     mobileLabel: "Weather",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-      </svg>
-    ),
+    icon: Cloud,
   },
   {
     id: "soil",
     label: "Soil Temp",
     mobileLabel: "Soil Temp",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
+    icon: Thermometer,
   },
 ];
 
@@ -490,26 +471,34 @@ function HomePageContent() {
       <div className="flex-shrink-0 max-w-4xl mx-auto w-full">
         {/* Tab Header */}
         <div className="flex gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-colors rounded-t-xl ${
-                activeTab === tab.id
-                  ? "text-[#7a8b6e] bg-white border border-[#e5e5e5] border-b-0 relative z-10"
-                  : "text-white bg-[#C17F59] hover:bg-[#b06f4a] border border-transparent border-b-[#e5e5e5]"
-              }`}
-            >
-              {tab.icon}
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden">{tab.mobileLabel}</span>
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                style={activeTab !== tab.id ? { backgroundColor: '#C17F59' } : {}}
+                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-all duration-200 rounded-t-xl ${
+                  activeTab === tab.id
+                    ? "text-stone-700 bg-white border-2 border-stone-300 border-b-0 relative z-10"
+                    : "text-white hover:opacity-90 border-2 border-transparent border-b-stone-300"
+                }`}
+              >
+                <Icon
+                  size={16}
+                  strokeWidth={2}
+                  className={activeTab === tab.id ? "text-stone-500" : "text-white"}
+                />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.mobileLabel}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-b-2xl border border-[#e5e5e5] border-t-0 -mt-px">
+        <div className="bg-white rounded-b-2xl border-2 border-stone-300 border-t-0 -mt-px">
           <div className="p-3 sm:p-4 min-h-[350px]">
             {renderTabContent()}
           </div>

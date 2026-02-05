@@ -1,6 +1,7 @@
 "use client";
 
 import { useProfile } from "@/hooks/useProfile";
+import { Scissors, Droplet, Sprout, Calendar, Lightbulb } from "lucide-react";
 
 const tipsData = {
   bermuda: {
@@ -106,10 +107,10 @@ export default function TipsPage() {
         {Object.entries(tips).map(([key, section]) => (
           <div key={key} className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
             <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-              {key === "mowing" && "✂️"}
-              {key === "watering" && "💧"}
-              {key === "fertilizing" && "🌱"}
-              {key === "seasonal" && "📅"}
+              {key === "mowing" && <Scissors size={20} strokeWidth={1.75} className="text-stone-500" />}
+              {key === "watering" && <Droplet size={20} strokeWidth={1.75} className="text-stone-500" />}
+              {key === "fertilizing" && <Sprout size={20} strokeWidth={1.75} className="text-stone-500" />}
+              {key === "seasonal" && <Calendar size={20} strokeWidth={1.75} className="text-stone-500" />}
               {section.title}
             </h2>
             <ul className="space-y-3">
@@ -127,7 +128,8 @@ export default function TipsPage() {
       {/* General Tips */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 mt-6">
         <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-          💡 General Best Practices
+          <Lightbulb size={20} strokeWidth={1.75} className="text-stone-500" />
+          General Best Practices
         </h2>
         <ul className="space-y-3">
           <li className="flex items-start gap-3">

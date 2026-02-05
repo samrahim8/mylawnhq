@@ -1,6 +1,17 @@
 "use client";
 
 import { CalendarActivity } from "@/types";
+import {
+  Scissors,
+  Droplet,
+  Sprout,
+  Wheat,
+  Flower2,
+  Bug,
+  Wind,
+  MoreHorizontal,
+  LucideIcon,
+} from "lucide-react";
 
 interface RecentActivitiesProps {
   activities: CalendarActivity[];
@@ -12,6 +23,17 @@ interface RecentActivitiesProps {
   compact?: boolean;
 }
 
+const activityIcons: Record<string, LucideIcon> = {
+  mow: Scissors,
+  water: Droplet,
+  fertilize: Sprout,
+  aerate: Wind,
+  pest: Bug,
+  weedControl: Flower2,
+  seed: Wheat,
+  other: MoreHorizontal,
+};
+
 export default function RecentActivities({
   activities,
   onDeleteActivity,
@@ -22,18 +44,8 @@ export default function RecentActivities({
 }: RecentActivitiesProps) {
   const today = new Date();
 
-  const getActivityIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      mow: "\u2702\uFE0F",
-      water: "\uD83D\uDCA7",
-      fertilize: "\uD83C\uDF31",
-      aerate: "\uD83D\uDD04",
-      pest: "\uD83D\uDC1B",
-      weedControl: "🌼",
-      seed: "\uD83C\uDF3E",
-      other: "\uD83D\uDCDD",
-    };
-    return icons[type] || "\uD83D\uDCDD";
+  const getActivityIcon = (type: string): LucideIcon => {
+    return activityIcons[type] || MoreHorizontal;
   };
 
   const getActivityLabel = (type: string) => {
@@ -177,9 +189,16 @@ export default function RecentActivities({
                 onClick={() => onEditActivity?.(activity)}
               >
                 <div className="flex items-start gap-1.5 sm:gap-2">
-                  <span className="text-sm sm:text-base lg:text-lg flex-shrink-0 mt-0.5" role="img" aria-hidden="true">
-                    {getActivityIcon(activity.type)}
-                  </span>
+                  {(() => {
+                    const Icon = getActivityIcon(activity.type);
+                    return (
+                      <Icon
+                        size={18}
+                        strokeWidth={1.75}
+                        className="text-stone-500 flex-shrink-0 mt-0.5"
+                      />
+                    );
+                  })()}
 
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] sm:text-xs lg:text-sm font-semibold text-[#2d3748]">

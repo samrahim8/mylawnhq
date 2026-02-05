@@ -3,6 +3,18 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { CalendarActivity } from "@/types";
+import {
+  Scissors,
+  Droplet,
+  Sprout,
+  Wheat,
+  Flower2,
+  Bug,
+  Wind,
+  MoreHorizontal,
+  MapPin,
+  LucideIcon,
+} from "lucide-react";
 
 interface CalendarProps {
   activities: CalendarActivity[];
@@ -14,6 +26,17 @@ interface TooltipPosition {
   top: number;
   left: number;
 }
+
+const activityIcons: Record<string, LucideIcon> = {
+  mow: Scissors,
+  water: Droplet,
+  fertilize: Sprout,
+  aerate: Wind,
+  pest: Bug,
+  weedControl: Flower2,
+  seed: Wheat,
+  other: MoreHorizontal,
+};
 
 export default function Calendar({ activities, onOpenActivityModal, compact }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -58,18 +81,8 @@ export default function Calendar({ activities, onOpenActivityModal, compact }: C
     return activities.filter((a) => a.date === dateStr);
   };
 
-  const getActivityIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      mow: "✂️",
-      water: "💧",
-      fertilize: "🌱",
-      aerate: "🔄",
-      pest: "🐛",
-      weedControl: "🌼",
-      seed: "🌾",
-      other: "📝",
-    };
-    return icons[type] || "📝";
+  const getActivityIcon = (type: string): LucideIcon => {
+    return activityIcons[type] || MoreHorizontal;
   };
 
   const getActivityLabel = (type: string) => {
@@ -229,31 +242,34 @@ export default function Calendar({ activities, onOpenActivityModal, compact }: C
               {monthNames[month]} {hoveredDay}, {year}
             </div>
             <div className="space-y-2 overflow-y-auto flex-1">
-              {hoveredActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-2">
-                  <span className="text-sm flex-shrink-0">{getActivityIcon(activity.type)}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-[#2d3748]">
-                      {getActivityLabel(activity.type)}
-                    </p>
-                    {activity.product && (
-                      <p className="text-[11px] sm:text-xs text-[#525252]">
-                        {activity.product}
+              {hoveredActivities.map((activity) => {
+                const Icon = getActivityIcon(activity.type);
+                return (
+                  <div key={activity.id} className="flex items-start gap-2">
+                    <Icon size={16} strokeWidth={1.75} className="text-stone-500 flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-medium text-[#2d3748]">
+                        {getActivityLabel(activity.type)}
                       </p>
-                    )}
-                    {activity.area && (
-                      <p className="text-[11px] sm:text-xs text-[#7a8b6e] mt-0.5">
-                        📍 {activity.area}
-                      </p>
-                    )}
-                    {activity.notes && (
-                      <p className="text-[11px] sm:text-xs text-[#a3a3a3] mt-0.5">
-                        {activity.notes}
-                      </p>
-                    )}
+                      {activity.product && (
+                        <p className="text-[11px] sm:text-xs text-[#525252]">
+                          {activity.product}
+                        </p>
+                      )}
+                      {activity.area && (
+                        <p className="text-[11px] sm:text-xs text-[#7a8b6e] mt-0.5 flex items-center gap-0.5">
+                          <MapPin size={10} strokeWidth={2} /> {activity.area}
+                        </p>
+                      )}
+                      {activity.notes && (
+                        <p className="text-[11px] sm:text-xs text-[#a3a3a3] mt-0.5">
+                          {activity.notes}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {/* Tooltip arrow */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-white" style={{ marginTop: '-1px' }} />
