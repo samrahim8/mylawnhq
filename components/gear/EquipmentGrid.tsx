@@ -157,8 +157,8 @@ export default function EquipmentGrid({
         {/* Benefits Row */}
         <div className="bg-white rounded-xl border border-[#E5E5E5] p-4 flex items-stretch">
           {/* Manuals on tap */}
-          <div className="flex-1 flex items-start gap-3">
-            <DocumentIcon className="w-6 h-6 text-[#8B9D82] flex-shrink-0 mt-0.5" />
+          <div className="flex-1 flex flex-col items-center text-center gap-2">
+            <DocumentIcon className="w-6 h-6 text-[#8B9D82]" />
             <div>
               <h4 className="font-semibold text-[#3D3D3D]">Manuals on tap</h4>
               <p className="text-sm text-[#A8A8A8]">No more digging through drawers</p>
@@ -167,8 +167,8 @@ export default function EquipmentGrid({
           {/* Divider */}
           <div className="w-px bg-[#E5E5E5] mx-4" />
           {/* Maintenance pings */}
-          <div className="flex-1 flex items-start gap-3">
-            <BellIcon className="w-6 h-6 text-[#8B9D82] flex-shrink-0 mt-0.5" />
+          <div className="flex-1 flex flex-col items-center text-center gap-2">
+            <BellIcon className="w-6 h-6 text-[#8B9D82]" />
             <div>
               <h4 className="font-semibold text-[#3D3D3D]">Maintenance pings</h4>
               <p className="text-sm text-[#A8A8A8]">We&apos;ll nudge you at the right time</p>
