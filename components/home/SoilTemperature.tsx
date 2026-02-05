@@ -153,17 +153,17 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                   {trend[hoveredIndex]}°F
                 </div>
               )}
-              <svg viewBox="0 0 200 60" className="w-full h-full" preserveAspectRatio="none">
+              <svg viewBox="0 0 200 70" className="w-full h-full">
                 {/* Grid lines */}
                 <line x1="0" y1="5" x2="200" y2="5" stroke="#e5e5e5" strokeWidth="0.5" />
-                <line x1="0" y1="30" x2="200" y2="30" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" />
-                <line x1="0" y1="55" x2="200" y2="55" stroke="#e5e5e5" strokeWidth="0.5" />
+                <line x1="0" y1="32" x2="200" y2="32" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" />
+                <line x1="0" y1="60" x2="200" y2="60" stroke="#e5e5e5" strokeWidth="0.5" />
                 {/* Trend line */}
                 <polyline
                   points={trend
                     .map((temp, i) => {
                       const x = (i / (trend.length - 1)) * 200;
-                      const y = 55 - ((temp - minTemp) / range) * 45;
+                      const y = 60 - ((temp - minTemp) / range) * 50;
                       return `${x},${y}`;
                     })
                     .join(" ")}
@@ -176,14 +176,14 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                 {/* Small dots at each data point */}
                 {trend.map((temp, i) => {
                   const x = (i / (trend.length - 1)) * 200;
-                  const y = 55 - ((temp - minTemp) / range) * 45;
+                  const y = 60 - ((temp - minTemp) / range) * 50;
                   return (
                     <circle
                       key={i}
                       cx={x}
                       cy={y}
-                      r={hoveredIndex === i ? 3 : 1.5}
-                      fill="#c17f59"
+                      r={hoveredIndex === i ? 4 : 2}
+                      fill="#7a8b6e"
                     />
                   );
                 })}
