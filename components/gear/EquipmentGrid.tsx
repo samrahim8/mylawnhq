@@ -85,7 +85,7 @@ export default function EquipmentGrid({
 }: EquipmentGridProps) {
   if (equipment.length === 0) {
     return (
-      <div className="space-y-4 pt-8">
+      <div className="space-y-4">
         {/* Header */}
         <div className="text-center mb-2">
           <h2 className="text-2xl font-bold text-[#3D3D3D] mb-2">

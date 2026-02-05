@@ -152,7 +152,7 @@ export default function GearPage() {
   const suggestedEquipment = getSuggestedEquipment();
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto pt-8">
       {/* Suggested Equipment from Profile */}
       {suggestedEquipment.length > 0 && equipment.length === 0 && (
         <div className="mb-6">
