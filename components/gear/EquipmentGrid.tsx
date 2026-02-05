@@ -103,20 +103,48 @@ export default function EquipmentGrid({
           </p>
 
           {/* Example Equipment Card */}
-          <div className="bg-white rounded-xl border border-[#E5E5E5] p-4 flex items-center gap-4">
-            {/* Equipment icon */}
-            <div className="w-14 h-14 bg-[#F5F3F0] rounded-xl flex items-center justify-center flex-shrink-0">
-              <MowerIcon className="w-8 h-8 text-[#8B9D82]" />
+          <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+            {/* Top section */}
+            <div className="p-4 flex items-start gap-4">
+              {/* Equipment icon */}
+              <div className="w-14 h-14 bg-[#F5F3F0] rounded-xl flex items-center justify-center flex-shrink-0">
+                <MowerIcon className="w-8 h-8 text-[#8B9D82]" />
+              </div>
+              {/* Details */}
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-[#3D3D3D] text-lg">HRX217VKA</h4>
+                <p className="text-[#A8A8A8]">Push Mower</p>
+              </div>
+              {/* Right side */}
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                {/* Manual button */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F3F0] rounded-lg text-[#8B9D82]">
+                  <DocumentIcon className="w-4 h-4" />
+                  <span className="font-medium text-sm">Manual</span>
+                </div>
+                {/* Warranty */}
+                <div className="flex items-center gap-1.5 text-sm text-[#A8A8A8]">
+                  <span>📋</span>
+                  <span>18 mo. left on warranty</span>
+                </div>
+              </div>
             </div>
-            {/* Details */}
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-[#3D3D3D] text-lg">Honda HRX217VKA</h4>
-              <p className="text-[#A8A8A8]">Push Mower</p>
-            </div>
-            {/* Manual link */}
-            <div className="flex items-center gap-1.5 text-[#8B9D82] flex-shrink-0">
-              <DocumentIcon className="w-5 h-5" />
-              <span className="font-medium">Manual</span>
+            {/* Bottom section - details row */}
+            <div className="border-t border-[#E5E5E5] bg-[#FAFAFA] px-4 py-3 flex items-center">
+              <div className="flex-1 text-center">
+                <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Serial</p>
+                <p className="font-semibold text-[#3D3D3D]">MZCG-8677291</p>
+              </div>
+              <div className="w-px h-8 bg-[#E5E5E5]" />
+              <div className="flex-1 text-center">
+                <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Brand</p>
+                <p className="font-semibold text-[#3D3D3D]">Honda</p>
+              </div>
+              <div className="w-px h-8 bg-[#E5E5E5]" />
+              <div className="flex-1 text-center">
+                <p className="text-xs font-medium text-[#A8A8A8] uppercase tracking-wide">Purchased</p>
+                <p className="font-semibold text-[#3D3D3D]">Mar 2024</p>
+              </div>
             </div>
           </div>
         </div>
