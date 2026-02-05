@@ -76,6 +76,23 @@ function HomePageContent() {
   const router = useRouter();
   const initialQuery = searchParams.get("q");
 
+  // Calculate tab counts
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const todayStr = now.toISOString().split("T")[0];
+
+  // The Log: activities in the past 7 days
+  const recentActivitiesCount = activities.filter((a) => {
+    const actDate = new Date(a.date);
+    return actDate >= sevenDaysAgo && actDate <= now;
+  }).length;
+
+  // Calendar: future events (date > today)
+  const futureEventsCount = activities.filter((a) => a.date > todayStr).length;
+
+  // To Do: incomplete todos
+  const pendingTodosCount = todos.filter((t) => !t.completed).length;
+
   const [activeTab, setActiveTab] = useState<TabId>("activities");
   const [chatInput, setChatInput] = useState(initialQuery || "");
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
@@ -469,36 +486,53 @@ function HomePageContent() {
 
       {/* Tab Section */}
       <div className="flex-shrink-0 max-w-4xl mx-auto w-full">
-        {/* Tab Header */}
-        <div className="flex gap-1">
+        {/* Tab Header - Pill Style */}
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-4">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+
+            // Get count for tabs that have them
+            let count: number | null = null;
+            if (tab.id === "activities") count = recentActivitiesCount;
+            if (tab.id === "calendar") count = futureEventsCount;
+            if (tab.id === "todos") count = pendingTodosCount;
+
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                style={activeTab !== tab.id ? { backgroundColor: '#C17F59' } : {}}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-all duration-200 rounded-t-xl ${
-                  activeTab === tab.id
-                    ? "text-stone-700 bg-white border-2 border-stone-300 border-b-0 relative z-10"
-                    : "text-white hover:opacity-90 border-2 border-transparent border-b-stone-300"
+                className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border-2 ${
+                  isActive
+                    ? "bg-[#8B9D82] text-white border-[#8B9D82] shadow-md"
+                    : "bg-white text-stone-600 border-stone-200 hover:border-stone-300 hover:bg-stone-50"
                 }`}
               >
                 <Icon
                   size={16}
                   strokeWidth={2}
-                  className={activeTab === tab.id ? "text-stone-500" : "text-white"}
+                  className={isActive ? "text-white" : "text-stone-500"}
                 />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.mobileLabel}</span>
+                <span>{tab.label}</span>
+                {count !== null && count > 0 && (
+                  <span
+                    className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] sm:text-xs font-bold ${
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-[#C17F59] text-white"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-b-2xl border-2 border-stone-300 border-t-0 -mt-px">
+        <div className="bg-white rounded-2xl border-2 border-stone-200 shadow-sm">
           <div className="p-3 sm:p-4 min-h-[350px]">
             {renderTabContent()}
           </div>
