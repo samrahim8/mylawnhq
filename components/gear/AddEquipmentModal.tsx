@@ -3,8 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Equipment, EquipmentIdentificationResult, EQUIPMENT_TYPES, ChatImage } from "@/types";
 
-type Step = "method" | "capture" | "manual" | "processing" | "confirm";
-type Method = "equipment_photo" | "sticker_photo" | "manual";
+type Step = "input" | "capture" | "processing" | "confirm";
 
 interface AddEquipmentModalProps {
   isOpen: boolean;
@@ -19,54 +18,51 @@ export default function AddEquipmentModal({
   onSave,
   prefillData,
 }: AddEquipmentModalProps) {
-  const [step, setStep] = useState<Step>("method");
-  const [method, setMethod] = useState<Method | null>(null);
-  const [image, setImage] = useState<ChatImage | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>("input");
+  const [identifier, setIdentifier] = useState("");
   const [result, setResult] = useState<EquipmentIdentificationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLookingUp, setIsLookingUp] = useState(false);
 
-  // Manual entry form state
-  const [manualBrand, setManualBrand] = useState("");
-  const [manualModel, setManualModel] = useState("");
-  const [manualType, setManualType] = useState<string>(EQUIPMENT_TYPES[0]);
-  const [manualUrl, setManualUrl] = useState("");
+  // Additional details (editable after lookup)
   const [serialNumber, setSerialNumber] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [warrantyMonths, setWarrantyMonths] = useState<number | "">("");
-  const [isProcessingManualPhoto, setIsProcessingManualPhoto] = useState(false);
-  const manualPhotoInputRef = useRef<HTMLInputElement>(null);
-  const manualCameraInputRef = useRef<HTMLInputElement>(null);
 
+  // Photo capture refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Handle prefill data when modal opens
   useEffect(() => {
     if (isOpen && prefillData) {
-      setManualBrand(prefillData.brand || "");
-      setManualModel(prefillData.model || "");
-      setManualType(prefillData.type || EQUIPMENT_TYPES[0]);
-      setManualUrl(prefillData.manualUrl || "");
-      setSerialNumber(prefillData.serialNumber || "");
-      setPurchaseDate(prefillData.purchaseDate || "");
-      setWarrantyMonths(prefillData.warrantyMonths ?? "");
-      setStep("manual");
-      setMethod("manual");
+      // If we have prefill data (from suggested equipment), set it as result
+      if (prefillData.brand && prefillData.model) {
+        setResult({
+          brand: prefillData.brand,
+          model: prefillData.model,
+          type: prefillData.type || EQUIPMENT_TYPES[0],
+          manualUrl: prefillData.manualUrl || null,
+          confidence: "high",
+          warrantyMonths: prefillData.warrantyMonths || 24,
+        });
+        setSerialNumber(prefillData.serialNumber || "");
+        setPurchaseDate(prefillData.purchaseDate || "");
+        setWarrantyMonths(prefillData.warrantyMonths ?? "");
+        setStep("confirm");
+      } else {
+        // Just prefill what we have
+        setIdentifier(prefillData.model || "");
+      }
     }
   }, [isOpen, prefillData]);
 
   const resetModal = () => {
-    setStep("method");
-    setMethod(null);
-    setImage(null);
-    setImagePreview(null);
+    setStep("input");
+    setIdentifier("");
     setResult(null);
     setError(null);
-    setManualBrand("");
-    setManualModel("");
-    setManualType(EQUIPMENT_TYPES[0] as string);
-    setManualUrl("");
+    setIsLookingUp(false);
     setSerialNumber("");
     setPurchaseDate("");
     setWarrantyMonths("");
@@ -77,24 +73,47 @@ export default function AddEquipmentModal({
     onClose();
   };
 
-  const selectMethod = (m: Method) => {
-    setMethod(m);
-    if (m === "manual") {
-      setStep("manual");
-    } else {
-      setStep("capture");
+  // Look up equipment by model/serial number
+  const handleLookup = async () => {
+    if (!identifier.trim()) {
+      setError("Please enter a model or serial number");
+      return;
+    }
+
+    setError(null);
+    setIsLookingUp(true);
+
+    try {
+      const response = await fetch("/api/equipment/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.result) {
+        setResult(data.result);
+        setWarrantyMonths(data.result.warrantyMonths || "");
+        setStep("confirm");
+      } else {
+        setError(data.error || "Couldn't identify that equipment. Try a photo instead.");
+      }
+    } catch {
+      setError("Failed to connect. Please try again.");
+    } finally {
+      setIsLookingUp(false);
     }
   };
 
+  // Process photo for equipment identification
   const processImage = async (file: File) => {
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       setError("Please upload a JPEG, PNG, GIF, or WebP image.");
       return;
     }
 
-    // Validate file size (5MB max)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       setError("Image must be under 5MB.");
@@ -102,12 +121,8 @@ export default function AddEquipmentModal({
     }
 
     setError(null);
+    setStep("processing");
 
-    // Create preview
-    const previewUrl = URL.createObjectURL(file);
-    setImagePreview(previewUrl);
-
-    // Convert to base64
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = (reader.result as string).split(",")[1];
@@ -116,17 +131,14 @@ export default function AddEquipmentModal({
         data: base64,
         mimeType: file.type as ChatImage["mimeType"],
       };
-      setImage(chatImage);
-      setStep("processing");
 
-      // Call API to identify equipment
       try {
         const response = await fetch("/api/equipment/identify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             image: chatImage,
-            method: method,
+            method: "sticker_photo",
           }),
         });
 
@@ -134,14 +146,15 @@ export default function AddEquipmentModal({
 
         if (data.success && data.result) {
           setResult(data.result);
+          setWarrantyMonths(data.result.warrantyMonths || "");
           setStep("confirm");
         } else {
-          setError(data.error || "Failed to identify equipment. Please try again.");
-          setStep("capture");
+          setError(data.error || "Couldn't identify equipment. Please enter details manually.");
+          setStep("input");
         }
       } catch {
-        setError("Failed to connect to server. Please try again.");
-        setStep("capture");
+        setError("Failed to connect. Please try again.");
+        setStep("input");
       }
     };
     reader.readAsDataURL(file);
@@ -152,6 +165,7 @@ export default function AddEquipmentModal({
     if (file) {
       processImage(file);
     }
+    e.target.value = "";
   };
 
   const handleConfirm = () => {
@@ -169,102 +183,10 @@ export default function AddEquipmentModal({
     }
   };
 
-  const handleManualSave = () => {
-    if (!manualBrand.trim() || !manualModel.trim()) {
-      setError("Brand and model are required.");
-      return;
-    }
-
-    onSave({
-      brand: manualBrand.trim(),
-      model: manualModel.trim(),
-      type: manualType,
-      manualUrl: manualUrl.trim() || null,
-      serialNumber: serialNumber.trim() || undefined,
-      purchaseDate: purchaseDate || undefined,
-      warrantyMonths: typeof warrantyMonths === "number" ? warrantyMonths : undefined,
-    });
-    handleClose();
-  };
-
   const handleRetry = () => {
-    setImage(null);
-    setImagePreview(null);
     setResult(null);
     setError(null);
-    setStep("capture");
-  };
-
-  // Process photo for manual entry auto-fill
-  const processManualPhoto = async (file: File) => {
-    // Validate file type
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      setError("Please upload a JPEG, PNG, GIF, or WebP image.");
-      return;
-    }
-
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setError("Image must be under 5MB.");
-      return;
-    }
-
-    setError(null);
-    setIsProcessingManualPhoto(true);
-
-    // Convert to base64
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1];
-      const chatImage: ChatImage = {
-        id: `img-${Date.now()}`,
-        data: base64,
-        mimeType: file.type as ChatImage["mimeType"],
-      };
-
-      // Call API to identify equipment
-      try {
-        const response = await fetch("/api/equipment/identify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image: chatImage,
-            method: "sticker_photo",
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.result) {
-          // Auto-fill the form with AI results
-          setManualBrand(data.result.brand || "");
-          setManualModel(data.result.model || "");
-          setManualType(data.result.type || EQUIPMENT_TYPES[0]);
-          setManualUrl(data.result.manualUrl || "");
-          if (data.result.warrantyMonths) {
-            setWarrantyMonths(data.result.warrantyMonths);
-          }
-        } else {
-          setError(data.error || "Couldn't identify the equipment. Please fill in the details manually.");
-        }
-      } catch {
-        setError("Failed to connect to server. Please fill in the details manually.");
-      } finally {
-        setIsProcessingManualPhoto(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleManualPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processManualPhoto(file);
-    }
-    // Reset input so same file can be selected again
-    e.target.value = "";
+    setStep("input");
   };
 
   if (!isOpen) return null;
@@ -285,9 +207,9 @@ export default function AddEquipmentModal({
             <h2 className="text-base sm:text-xl font-semibold text-[#1a1a1a]">
               Add Your Gear
             </h2>
-            {step === "method" && (
+            {step === "input" && (
               <p className="text-xs sm:text-sm text-[#737373] mt-0.5">
-                Snap a photo and we&apos;ll figure out what you&apos;ve got.
+                Enter the model or serial number
               </p>
             )}
           </div>
@@ -313,154 +235,114 @@ export default function AddEquipmentModal({
 
         {/* Content */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-          {/* Step: Method Selection */}
-          {step === "method" && (
-            <div className="space-y-3">
-              <button
-                onClick={() => selectMethod("equipment_photo")}
-                className="w-full p-4 bg-white border border-[#e5e5e5] rounded-lg hover:border-[#7a8b6e] hover:bg-[#f8f6f3] transition-colors text-left group"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-[#f0f4ed] group-hover:bg-[#e8ebe5] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-[#1a1a1a]">Snap the whole thing</h3>
-                    <p className="text-sm text-[#737373] mt-0.5">
-                      Get the whole piece of equipment in frame — bonus points if the brand logo is visible!
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => selectMethod("sticker_photo")}
-                className="w-full p-4 bg-white border border-[#e5e5e5] rounded-lg hover:border-[#7a8b6e] hover:bg-[#f8f6f3] transition-colors text-left group"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-[#f0f4ed] group-hover:bg-[#e8ebe5] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6M9 17h3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-[#1a1a1a]">Snap the model sticker</h3>
-                    <p className="text-sm text-[#737373] mt-0.5">
-                      Usually on the deck or near the engine. Look for something like &quot;HRX217VKA&quot;.
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => selectMethod("manual")}
-                className="w-full p-4 bg-white border border-[#e5e5e5] rounded-lg hover:border-[#7a8b6e] hover:bg-[#f8f6f3] transition-colors text-left group"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-[#f0f4ed] group-hover:bg-[#e8ebe5] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-[#1a1a1a]">I&apos;ll type it myself</h3>
-                    <p className="text-sm text-[#737373] mt-0.5">
-                      Old school works too — enter the details manually.
-                    </p>
-                  </div>
-                </div>
-              </button>
-            </div>
-          )}
-
-          {/* Step: Image Capture */}
-          {step === "capture" && (
+          {/* Step: Input */}
+          {step === "input" && (
             <div className="space-y-4">
-              <button
-                onClick={() => setStep("method")}
-                className="inline-flex items-center gap-1 text-sm text-[#7a8b6e] hover:text-[#5a6950]"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back
-              </button>
-
               {error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
                   {error}
                 </div>
               )}
 
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-[#f0f4ed] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Model/Serial Input */}
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Model or Serial Number
+                </label>
+                <input
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+                  placeholder="e.g., HRX217VKA or MZCG-8677291"
+                  className="w-full px-3 py-3 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent text-base"
+                  autoFocus
+                />
+                <p className="text-xs text-[#a3a3a3] mt-1.5">
+                  We&apos;ll find the brand, warranty info, and owner&apos;s manual
+                </p>
+              </div>
+
+              {/* Lookup Button */}
+              <button
+                onClick={handleLookup}
+                disabled={isLookingUp || !identifier.trim()}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#8B9D82] hover:bg-[#7a8b71] disabled:bg-[#a3a3a3] text-white rounded-lg font-medium transition-colors"
+              >
+                {isLookingUp ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    Looking up...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Look Up Equipment
+                  </>
+                )}
+              </button>
+
+              {/* Divider */}
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#e5e5e5]" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white text-[#a3a3a3]">or snap a photo</span>
+                </div>
+              </div>
+
+              {/* Photo Options */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-[#e5e5e5] hover:bg-[#f8f6f3] rounded-lg text-[#525252] font-medium transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                </div>
-                <h3 className="font-medium text-[#1a1a1a] mb-1">
-                  {method === "sticker_photo" ? "Snap the model sticker" : "Snap your equipment"}
-                </h3>
-                <p className="text-sm text-[#737373] mb-6">
-                  {method === "sticker_photo"
-                    ? "Get a clear shot of the model number sticker."
-                    : "Try to capture the whole thing with the brand visible."}
-                </p>
-
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={() => cameraInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] text-white rounded-lg font-medium text-sm transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    </svg>
-                    Take Photo
-                  </button>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 border border-[#e5e5e5] hover:bg-[#f8f6f3] text-[#525252] rounded-lg font-medium text-sm transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Upload
-                  </button>
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  capture="environment"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
+                  Take Photo
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-[#e5e5e5] hover:bg-[#f8f6f3] rounded-lg text-[#525252] font-medium transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Upload
+                </button>
               </div>
+
+              <p className="text-xs text-[#a3a3a3] text-center">
+                Take a photo of the model sticker for best results
+              </p>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
           )}
 
           {/* Step: Processing */}
           {step === "processing" && (
             <div className="text-center py-12">
-              {imagePreview && (
-                <div className="w-24 h-24 mx-auto mb-4 rounded-lg overflow-hidden border border-[#e5e5e5]">
-                  <img src={imagePreview} alt="Equipment" className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div className="animate-spin w-8 h-8 border-3 border-[#7a8b6e] border-t-transparent rounded-full mx-auto mb-4" />
+              <div className="animate-spin w-10 h-10 border-3 border-[#8B9D82] border-t-transparent rounded-full mx-auto mb-4" />
               <p className="text-[#525252] font-medium">Identifying your equipment...</p>
               <p className="text-sm text-[#737373] mt-1">This&apos;ll just take a sec</p>
             </div>
@@ -471,38 +353,42 @@ export default function AddEquipmentModal({
             <div className="space-y-4">
               <div className="text-center">
                 <div className="w-12 h-12 bg-[#f0f4ed] rounded-full flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-6 h-6 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-[#8B9D82]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-[#1a1a1a] text-lg">Got it!</h3>
-                <p className="text-sm text-[#737373]">Is this what you&apos;ve got?</p>
+                <h3 className="font-semibold text-[#1a1a1a] text-lg">Found it!</h3>
               </div>
 
-              {imagePreview && (
-                <div className="w-full h-40 rounded-lg overflow-hidden border border-[#e5e5e5]">
-                  <img src={imagePreview} alt="Equipment" className="w-full h-full object-cover" />
-                </div>
-              )}
-
+              {/* Equipment Info Card */}
               <div className="bg-[#f8f6f3] rounded-lg p-4">
                 <div className="font-semibold text-[#1a1a1a] text-lg">
                   {result.brand} {result.model}
                 </div>
                 <div className="text-sm text-[#737373] mt-1">{result.type}</div>
-                {result.manualUrl && (
-                  <a
-                    href={result.manualUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-[#7a8b6e] hover:text-[#5a6950] mt-2"
-                  >
-                    Owner&apos;s Manual
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                )}
+                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#e5e5e5]">
+                  {result.manualUrl && (
+                    <a
+                      href={result.manualUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-[#8B9D82] hover:text-[#6a7b5e]"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Owner&apos;s Manual
+                    </a>
+                  )}
+                  {result.warrantyMonths && (
+                    <div className="inline-flex items-center gap-1 text-sm text-[#737373]">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      {result.warrantyMonths} mo. warranty
+                    </div>
+                  )}
+                </div>
                 {result.confidence !== "high" && (
                   <p className="text-xs text-[#a3a3a3] mt-2">
                     Confidence: {result.confidence}
@@ -510,10 +396,10 @@ export default function AddEquipmentModal({
                 )}
               </div>
 
-              {/* Additional Details for AI-identified equipment */}
+              {/* Additional Details */}
               <div className="space-y-3">
                 <p className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">
-                  Add your details
+                  Add your details (optional)
                 </p>
                 <div>
                   <label className="block text-sm font-medium text-[#525252] mb-1.5">
@@ -549,236 +435,23 @@ export default function AddEquipmentModal({
                       max="120"
                       value={warrantyMonths === "" ? "" : (warrantyMonths || result.warrantyMonths || "")}
                       onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
-                      placeholder=""
+                      placeholder={result.warrantyMonths?.toString() || ""}
                       className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
                     />
-                    {result.warrantyMonths && (
-                      <p className="text-xs text-[#7a8b6e] mt-1">
-                        Typical for {result.brand}: {result.warrantyMonths} months
-                      </p>
-                    )}
                   </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleRetry}
-                  className="flex-1 px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#525252] text-sm font-medium hover:bg-[#f5f5f5] transition-colors"
-                >
-                  Not Quite — Try Again
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-1 px-4 py-2.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] rounded-lg text-white text-sm font-medium transition-colors"
-                >
-                  Yep, That&apos;s It!
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step: Manual Entry */}
-          {step === "manual" && (
-            <div className="space-y-4">
-              <button
-                onClick={() => setStep("method")}
-                className="inline-flex items-center gap-1 text-sm text-[#7a8b6e] hover:text-[#5a6950]"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back
-              </button>
-
-              {/* Quick Photo Auto-fill */}
-              <div className="bg-[#f8f6f3] rounded-lg p-4 border border-[#e5e5e5]">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-[#f0f4ed] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-[#1a1a1a] text-sm">Got a sticker or box?</h4>
-                    <p className="text-xs text-[#737373] mt-0.5">
-                      Snap a photo and we&apos;ll auto-fill the details
-                    </p>
-                  </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => manualCameraInputRef.current?.click()}
-                      disabled={isProcessingManualPhoto}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] disabled:bg-[#a3a3a3] text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      {isProcessingManualPhoto ? (
-                        <>
-                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                          <span className="hidden sm:inline">Scanning...</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          </svg>
-                          <span className="hidden sm:inline">Photo</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => manualPhotoInputRef.current?.click()}
-                      disabled={isProcessingManualPhoto}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#e5e5e5] hover:bg-[#f5f5f5] disabled:bg-[#f5f5f5] text-[#525252] text-sm font-medium rounded-lg transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="hidden sm:inline">Upload</span>
-                    </button>
-                  </div>
-                </div>
-                <input
-                  ref={manualPhotoInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  className="hidden"
-                  onChange={handleManualPhotoChange}
-                />
-                <input
-                  ref={manualCameraInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  capture="environment"
-                  className="hidden"
-                  onChange={handleManualPhotoChange}
-                />
-              </div>
-
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                  {error}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                  Brand <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={manualBrand}
-                  onChange={(e) => setManualBrand(e.target.value)}
-                  placeholder="e.g., Honda, Toro, John Deere"
-                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                  Model <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={manualModel}
-                  onChange={(e) => setManualModel(e.target.value)}
-                  placeholder="e.g., HRX217VKA"
-                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                  Equipment Type
-                </label>
-                <select
-                  value={manualType}
-                  onChange={(e) => setManualType(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                >
-                  {EQUIPMENT_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                  Owner&apos;s Manual URL (optional)
-                </label>
-                <input
-                  type="url"
-                  value={manualUrl}
-                  onChange={(e) => setManualUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                />
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-[#e5e5e5] pt-4 mt-4">
-                <p className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide mb-3">
-                  Additional Details (optional)
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                  Serial Number
-                </label>
-                <input
-                  type="text"
-                  value={serialNumber}
-                  onChange={(e) => setSerialNumber(e.target.value)}
-                  placeholder="e.g., MZCG-8677291"
-                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                    Purchase Date
-                  </label>
-                  <input
-                    type="date"
-                    value={purchaseDate}
-                    onChange={(e) => setPurchaseDate(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
-                    Warranty (months)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="120"
-                    value={warrantyMonths}
-                    onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
-                    placeholder=""
-                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
-                  />
                 </div>
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
-                  type="button"
-                  onClick={handleClose}
+                  onClick={handleRetry}
                   className="flex-1 px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#525252] text-sm font-medium hover:bg-[#f5f5f5] transition-colors"
                 >
-                  Cancel
+                  Not Right — Try Again
                 </button>
                 <button
-                  type="button"
-                  onClick={handleManualSave}
-                  className="flex-1 px-4 py-2.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] rounded-lg text-white text-sm font-medium transition-colors"
+                  onClick={handleConfirm}
+                  className="flex-1 px-4 py-2.5 bg-[#8B9D82] hover:bg-[#7a8b71] rounded-lg text-white text-sm font-medium transition-colors"
                 >
                   Add Gear
                 </button>
