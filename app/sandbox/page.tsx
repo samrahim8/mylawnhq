@@ -49,7 +49,7 @@ export default function SandboxHero() {
           {/* Left column */}
           <div className="max-w-xl">
             <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-deep-brown leading-[1.1] tracking-tight">
-              YOUR LAWN CALLED. IT WANTS A PLAN.
+              YOUR LAWN CALLED.<br className="hidden lg:block" /> IT WANTS A PLAN.
             </h1>
             <p className="mt-5 text-lg sm:text-xl text-deep-brown/70 leading-relaxed">
               Ace, our AI, analyzes your grass, climate, and goals — then builds your plan week by week.
