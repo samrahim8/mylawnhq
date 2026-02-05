@@ -52,13 +52,13 @@ export default function SandboxHero() {
               YOUR LAWN CALLED.<br className="hidden lg:block" /> IT WANTS A PLAN.
             </h1>
             <p className="mt-5 text-lg sm:text-xl text-deep-brown/70 leading-relaxed">
-              Chip, your AI lawn guy, analyzes your grass, climate, and goals — then builds your plan week by week.
+              Get a week-by-week playbook tuned to your frost dates, soil temps, and the weeds that hit your zip code hardest.
             </p>
 
             <ul className="mt-6 space-y-3">
               {[
-                "Know exactly what product to buy",
-                "Right timing for your climate",
+                "Tells you exactly which bag to grab at the store",
+                "Timed to your local weather and soil temps",
                 "No credit card required",
               ].map((item) => (
                 <li
