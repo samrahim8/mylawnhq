@@ -73,11 +73,19 @@ export interface DayForecast {
   icon: string;
 }
 
+export interface ChatImage {
+  id: string;
+  data: string; // base64 encoded image data
+  mimeType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+  preview?: string; // optional thumbnail preview URL
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  images?: ChatImage[];
 }
 
 export interface ChatSession {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChatMessage } from "@/types";
+import { ChatMessage, ChatImage } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
 import { useCalendar } from "@/hooks/useCalendar";
 import { useWeather } from "@/hooks/useWeather";
@@ -26,8 +26,11 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<ChatImage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const initialMessageProcessed = useRef(false);
   const sessionInitialized = useRef(false);
 
@@ -63,9 +66,59 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
     }
   }, [input]);
 
+  const processImage = (file: File): Promise<ChatImage> => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
+        reject(new Error("Please upload a JPEG, PNG, GIF, or WebP image"));
+        return;
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB limit
+      if (file.size > maxSize) {
+        reject(new Error("Image must be smaller than 5MB"));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        const base64 = dataUrl.split(",")[1];
+        resolve({
+          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          data: base64,
+          mimeType: file.type as ChatImage["mimeType"],
+          preview: dataUrl,
+        });
+      };
+      reader.onerror = () => reject(new Error("Failed to read image"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const newImages = await Promise.all(
+        Array.from(files).map(processImage)
+      );
+      setPendingImages((prev) => [...prev, ...newImages].slice(0, 4)); // Max 4 images
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to upload image");
+    }
+
+    // Reset input
+    e.target.value = "";
+  };
+
+  const removeImage = (imageId: string) => {
+    setPendingImages((prev) => prev.filter((img) => img.id !== imageId));
+  };
+
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
-    if (!text || isLoading) return;
+    if ((!text && pendingImages.length === 0) || isLoading) return;
 
     // Create a new session if we don't have one
     let sessionId = currentSessionId;
@@ -78,13 +131,15 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: text,
+      content: text || (pendingImages.length > 0 ? "What can you tell me about this?" : ""),
       timestamp: new Date().toISOString(),
+      images: pendingImages.length > 0 ? [...pendingImages] : undefined,
     };
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
+    setPendingImages([]);
     setIsLoading(true);
 
     // Save immediately with user message
@@ -97,7 +152,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
 
     try {
       const requestBody: {
-        messages: { role: string; content: string }[];
+        messages: { role: string; content: string; images?: ChatImage[] }[];
         profile: typeof profile;
         weatherContext?: typeof weather;
         activitiesContext?: typeof activities;
@@ -105,6 +160,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
         messages: newMessages.map((m) => ({
           role: m.role,
           content: m.content,
+          images: m.images,
         })),
         profile: profile || null,
       };
@@ -239,7 +295,21 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
                         dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
                       />
                     ) : (
-                      <p className="leading-relaxed">{message.content}</p>
+                      <div>
+                        {message.images && message.images.length > 0 && (
+                          <div className={`flex gap-2 flex-wrap ${message.content ? "mb-2" : ""}`}>
+                            {message.images.map((img) => (
+                              <img
+                                key={img.id}
+                                src={img.preview || `data:${img.mimeType};base64,${img.data}`}
+                                alt="Uploaded"
+                                className="max-w-[200px] max-h-[200px] object-cover rounded-lg"
+                              />
+                            ))}
+                          </div>
+                        )}
+                        {message.content && <p className="leading-relaxed">{message.content}</p>}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -264,29 +334,104 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
       {/* Input area - fixed at bottom, centered */}
       <div className="border-t border-neutral-100 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-4">
+          {/* Image preview area */}
+          {pendingImages.length > 0 && (
+            <div className="flex gap-2 mb-3 flex-wrap">
+              {pendingImages.map((img) => (
+                <div key={img.id} className="relative group">
+                  <img
+                    src={img.preview}
+                    alt="Upload preview"
+                    className="w-20 h-20 object-cover rounded-xl border border-neutral-200"
+                  />
+                  <button
+                    onClick={() => removeImage(img.id)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Hidden file inputs */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            multiple
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            capture="environment"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+
           <div className="relative flex items-end bg-neutral-50 border border-neutral-200 rounded-2xl focus-within:border-neutral-400 focus-within:ring-1 focus-within:ring-neutral-400 transition-all">
             <textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="What's going on with your lawn?"
+              placeholder={pendingImages.length > 0 ? "Add a question about your photo..." : "Talk to me, grass whisperer."}
               rows={1}
               className="flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none py-4 px-4 max-h-[200px]"
             />
-            <button
-              onClick={() => handleSend()}
-              disabled={!input.trim() || isLoading}
-              className={`m-2 p-2 rounded-xl transition-all ${
-                input.trim() && !isLoading
-                  ? "bg-[#6b7a5d] hover:bg-[#5a6950] text-white"
-                  : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1 m-2">
+              {/* Photo upload button */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || pendingImages.length >= 4}
+                className={`p-2 rounded-xl transition-all ${
+                  isLoading || pendingImages.length >= 4
+                    ? "text-neutral-300 cursor-not-allowed"
+                    : "text-[#6b7a5d] hover:bg-[#6b7a5d]/10"
+                }`}
+                title="Upload photo"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+              {/* Camera button */}
+              <button
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={isLoading || pendingImages.length >= 4}
+                className={`p-2 rounded-xl transition-all ${
+                  isLoading || pendingImages.length >= 4
+                    ? "text-neutral-300 cursor-not-allowed"
+                    : "text-[#6b7a5d] hover:bg-[#6b7a5d]/10"
+                }`}
+                title="Take photo"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+              {/* Send button */}
+              <button
+                onClick={() => handleSend()}
+                disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
+                className={`p-2 rounded-xl transition-all ${
+                  (input.trim() || pendingImages.length > 0) && !isLoading
+                    ? "bg-[#6b7a5d] hover:bg-[#5a6950] text-white"
+                    : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              </button>
+            </div>
           </div>
           <p className="text-xs text-neutral-400 text-center mt-2">
             LawnHQ can make mistakes. Consider checking important info.

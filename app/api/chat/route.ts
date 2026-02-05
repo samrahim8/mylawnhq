@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getContextualPrompt } from "@/lib/lawn-knowledge";
-import { WeatherData, CalendarActivity } from "@/types";
+import { WeatherData, CalendarActivity, ChatImage } from "@/types";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -112,11 +112,44 @@ When the user asks "What should I do today?" or similar questions:
 5. Explain WHY each recommendation makes sense given the conditions`;
     }
 
-    // Convert messages to Anthropic format
-    const anthropicMessages = messages.map((msg: { role: string; content: string }) => ({
-      role: msg.role as "user" | "assistant",
-      content: msg.content,
-    }));
+    // Convert messages to Anthropic format with vision support
+    const anthropicMessages = messages.map((msg: { role: string; content: string; images?: ChatImage[] }) => {
+      // If message has images, create a multi-part content array
+      if (msg.images && msg.images.length > 0 && msg.role === "user") {
+        const contentParts: Anthropic.MessageParam["content"] = [];
+
+        // Add images first
+        msg.images.forEach((img: ChatImage) => {
+          contentParts.push({
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: img.mimeType,
+              data: img.data,
+            },
+          });
+        });
+
+        // Add text content if present
+        if (msg.content) {
+          contentParts.push({
+            type: "text",
+            text: msg.content,
+          });
+        }
+
+        return {
+          role: msg.role as "user" | "assistant",
+          content: contentParts,
+        };
+      }
+
+      // Regular text message
+      return {
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      };
+    });
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
