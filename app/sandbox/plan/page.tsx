@@ -536,18 +536,39 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
           {/* Stage 1: Photo Upload */}
           {conversionStep === "photos" && (
             <div>
-              <div className="text-center mb-6">
-                <h3 className="font-display text-xl font-bold text-deep-brown">
-                  Your plan is 70% personalized
+              <div className="mb-6">
+                <h3 className="font-display text-xl font-bold text-deep-brown text-center mb-4">
+                  We can&rsquo;t spot problems we can&rsquo;t see
                 </h3>
-                <div className="w-full bg-deep-brown/10 rounded-full h-2 mt-3 mb-4">
-                  <div className="h-2 bg-lawn rounded-full transition-all duration-500" style={{ width: "70%" }} />
+                {/* Checklist instead of progress bar */}
+                <div className="space-y-2 mb-4">
+                  {[
+                    { done: true, label: "Climate zone analyzed" },
+                    { done: true, label: "Grass type matched" },
+                    { done: true, label: "Schedule built" },
+                    { done: false, label: "Weed scan", note: "needs photos" },
+                    { done: false, label: "Disease detection", note: "needs photos" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      {item.done ? (
+                        <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border-2 border-deep-brown/20 flex-shrink-0" />
+                      )}
+                      <span className={item.done ? "text-deep-brown/70" : "text-deep-brown/50"}>
+                        {item.label}
+                        {item.note && <span className="text-deep-brown/30 ml-1">({item.note})</span>}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-sm text-deep-brown/70 leading-relaxed">
-                  Snap photos of your lawn to complete your plan. We&rsquo;ll spot issues and add targeted fixes.
+                <p className="text-sm text-deep-brown/70 leading-relaxed text-center">
+                  Snap a few photos and we&rsquo;ll diagnose weeds, bare spots, and disease — then add targeted fixes to your plan.
                 </p>
-                <p className="mt-1 text-xs text-deep-brown/40">
-                  Takes 30 seconds. Makes your plan 10x better.
+                <p className="mt-1 text-xs text-deep-brown/40 text-center">
+                  30 seconds. Like having a lawn pro walk your yard.
                 </p>
               </div>
 
@@ -664,14 +685,14 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                 disabled={Object.keys(photos).length === 0}
                 className="w-full bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Analyze My Lawn
+                Scan My Lawn
               </button>
 
               <button
                 onClick={() => setConversionStep("email")}
                 className="mt-3 w-full text-center text-xs text-deep-brown/40 hover:text-deep-brown/60 transition-colors"
               >
-                I&rsquo;ll do this later &rarr;
+                Skip diagnosis &rarr;
               </button>
             </div>
           )}
@@ -690,7 +711,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                 />
               </div>
               <div className="text-left space-y-3">
-                {["Scanning for weeds...", "Checking grass health...", "Identifying bare spots...", "Analyzing soil conditions..."].map((step, i) => (
+                {["Scanning for crabgrass and dandelions...", "Checking grass color and density...", "Looking for bare or thin patches...", "Detecting signs of fungus..."].map((step, i) => (
                   <div key={i} className="flex items-center gap-3 text-sm">
                     {i < analysisStepIdx ? (
                       <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -715,12 +736,8 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
             <div>
               <div className="text-center mb-6">
                 <h3 className="font-display text-xl font-bold text-deep-brown">
-                  Lawn Diagnosis
+                  We found 3 issues
                 </h3>
-                <div className="w-full bg-deep-brown/10 rounded-full h-2 mt-3 mb-2">
-                  <div className="h-2 bg-lawn rounded-full transition-all duration-500" style={{ width: "100%" }} />
-                </div>
-                <p className="text-xs text-lawn font-medium">Your plan is 100% personalized</p>
               </div>
 
               {/* Uploaded photo thumbnails */}
@@ -779,7 +796,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                 onClick={() => setConversionStep("email")}
                 className="w-full bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors"
               >
-                Create free account to save your plan + diagnosis
+                Get my plan + diagnosis
               </button>
             </div>
           )}
@@ -788,10 +805,10 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
           {conversionStep === "email" && !emailSubmitted && (
             <div className="text-center">
               <h3 className="font-display text-xl font-bold text-deep-brown mb-2">
-                {Object.keys(photos).length > 0 ? "Save your plan + diagnosis" : "Save your personalized plan"}
+                {Object.keys(photos).length > 0 ? "Where should we send your diagnosis?" : "Where should we send your plan?"}
               </h3>
               <p className="text-sm text-deep-brown/50 mb-6">
-                Enter your email to keep your plan and get reminders.
+                We&rsquo;ll email your plan and remind you when each task is due.
               </p>
 
               <form
@@ -820,12 +837,12 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                   type="submit"
                   className="w-full bg-terracotta text-white font-bold py-3 px-6 rounded-lg text-sm uppercase tracking-wide hover:bg-terracotta/90 transition-colors"
                 >
-                  Save My Plan
+                  Send My Plan
                 </button>
               </form>
 
               <ul className="mt-6 space-y-2 text-left max-w-sm mx-auto">
-                {["Save your plan", "Get reminders when tasks are due", "Track progress over time"].map((item) => (
+                {["Your full 90-day plan", "Reminders before each task is due", "Free forever — no credit card"].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-deep-brown/60">
                     <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
