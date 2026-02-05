@@ -258,22 +258,22 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-6">
+      <div className={`flex-1 ${messages.length > 0 ? "overflow-y-auto" : "overflow-hidden"}`}>
+        <div className={`max-w-3xl mx-auto px-4 ${messages.length > 0 ? "py-6" : "py-4 h-full"}`}>
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-              <div className="w-16 h-16 bg-[#6b7a5d] rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#6b7a5d] rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
-              <h1 className="text-3xl font-semibold text-neutral-900 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 mb-1 sm:mb-2">
                 Let&apos;s talk grass.
               </h1>
-              <p className="text-neutral-500 mb-10">
+              <p className="text-sm sm:text-base text-neutral-500 mb-6 sm:mb-10">
                 No question too basic.
               </p>
-              <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full max-w-md px-2">
                 {[
                   "My grass looks kinda yellow",
                   "When should I put down fertilizer?",
@@ -283,7 +283,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
                   <button
                     key={suggestion}
                     onClick={() => handleSend(suggestion)}
-                    className="p-4 text-left text-sm bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-neutral-700 transition-colors"
+                    className="p-3 sm:p-4 text-left text-xs sm:text-sm bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-neutral-700 transition-colors"
                   >
                     {suggestion}
                   </button>
