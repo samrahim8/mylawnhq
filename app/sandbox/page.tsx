@@ -106,7 +106,7 @@ export default function SandboxHero() {
                 <div className="flex items-center gap-2">
                   <span className="text-lawn text-lg">&#127793;</span>
                   <h2 className="font-display font-semibold text-deep-brown text-lg">
-                    Takes 30 Seconds
+                    30-Second Setup
                   </h2>
                 </div>
                 <p className="mt-1 text-sm text-deep-brown/50">
