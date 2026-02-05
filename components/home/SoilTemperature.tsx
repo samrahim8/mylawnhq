@@ -153,17 +153,17 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                   {trend[hoveredIndex]}°F
                 </div>
               )}
-              <svg viewBox="0 0 200 70" className="w-full h-full">
+              <svg viewBox="0 0 100 50" className="w-full h-full" preserveAspectRatio="none">
                 {/* Grid lines */}
-                <line x1="0" y1="5" x2="200" y2="5" stroke="#e5e5e5" strokeWidth="0.5" />
-                <line x1="0" y1="32" x2="200" y2="32" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" />
-                <line x1="0" y1="60" x2="200" y2="60" stroke="#e5e5e5" strokeWidth="0.5" />
+                <line x1="0" y1="2" x2="100" y2="2" stroke="#e5e5e5" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
+                <line x1="0" y1="25" x2="100" y2="25" stroke="#e5e5e5" strokeWidth="0.5" strokeDasharray="4" vectorEffect="non-scaling-stroke" />
+                <line x1="0" y1="48" x2="100" y2="48" stroke="#e5e5e5" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
                 {/* Trend line */}
                 <polyline
                   points={trend
                     .map((temp, i) => {
-                      const x = (i / (trend.length - 1)) * 200;
-                      const y = 60 - ((temp - minTemp) / range) * 50;
+                      const x = (i / (trend.length - 1)) * 100;
+                      const y = 46 - ((temp - minTemp) / range) * 40;
                       return `${x},${y}`;
                     })
                     .join(" ")}
@@ -172,22 +172,27 @@ export default function SoilTemperature({ temperature, trend, loading, compact }
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
                 />
-                {/* Small dots at each data point */}
-                {trend.map((temp, i) => {
-                  const x = (i / (trend.length - 1)) * 200;
-                  const y = 60 - ((temp - minTemp) / range) * 50;
-                  return (
-                    <circle
-                      key={i}
-                      cx={x}
-                      cy={y}
-                      r={hoveredIndex === i ? 4 : 2}
-                      fill="#7a8b6e"
-                    />
-                  );
-                })}
               </svg>
+              {/* Dots rendered as absolute positioned divs for perfect circles */}
+              {trend.map((temp, i) => {
+                const xPercent = (i / (trend.length - 1)) * 100;
+                const yPercent = ((temp - minTemp) / range) * 80 + 10;
+                return (
+                  <div
+                    key={i}
+                    className="absolute rounded-full bg-[#7a8b6e] transition-all duration-150"
+                    style={{
+                      left: `${xPercent}%`,
+                      bottom: `${yPercent}%`,
+                      width: hoveredIndex === i ? 8 : 5,
+                      height: hoveredIndex === i ? 8 : 5,
+                      transform: "translate(-50%, 50%)",
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
           {/* X-axis day labels */}
