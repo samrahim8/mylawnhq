@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useEquipment } from "@/hooks/useEquipment";
 import { useProfile } from "@/hooks/useProfile";
-import EquipmentGrid from "@/components/gear/EquipmentGrid";
+import EquipmentGrid, { MowerIcon, SpreaderIcon } from "@/components/gear/EquipmentGrid";
 import AddEquipmentModal from "@/components/gear/AddEquipmentModal";
 import { Equipment } from "@/types";
 
@@ -166,36 +166,32 @@ export default function GearPage() {
                 className="bg-white rounded-xl border border-[#E5E5E5] p-4 flex items-center gap-4"
               >
                 {/* Icon */}
-                <div className="w-12 h-12 bg-[#FEF3C7] rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-[#F5F3F0] rounded-xl flex items-center justify-center flex-shrink-0">
                   {item.type === "mower" ? (
-                    <svg className="w-6 h-6 text-[#D97706]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <MowerIcon className="w-7 h-7 text-[#8B9D82]" />
                   ) : (
-                    <svg className="w-6 h-6 text-[#D97706]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
+                    <SpreaderIcon className="w-7 h-7 text-[#8B9D82]" />
                   )}
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-[#3D3D3D]">{item.displayName}</h4>
-                    <span className="px-2 py-0.5 bg-[#FEF3C7] text-[#D97706] text-xs font-medium rounded-full">
-                      Needs details
-                    </span>
-                  </div>
+                  <h4 className="font-semibold text-[#3D3D3D]">{item.displayName}</h4>
                   <p className="text-sm text-[#A8A8A8]">{item.equipmentType}</p>
                 </div>
 
-                {/* Add button */}
-                <button
-                  onClick={() => handleAddSuggested(item)}
-                  className="px-4 py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white text-sm font-medium rounded-lg transition-colors flex-shrink-0"
-                >
-                  Complete
-                </button>
+                {/* Badge and button */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="px-2.5 py-1 bg-[#EA580C] text-white text-xs font-medium rounded-full">
+                    Needs details
+                  </span>
+                  <button
+                    onClick={() => handleAddSuggested(item)}
+                    className="px-4 py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Complete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -77,6 +77,76 @@ function BellIcon({ className }: { className?: string }) {
   );
 }
 
+// Broadcast Spreader icon
+export function SpreaderIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Hopper/container */}
+      <path
+        d="M14 8h20l-3 16H17L14 8z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      {/* Hopper top rim */}
+      <path
+        d="M14 8h20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* Handle */}
+      <path
+        d="M24 8V4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M20 4h8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* Frame/legs */}
+      <path
+        d="M17 24v8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M31 24v8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* Wheels */}
+      <circle cx="17" cy="36" r="4" stroke="currentColor" strokeWidth="2" fill="none" />
+      <circle cx="31" cy="36" r="4" stroke="currentColor" strokeWidth="2" fill="none" />
+      {/* Spreader disc */}
+      <ellipse cx="24" cy="28" rx="5" ry="2" stroke="currentColor" strokeWidth="2" fill="none" />
+      {/* Spread pattern */}
+      <path
+        d="M16 32l-4 6M24 30v8M32 32l4 6"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeDasharray="2 2"
+      />
+    </svg>
+  );
+}
+
+// Export MowerIcon for use in other components
+export { MowerIcon };
+
 export default function EquipmentGrid({
   equipment,
   onAddClick,
