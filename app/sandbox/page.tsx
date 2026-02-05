@@ -52,7 +52,7 @@ export default function SandboxHero() {
               GET THE BEST LAWN ON YOUR BLOCK
             </h1>
             <p className="mt-5 text-lg sm:text-xl text-deep-brown/70 leading-relaxed">
-              A 90-day plan that tells you exactly what to do, when to do it, and what to buy.
+              Ace, our AI, analyzes your grass, climate, and goals — then builds your plan week by week.
             </p>
 
             <ul className="mt-6 space-y-3">
