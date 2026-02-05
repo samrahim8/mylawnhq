@@ -271,7 +271,7 @@ function GrassHelper({
   return (
     <div>
       <h2 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
-        Let&rsquo;s figure out your grass type
+        Let Ace figure out your grass type
       </h2>
       <p className="mt-2 text-deep-brown/60">
         Quick question {helperStep + 1} of 3

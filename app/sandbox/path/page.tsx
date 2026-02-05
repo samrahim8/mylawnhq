@@ -17,7 +17,7 @@ function PathSelection() {
               How would you like to get started?
             </h1>
             <p className="mt-2 text-deep-brown/60">
-              Either way, you&rsquo;ll get a free 90-day plan.
+              Either way, Ace will build you a free 90-day plan.
             </p>
           </div>
 
@@ -36,7 +36,7 @@ function PathSelection() {
                     Guide me through it
                   </h2>
                   <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                    Answer 4 quick questions about your lawn. Takes 30 seconds.
+                    Answer 4 quick questions and Ace will build your plan. Takes 30 seconds.
                     Perfect if you&rsquo;re not sure about your grass type or
                     where to start.
                   </p>
