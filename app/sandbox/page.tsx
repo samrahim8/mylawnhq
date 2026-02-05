@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Logo, LogoIcon } from "@/components/Logo";
 
 export default function SandboxHero() {
   const [zip, setZip] = useState("");
@@ -21,12 +22,7 @@ export default function SandboxHero() {
     <div className="min-h-screen bg-cream">
       {/* Nav */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lawn text-xl">&#127793;</span>
-          <span className="font-display font-bold text-deep-brown text-xl tracking-tight">
-            LawnHQ
-          </span>
-        </div>
+        <Logo />
         <div className="hidden sm:flex items-center gap-6 text-sm text-deep-brown/70">
           <a href="/dashboard" className="hover:text-deep-brown transition-colors">
             Demo
@@ -104,7 +100,7 @@ export default function SandboxHero() {
             <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-6 sm:p-8">
               <div className="mb-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-lawn text-lg">&#127793;</span>
+                  <LogoIcon className="w-5 h-5" />
                   <h2 className="font-display font-semibold text-deep-brown text-lg">
                     30-Second Setup
                   </h2>
