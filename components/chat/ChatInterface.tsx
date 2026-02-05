@@ -46,11 +46,26 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
     }
   }, [currentSession, currentSessionId, isLoaded]);
 
-  // Handle initial message from URL query
+  // Handle initial message from URL query (with potential images from home page)
   useEffect(() => {
     if (initialMessage && !initialMessageProcessed.current && isLoaded && messages.length === 0) {
       initialMessageProcessed.current = true;
-      handleSend(initialMessage);
+
+      // Check for pending images from home page
+      const pendingImagesJson = sessionStorage.getItem("pendingChatImages");
+      if (pendingImagesJson) {
+        try {
+          const images = JSON.parse(pendingImagesJson) as ChatImage[];
+          setPendingImages(images);
+          sessionStorage.removeItem("pendingChatImages");
+          // Small delay to ensure images are set before sending
+          setTimeout(() => handleSend(initialMessage), 100);
+        } catch {
+          handleSend(initialMessage);
+        }
+      } else {
+        handleSend(initialMessage);
+      }
     }
   }, [initialMessage, isLoaded, messages.length]);
 

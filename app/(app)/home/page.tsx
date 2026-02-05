@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CalendarActivity } from "@/types";
+import { CalendarActivity, ChatImage } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
 import { useTodos } from "@/hooks/useTodos";
 import { useCalendar } from "@/hooks/useCalendar";
@@ -102,7 +102,10 @@ function HomePageContent() {
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isChatFocused, setIsChatFocused] = useState(false);
+  const [chatImages, setChatImages] = useState<ChatImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatFileInputRef = useRef<HTMLInputElement>(null);
+  const chatCameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // If there's an initial query from the landing page, auto-redirect to chat
@@ -166,10 +169,58 @@ function HomePageContent() {
     [addPhoto]
   );
 
+  const processChatImage = (file: File): Promise<ChatImage> => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
+        reject(new Error("Please upload a JPEG, PNG, GIF, or WebP image"));
+        return;
+      }
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        reject(new Error("Image must be smaller than 5MB"));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        const base64 = dataUrl.split(",")[1];
+        resolve({
+          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          data: base64,
+          mimeType: file.type as ChatImage["mimeType"],
+          preview: dataUrl,
+        });
+      };
+      reader.onerror = () => reject(new Error("Failed to read image"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleChatImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    try {
+      const newImages = await Promise.all(Array.from(files).map(processChatImage));
+      setChatImages((prev) => [...prev, ...newImages].slice(0, 4));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to upload image");
+    }
+    e.target.value = "";
+  };
+
+  const removeChatImage = (imageId: string) => {
+    setChatImages((prev) => prev.filter((img) => img.id !== imageId));
+  };
+
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (chatInput.trim()) {
-      window.location.href = `/chat?q=${encodeURIComponent(chatInput.trim())}`;
+    if (chatInput.trim() || chatImages.length > 0) {
+      // Store images in sessionStorage to pass to chat page
+      if (chatImages.length > 0) {
+        sessionStorage.setItem("pendingChatImages", JSON.stringify(chatImages));
+      }
+      const query = chatInput.trim() || (chatImages.length > 0 ? "What can you tell me about this?" : "");
+      window.location.href = `/chat?q=${encodeURIComponent(query)}${chatImages.length > 0 ? "&hasImages=true" : ""}`;
     }
   };
 
@@ -261,8 +312,50 @@ function HomePageContent() {
 
           {/* Chat Input */}
           <form onSubmit={handleChatSubmit} className="relative">
+            {/* Image preview */}
+            {chatImages.length > 0 && (
+              <div className="flex gap-2 px-4 pt-3 flex-wrap">
+                {chatImages.map((img) => (
+                  <div key={img.id} className="relative group">
+                    <img
+                      src={img.preview}
+                      alt="Upload preview"
+                      className="w-16 h-16 object-cover rounded-lg border border-[#e5e5e5]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeChatImage(img.id)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Hidden file inputs for chat */}
+            <input
+              ref={chatFileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              multiple
+              onChange={handleChatImageUpload}
+              className="hidden"
+            />
+            <input
+              ref={chatCameraInputRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              capture="environment"
+              onChange={handleChatImageUpload}
+              className="hidden"
+            />
+
             {/* Custom placeholder with blinking cursor */}
-            {!chatInput && !isChatFocused && (
+            {!chatInput && !isChatFocused && chatImages.length === 0 && (
               <div
                 className="absolute left-4 top-4 text-base text-[#a3a3a3] pointer-events-none flex items-center"
                 onClick={() => textareaRef.current?.focus()}
@@ -283,12 +376,56 @@ function HomePageContent() {
                   handleChatSubmit(e);
                 }
               }}
+              placeholder={chatImages.length > 0 ? "Add a question about your photo..." : ""}
               rows={3}
-              className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] focus:outline-none bg-transparent resize-none"
+              className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none bg-transparent resize-none"
             />
+
+            {/* Bottom buttons row */}
+            <div className="absolute left-3 bottom-3 flex items-center gap-1">
+              {/* Photo upload button */}
+              <button
+                type="button"
+                onClick={() => chatFileInputRef.current?.click()}
+                disabled={chatImages.length >= 4}
+                className={`p-2 rounded-lg transition-colors ${
+                  chatImages.length >= 4
+                    ? "text-[#d4d4d4] cursor-not-allowed"
+                    : "text-[#7a8b6e] hover:bg-[#7a8b6e]/10"
+                }`}
+                title="Upload photo"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+              {/* Camera button */}
+              <button
+                type="button"
+                onClick={() => chatCameraInputRef.current?.click()}
+                disabled={chatImages.length >= 4}
+                className={`p-2 rounded-lg transition-colors ${
+                  chatImages.length >= 4
+                    ? "text-[#d4d4d4] cursor-not-allowed"
+                    : "text-[#7a8b6e] hover:bg-[#7a8b6e]/10"
+                }`}
+                title="Take photo"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            </div>
+
             <button
               type="submit"
-              className="absolute right-3 bottom-3 p-2.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] text-white rounded-xl transition-colors"
+              disabled={!chatInput.trim() && chatImages.length === 0}
+              className={`absolute right-3 bottom-3 p-2.5 rounded-xl transition-colors ${
+                chatInput.trim() || chatImages.length > 0
+                  ? "bg-[#7a8b6e] hover:bg-[#6a7b5e] text-white"
+                  : "bg-[#e5e5e5] text-[#a3a3a3] cursor-not-allowed"
+              }`}
               aria-label="Send message"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
