@@ -50,11 +50,12 @@ export default function TodoList({ todos, onAdd, onToggle, onDelete, onOpenModal
           </div>
           <button
             onClick={onOpenModal || (() => setIsAdding(true))}
-            className="p-1.5 sm:p-2 bg-[#7a8b6e] hover:bg-[#6a7b5e] rounded-lg text-white transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white rounded-full text-[11px] sm:text-xs font-medium transition-colors"
           >
             <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
+            Add Task
           </button>
         </div>
       )}

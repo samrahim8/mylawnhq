@@ -239,16 +239,16 @@ export default function RecentActivities({
 
       {/* Footer */}
       {sortedActivities.length > 0 && (
-        <div className="pt-1.5 sm:pt-2 mt-auto flex-shrink-0 border-t border-[#e5e5e5]">
+        <div className="pt-2 sm:pt-3 mt-auto flex-shrink-0 border-t border-[#e5e5e5] flex justify-center">
           <button
             type="button"
             onClick={() => onOpenActivityModal?.()}
-            className="w-full text-[11px] sm:text-xs text-[#7a8b6e] hover:text-[#6a7b5e] font-medium py-0.5 sm:py-1 flex items-center justify-center gap-1 transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#8B9D82] hover:bg-[#7a8b71] text-white rounded-full text-[11px] sm:text-xs font-medium transition-colors"
           >
             <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Log Activity
+            + Log Activity
           </button>
         </div>
       )}
