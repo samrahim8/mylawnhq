@@ -44,7 +44,7 @@ export default function ActivityModal({
   const isEditing = !!editingActivity;
   const [date, setDate] = useState(() => getLocalDateString());
   const [activityType, setActivityType] = useState<CalendarActivity["type"]>("mow");
-  const [area, setArea] = useState<string>("all");
+  const [selectedAreas, setSelectedAreas] = useState<string[]>(["all"]);
   const [product, setProduct] = useState("");
   const [waterAmount, setWaterAmount] = useState("");
   const [notes, setNotes] = useState("");
@@ -151,7 +151,13 @@ export default function ActivityModal({
         // Populate form with existing activity data
         setDate(editingActivity.date);
         setActivityType(editingActivity.type);
-        setArea(editingActivity.area || "all");
+        // Parse area string back to array (handles "Front, Back" format)
+        if (editingActivity.area) {
+          const areas = editingActivity.area.split(", ").map(a => a.toLowerCase());
+          setSelectedAreas(areas.length > 0 ? areas : ["all"]);
+        } else {
+          setSelectedAreas(["all"]);
+        }
         setProduct(editingActivity.product || "");
         setWaterAmount(editingActivity.amount || "");
         setNotes(editingActivity.notes || "");
@@ -159,7 +165,7 @@ export default function ActivityModal({
         // Reset to defaults for new activity
         setDate(getLocalDateString());
         setActivityType("mow");
-        setArea("all");
+        setSelectedAreas(["all"]);
         setProduct("");
         setWaterAmount("");
         setNotes("");
@@ -174,6 +180,40 @@ export default function ActivityModal({
     { value: "all", label: "All" },
   ];
 
+  // Toggle area selection - "All" is exclusive, other areas can be multi-selected
+  const toggleArea = (value: string) => {
+    if (value === "all") {
+      // Selecting "All" clears other selections
+      setSelectedAreas(["all"]);
+    } else {
+      setSelectedAreas(prev => {
+        // Remove "all" if it was selected
+        const withoutAll = prev.filter(a => a !== "all");
+
+        if (withoutAll.includes(value)) {
+          // Deselect this area
+          const newAreas = withoutAll.filter(a => a !== value);
+          // If nothing left, default to "all"
+          return newAreas.length > 0 ? newAreas : ["all"];
+        } else {
+          // Add this area
+          return [...withoutAll, value];
+        }
+      });
+    }
+  };
+
+  // Format selected areas for display/storage (e.g., "Front, Back")
+  const formatAreas = (areas: string[]): string => {
+    if (areas.includes("all")) return "All";
+    const labelMap: Record<string, string> = {
+      front: "Front",
+      back: "Back",
+      side: "Side",
+    };
+    return areas.map(a => labelMap[a] || a).join(", ");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -185,7 +225,7 @@ export default function ActivityModal({
     const activityData = {
       type: activityType,
       date,
-      area: area || undefined,
+      area: formatAreas(selectedAreas) || undefined,
       product: activityType !== "water" ? (product.trim() || undefined) : undefined,
       amount: activityType === "water" ? (waterAmount.trim() || undefined) : undefined,
       notes: notes.trim() || undefined,
@@ -296,9 +336,9 @@ export default function ActivityModal({
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setArea(option.value)}
+                  onClick={() => toggleArea(option.value)}
                   className={`flex-1 py-1.5 sm:py-2 px-1 sm:px-3 rounded-lg border text-xs sm:text-sm font-medium transition-colors min-w-0 ${
-                    area === option.value
+                    selectedAreas.includes(option.value)
                       ? "border-[#7a8b6e] bg-[#f0f4ed] text-[#7a8b6e]"
                       : "border-[#e5e5e5] hover:border-[#a3a3a3] text-[#525252]"
                   }`}
