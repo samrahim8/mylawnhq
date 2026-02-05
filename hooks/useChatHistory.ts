@@ -53,10 +53,6 @@ export function useChatHistory() {
     setIsLoaded(true);
   }, []);
 
-  // Keep ref in sync with state for synchronous access
-  useEffect(() => {
-    sessionsRef.current = sessions;
-  }, [sessions]);
 
   // Save sessions to localStorage
   const saveSessions = useCallback((newSessions: ChatSession[]) => {
