@@ -347,8 +347,8 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
       </div>
 
       {/* Input area - fixed at bottom, centered */}
-      <div className="border-t border-neutral-100 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+      <div className="flex-shrink-0 border-t border-neutral-100 bg-white pb-safe">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           {/* Image preview area */}
           {pendingImages.length > 0 && (
             <div className="flex gap-2 mb-3 flex-wrap">
@@ -396,16 +396,16 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={pendingImages.length > 0 ? "Add a question about your photo..." : "Talk to me, grass whisperer."}
+              placeholder={pendingImages.length > 0 ? "Ask about your photo..." : "Talk to me, grass whisperer."}
               rows={1}
-              className="flex-1 bg-transparent text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none py-4 px-4 max-h-[200px]"
+              className="flex-1 bg-transparent text-sm sm:text-base text-neutral-900 placeholder-neutral-400 outline-none resize-none py-3 sm:py-4 pl-3 sm:pl-4 pr-2 max-h-[200px]"
             />
-            <div className="flex items-center gap-1 m-2">
+            <div className="flex items-center gap-0.5 sm:gap-1 m-1.5 sm:m-2 flex-shrink-0">
               {/* Photo upload button */}
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading || pendingImages.length >= 4}
-                className={`p-2 rounded-xl transition-all ${
+                className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all ${
                   isLoading || pendingImages.length >= 4
                     ? "text-neutral-300 cursor-not-allowed"
                     : "text-[#6b7a5d] hover:bg-[#6b7a5d]/10"
@@ -420,7 +420,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               <button
                 onClick={() => cameraInputRef.current?.click()}
                 disabled={isLoading || pendingImages.length >= 4}
-                className={`p-2 rounded-xl transition-all ${
+                className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all ${
                   isLoading || pendingImages.length >= 4
                     ? "text-neutral-300 cursor-not-allowed"
                     : "text-[#6b7a5d] hover:bg-[#6b7a5d]/10"
@@ -436,7 +436,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               <button
                 onClick={() => handleSend()}
                 disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
-                className={`p-2 rounded-xl transition-all ${
+                className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all ${
                   (input.trim() || pendingImages.length > 0) && !isLoading
                     ? "bg-[#6b7a5d] hover:bg-[#5a6950] text-white"
                     : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
@@ -448,7 +448,7 @@ export default function ChatInterface({ initialMessage }: ChatInterfaceProps) {
               </button>
             </div>
           </div>
-          <p className="text-xs text-neutral-400 text-center mt-2">
+          <p className="text-[10px] sm:text-xs text-neutral-400 text-center mt-1.5 sm:mt-2">
             LawnHQ can make mistakes. Consider checking important info.
           </p>
         </div>

@@ -159,12 +159,12 @@ function SidebarContent({ isExpanded, onLinkClick }: { isExpanded: boolean; onLi
 
           {/* Recent Chat History */}
           {isExpanded && recentSessions.length > 0 && (
-            <div className="mt-1 ml-2 space-y-0.5">
+            <div className="mt-1 ml-2 space-y-0.5 max-h-[200px] overflow-y-auto">
               {recentSessions.map((session) => (
                 <button
                   key={session.id}
                   onClick={() => handleSelectChat(session.id)}
-                  className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors truncate ${
+                  className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors ${
                     session.isActive
                       ? "bg-[#e8ebe5] text-[#5a6950]"
                       : "text-[#737373] hover:bg-[#f8f6f3] hover:text-[#525252]"

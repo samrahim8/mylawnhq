@@ -33,6 +33,9 @@ const config: Config = {
         display: ["Space Grotesk", "system-ui", "sans-serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
       },
+      padding: {
+        safe: "env(safe-area-inset-bottom)",
+      },
     },
   },
   plugins: [],
