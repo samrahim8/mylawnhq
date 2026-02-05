@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Equipment, EquipmentIdentificationResult, EQUIPMENT_TYPES, ChatImage } from "@/types";
 
 type Step = "method" | "capture" | "manual" | "processing" | "confirm";
@@ -10,12 +10,14 @@ interface AddEquipmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (equipment: Omit<Equipment, "id" | "createdAt" | "updatedAt">) => void;
+  prefillData?: Partial<Omit<Equipment, "id" | "createdAt" | "updatedAt">> | null;
 }
 
 export default function AddEquipmentModal({
   isOpen,
   onClose,
   onSave,
+  prefillData,
 }: AddEquipmentModalProps) {
   const [step, setStep] = useState<Step>("method");
   const [method, setMethod] = useState<Method | null>(null);
@@ -35,6 +37,21 @@ export default function AddEquipmentModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle prefill data when modal opens
+  useEffect(() => {
+    if (isOpen && prefillData) {
+      setManualBrand(prefillData.brand || "");
+      setManualModel(prefillData.model || "");
+      setManualType(prefillData.type || EQUIPMENT_TYPES[0]);
+      setManualUrl(prefillData.manualUrl || "");
+      setSerialNumber(prefillData.serialNumber || "");
+      setPurchaseDate(prefillData.purchaseDate || "");
+      setWarrantyMonths(prefillData.warrantyMonths ?? 24);
+      setStep("manual");
+      setMethod("manual");
+    }
+  }, [isOpen, prefillData]);
 
   const resetModal = () => {
     setStep("method");
