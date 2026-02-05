@@ -352,17 +352,17 @@ function HomePageContent() {
       {/* Tab Section */}
       <div className="flex-shrink-0 max-w-4xl mx-auto w-full">
         {/* Tab Header */}
-        <div className="flex">
-          {tabs.map((tab, index) => (
+        <div className="flex gap-1">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-colors rounded-t-xl ${
                 activeTab === tab.id
-                  ? "text-[#7a8b6e] bg-white border border-[#e5e5e5] border-b-0 rounded-t-xl relative z-10"
-                  : "text-[#525252] bg-[#e8e5e0] hover:text-[#1a1a1a] hover:bg-[#f0ece5] border-b border-[#e5e5e5]"
-              } ${index === 0 ? "rounded-tl-xl" : ""} ${index === tabs.length - 1 ? "rounded-tr-xl" : ""}`}
+                  ? "text-[#7a8b6e] bg-white border border-[#e5e5e5] border-b-0 relative z-10"
+                  : "text-[#525252] bg-[#e8e5e0] hover:text-[#1a1a1a] hover:bg-[#f0ece5] border border-transparent border-b-[#e5e5e5]"
+              }`}
             >
               {tab.icon}
               <span className="hidden sm:inline">{tab.label}</span>
