@@ -44,6 +44,7 @@ export function useChatHistory() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as ChatSession[];
+        sessionsRef.current = parsed; // Initialize ref immediately
         setSessions(parsed);
       }
     } catch (error) {
