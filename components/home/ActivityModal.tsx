@@ -119,7 +119,7 @@ export default function ActivityModal({
   ];
 
   // Combine saved products with common products (removing duplicates)
-  const allProducts = [...new Set([...savedProducts, ...COMMON_PRODUCTS])];
+  const allProducts = Array.from(new Set([...savedProducts, ...COMMON_PRODUCTS]));
 
   // Filter products based on input
   const filteredProducts = product.trim()
