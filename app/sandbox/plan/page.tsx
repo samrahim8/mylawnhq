@@ -854,29 +854,74 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
             </div>
           )}
 
-          {/* Email submitted confirmation */}
+          {/* Email submitted confirmation + Pro upsell */}
           {conversionStep === "email" && emailSubmitted && (
-            <div className="text-center py-4">
-              <div className="w-14 h-14 bg-lawn/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+            <div className="py-2">
+              {/* Success message */}
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-lawn/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="font-display text-lg font-bold text-deep-brown">
+                  Plan saved!
+                </h3>
+                <p className="text-sm text-deep-brown/50">
+                  We&rsquo;ll send it to <strong>{email}</strong>
+                </p>
               </div>
-              <h3 className="font-display text-xl font-bold text-deep-brown mb-2">
-                Plan saved!
-              </h3>
-              <p className="text-sm text-deep-brown/50 mb-6">
-                We&rsquo;ll send your plan and reminders to <strong>{email}</strong>.
-              </p>
+
+              {/* Pro upsell card */}
+              <div className="bg-gradient-to-br from-lawn/5 to-lawn/10 border border-lawn/20 rounded-xl p-5 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">&#127775;</span>
+                  <span className="font-display font-bold text-deep-brown">Upgrade to Pro</span>
+                  <span className="ml-auto text-xs font-bold text-lawn bg-lawn/10 px-2 py-0.5 rounded-full">$4/mo</span>
+                </div>
+
+                <ul className="space-y-2 mb-4">
+                  {[
+                    "SMS reminders before each task",
+                    "AI chat for lawn questions anytime",
+                    "Monthly progress photos & tracking",
+                    "Priority support from lawn experts",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-deep-brown/70">
+                      <svg className="w-4 h-4 text-lawn flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set("email", email);
+                    params.set("upgrade", "pro");
+                    router.push(`/sandbox/save?${params.toString()}`);
+                  }}
+                  className="w-full bg-lawn text-white font-bold py-3 px-6 rounded-lg text-sm hover:bg-lawn/90 transition-colors"
+                >
+                  Start 7-day free trial
+                </button>
+                <p className="text-[10px] text-deep-brown/40 text-center mt-2">
+                  Cancel anytime. No commitment.
+                </p>
+              </div>
+
+              {/* Skip option */}
               <button
                 onClick={() => {
                   const params = new URLSearchParams(searchParams.toString());
                   params.set("email", email);
                   router.push(`/sandbox/save?${params.toString()}`);
                 }}
-                className="bg-terracotta text-white font-semibold py-3 px-6 rounded-lg text-sm hover:bg-terracotta/90 transition-colors"
+                className="w-full text-center text-xs text-deep-brown/40 hover:text-deep-brown/60 transition-colors"
               >
-                Continue to your dashboard &rarr;
+                Continue with free plan &rarr;
               </button>
             </div>
           )}
