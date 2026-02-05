@@ -205,11 +205,11 @@ export default function Calendar({ activities, onOpenActivityModal, compact }: C
             transform: 'translate(-50%, -100%)',
           }}
         >
-          <div className="w-64 bg-white border border-[#e5e5e5] rounded-lg shadow-xl p-3">
-            <div className="text-xs sm:text-sm font-semibold text-[#1a1a1a] mb-2 border-b border-[#e5e5e5] pb-2">
+          <div className="w-64 bg-white border border-[#e5e5e5] rounded-lg shadow-xl p-3 max-h-64 flex flex-col">
+            <div className="text-xs sm:text-sm font-semibold text-[#1a1a1a] mb-2 border-b border-[#e5e5e5] pb-2 flex-shrink-0">
               {monthNames[month]} {hoveredDay}, {year}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto flex-1">
               {hoveredActivities.map((activity) => (
                 <div key={activity.id} className="flex items-start gap-2">
                   <span className="text-sm flex-shrink-0">{getActivityIcon(activity.type)}</span>

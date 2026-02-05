@@ -98,7 +98,7 @@ export default function TodoList({ todos, onAdd, onToggle, onDelete, onOpenModal
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto min-h-0 space-y-1 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto min-h-0 space-y-1">
           {/* Active todos */}
           {activeTodos.map((todo) => (
             <div
