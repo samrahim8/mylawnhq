@@ -118,10 +118,15 @@ export default function EquipmentGrid({
               {/* Right side */}
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 {/* Manual button */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F3F0] rounded-lg text-[#8B9D82]">
+                <a
+                  href="http://cdn.powerequipment.honda.com/pe/pdf/manuals/00x31vh7n030.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F3F0] rounded-lg text-[#8B9D82] hover:bg-[#e8e6e1] transition-colors"
+                >
                   <DocumentIcon className="w-4 h-4" />
                   <span className="font-medium text-sm">Manual</span>
-                </div>
+                </a>
                 {/* Warranty */}
                 <div className="flex items-center gap-1.5 text-sm text-[#A8A8A8]">
                   <span>📋</span>
