@@ -33,7 +33,10 @@ export default function AddEquipmentModal({
   const [manualUrl, setManualUrl] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
-  const [warrantyMonths, setWarrantyMonths] = useState<number | "">(24);
+  const [warrantyMonths, setWarrantyMonths] = useState<number | "">("");
+  const [isProcessingManualPhoto, setIsProcessingManualPhoto] = useState(false);
+  const manualPhotoInputRef = useRef<HTMLInputElement>(null);
+  const manualCameraInputRef = useRef<HTMLInputElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +50,7 @@ export default function AddEquipmentModal({
       setManualUrl(prefillData.manualUrl || "");
       setSerialNumber(prefillData.serialNumber || "");
       setPurchaseDate(prefillData.purchaseDate || "");
-      setWarrantyMonths(prefillData.warrantyMonths ?? 24);
+      setWarrantyMonths(prefillData.warrantyMonths ?? "");
       setStep("manual");
       setMethod("manual");
     }
@@ -66,7 +69,7 @@ export default function AddEquipmentModal({
     setManualUrl("");
     setSerialNumber("");
     setPurchaseDate("");
-    setWarrantyMonths(24);
+    setWarrantyMonths("");
   };
 
   const handleClose = () => {
@@ -190,6 +193,78 @@ export default function AddEquipmentModal({
     setResult(null);
     setError(null);
     setStep("capture");
+  };
+
+  // Process photo for manual entry auto-fill
+  const processManualPhoto = async (file: File) => {
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setError("Please upload a JPEG, PNG, GIF, or WebP image.");
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError("Image must be under 5MB.");
+      return;
+    }
+
+    setError(null);
+    setIsProcessingManualPhoto(true);
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      const chatImage: ChatImage = {
+        id: `img-${Date.now()}`,
+        data: base64,
+        mimeType: file.type as ChatImage["mimeType"],
+      };
+
+      // Call API to identify equipment
+      try {
+        const response = await fetch("/api/equipment/identify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: chatImage,
+            method: "sticker_photo",
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.result) {
+          // Auto-fill the form with AI results
+          setManualBrand(data.result.brand || "");
+          setManualModel(data.result.model || "");
+          setManualType(data.result.type || EQUIPMENT_TYPES[0]);
+          setManualUrl(data.result.manualUrl || "");
+          if (data.result.warrantyMonths) {
+            setWarrantyMonths(data.result.warrantyMonths);
+          }
+        } else {
+          setError(data.error || "Couldn't identify the equipment. Please fill in the details manually.");
+        }
+      } catch {
+        setError("Failed to connect to server. Please fill in the details manually.");
+      } finally {
+        setIsProcessingManualPhoto(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleManualPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processManualPhoto(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = "";
   };
 
   if (!isOpen) return null;
@@ -472,14 +547,14 @@ export default function AddEquipmentModal({
                       type="number"
                       min="0"
                       max="120"
-                      value={warrantyMonths === "" ? "" : (warrantyMonths || result.warrantyMonths || 24)}
+                      value={warrantyMonths === "" ? "" : (warrantyMonths || result.warrantyMonths || "")}
                       onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
-                      placeholder="24"
+                      placeholder=""
                       className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
                     />
-                    {result.warrantyMonths && warrantyMonths === 24 && (
+                    {result.warrantyMonths && (
                       <p className="text-xs text-[#7a8b6e] mt-1">
-                        Typical for {result.brand}
+                        Typical for {result.brand}: {result.warrantyMonths} months
                       </p>
                     )}
                   </div>
@@ -515,6 +590,72 @@ export default function AddEquipmentModal({
                 </svg>
                 Back
               </button>
+
+              {/* Quick Photo Auto-fill */}
+              <div className="bg-[#f8f6f3] rounded-lg p-4 border border-[#e5e5e5]">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-[#f0f4ed] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-[#7a8b6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-[#1a1a1a] text-sm">Got a sticker or box?</h4>
+                    <p className="text-xs text-[#737373] mt-0.5">
+                      Snap a photo and we&apos;ll auto-fill the details
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => manualCameraInputRef.current?.click()}
+                      disabled={isProcessingManualPhoto}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#7a8b6e] hover:bg-[#6a7b5e] disabled:bg-[#a3a3a3] text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      {isProcessingManualPhoto ? (
+                        <>
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                          <span className="hidden sm:inline">Scanning...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          </svg>
+                          <span className="hidden sm:inline">Photo</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => manualPhotoInputRef.current?.click()}
+                      disabled={isProcessingManualPhoto}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#e5e5e5] hover:bg-[#f5f5f5] disabled:bg-[#f5f5f5] text-[#525252] text-sm font-medium rounded-lg transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="hidden sm:inline">Upload</span>
+                    </button>
+                  </div>
+                </div>
+                <input
+                  ref={manualPhotoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={handleManualPhotoChange}
+                />
+                <input
+                  ref={manualCameraInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleManualPhotoChange}
+                />
+              </div>
 
               {error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
@@ -620,7 +761,7 @@ export default function AddEquipmentModal({
                     max="120"
                     value={warrantyMonths}
                     onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
-                    placeholder="24"
+                    placeholder=""
                     className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
                   />
                 </div>
