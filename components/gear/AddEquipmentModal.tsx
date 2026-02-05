@@ -3,20 +3,24 @@
 import { useState, useRef, useEffect } from "react";
 import { Equipment, EquipmentIdentificationResult, EQUIPMENT_TYPES, ChatImage } from "@/types";
 
-type Step = "input" | "manual" | "processing" | "confirm";
+type Step = "input" | "manual" | "processing" | "confirm" | "edit";
 
 interface AddEquipmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (equipment: Omit<Equipment, "id" | "createdAt" | "updatedAt">) => void;
+  onUpdate?: (id: string, equipment: Partial<Equipment>) => void;
   prefillData?: Partial<Omit<Equipment, "id" | "createdAt" | "updatedAt">> | null;
+  editingEquipment?: Equipment | null;
 }
 
 export default function AddEquipmentModal({
   isOpen,
   onClose,
   onSave,
+  onUpdate,
   prefillData,
+  editingEquipment,
 }: AddEquipmentModalProps) {
   const [step, setStep] = useState<Step>("input");
   const [identifier, setIdentifier] = useState("");
@@ -39,9 +43,19 @@ export default function AddEquipmentModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle prefill data when modal opens
+  // Handle prefill data or editing equipment when modal opens
   useEffect(() => {
-    if (isOpen && prefillData) {
+    if (isOpen && editingEquipment) {
+      // Editing existing equipment - go directly to edit step
+      setManualBrand(editingEquipment.brand);
+      setManualModel(editingEquipment.model);
+      setManualType(editingEquipment.type);
+      setManualUrl(editingEquipment.manualUrl || "");
+      setSerialNumber(editingEquipment.serialNumber || "");
+      setPurchaseDate(editingEquipment.purchaseDate || "");
+      setWarrantyMonths(editingEquipment.warrantyMonths ?? "");
+      setStep("edit");
+    } else if (isOpen && prefillData) {
       // If we have prefill data (from suggested equipment), set it as result
       if (prefillData.brand && prefillData.model) {
         setResult({
@@ -61,7 +75,7 @@ export default function AddEquipmentModal({
         setIdentifier(prefillData.model || "");
       }
     }
-  }, [isOpen, prefillData]);
+  }, [isOpen, prefillData, editingEquipment]);
 
   const resetModal = () => {
     setStep("input");
@@ -211,6 +225,26 @@ export default function AddEquipmentModal({
     handleClose();
   };
 
+  const handleEditSave = () => {
+    if (!manualBrand.trim() || !manualModel.trim()) {
+      setError("Brand and model are required.");
+      return;
+    }
+
+    if (editingEquipment && onUpdate) {
+      onUpdate(editingEquipment.id, {
+        brand: manualBrand.trim(),
+        model: manualModel.trim(),
+        type: manualType,
+        manualUrl: manualUrl.trim() || null,
+        serialNumber: serialNumber.trim() || undefined,
+        purchaseDate: purchaseDate || undefined,
+        warrantyMonths: typeof warrantyMonths === "number" ? warrantyMonths : undefined,
+      });
+    }
+    handleClose();
+  };
+
   const handleRetry = () => {
     setResult(null);
     setError(null);
@@ -233,7 +267,7 @@ export default function AddEquipmentModal({
         <div className="flex items-center justify-between px-4 py-3 sm:p-6 border-b border-[#e5e5e5] flex-shrink-0">
           <div>
             <h2 className="text-base sm:text-xl font-semibold text-[#1a1a1a]">
-              Add Your Gear
+              {step === "edit" ? "Edit Your Gear" : "Add Your Gear"}
             </h2>
             {step === "input" && (
               <p className="text-xs sm:text-sm text-[#737373] mt-0.5">
@@ -243,6 +277,11 @@ export default function AddEquipmentModal({
             {step === "manual" && (
               <p className="text-xs sm:text-sm text-[#737373] mt-0.5">
                 Enter your equipment details
+              </p>
+            )}
+            {step === "edit" && (
+              <p className="text-xs sm:text-sm text-[#737373] mt-0.5">
+                Update your equipment details
               </p>
             )}
           </div>
@@ -642,6 +681,138 @@ export default function AddEquipmentModal({
                   className="flex-1 px-4 py-2.5 bg-[#8B9D82] hover:bg-[#7a8b71] rounded-lg text-white text-sm font-medium transition-colors"
                 >
                   Add Gear
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step: Edit */}
+          {step === "edit" && (
+            <div className="space-y-4">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Brand <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={manualBrand}
+                  onChange={(e) => setManualBrand(e.target.value)}
+                  placeholder="e.g., Honda, Toro, John Deere"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Model <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={manualModel}
+                  onChange={(e) => setManualModel(e.target.value)}
+                  placeholder="e.g., HRX217VKA"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Equipment Type
+                </label>
+                <select
+                  value={manualType}
+                  onChange={(e) => setManualType(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                >
+                  {EQUIPMENT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Owner&apos;s Manual URL
+                </label>
+                <input
+                  type="url"
+                  value={manualUrl}
+                  onChange={(e) => setManualUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#e5e5e5] pt-4 mt-4">
+                <p className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide mb-3">
+                  Additional Details
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                  Serial Number
+                </label>
+                <input
+                  type="text"
+                  value={serialNumber}
+                  onChange={(e) => setSerialNumber(e.target.value)}
+                  placeholder="e.g., MZCG-8677291"
+                  className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Purchase Date
+                  </label>
+                  <input
+                    type="date"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#525252] mb-1.5">
+                    Warranty (months)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="120"
+                    value={warrantyMonths}
+                    onChange={(e) => setWarrantyMonths(e.target.value === "" ? "" : parseInt(e.target.value))}
+                    placeholder="e.g., 36"
+                    className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#7a8b6e] focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="flex-1 px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-[#525252] text-sm font-medium hover:bg-[#f5f5f5] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleEditSave}
+                  className="flex-1 px-4 py-2.5 bg-[#8B9D82] hover:bg-[#7a8b71] rounded-lg text-white text-sm font-medium transition-colors"
+                >
+                  Save Changes
                 </button>
               </div>
             </div>

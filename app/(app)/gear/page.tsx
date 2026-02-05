@@ -49,7 +49,7 @@ const SPREADER_TYPE_MAP: Record<string, { brand: string; model: string; equipmen
 };
 
 export default function GearPage() {
-  const { equipment, loading, addEquipment, deleteEquipment } = useEquipment();
+  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment } = useEquipment();
   const { profile, loading: profileLoading } = useProfile();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
@@ -84,8 +84,14 @@ export default function GearPage() {
   };
 
   const handleEdit = (item: Equipment) => {
-    // For now, just open modal - could add edit functionality later
     setEditingEquipment(item);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdate = (id: string, updates: Partial<Equipment>) => {
+    updateEquipment(id, updates);
+    setIsModalOpen(false);
+    setEditingEquipment(null);
   };
 
   // Build list of suggested equipment from profile that isn't already added
@@ -155,15 +161,18 @@ export default function GearPage() {
         onAddSuggested={handleAddSuggested}
       />
 
-      {/* Add Equipment Modal */}
+      {/* Add/Edit Equipment Modal */}
       <AddEquipmentModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setPrefillData(null);
+          setEditingEquipment(null);
         }}
         onSave={handleSave}
+        onUpdate={handleUpdate}
         prefillData={prefillData}
+        editingEquipment={editingEquipment}
       />
     </div>
   );
