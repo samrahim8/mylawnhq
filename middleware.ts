@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Redirect unauthenticated users to login (except for public pages)
-  const publicPaths = ["/", "/login", "/signup", "/home", "/chat", "/spreader", "/profile"];
+  const publicPaths = ["/", "/login", "/signup", "/home", "/chat", "/spreader", "/profile", "/gear"];
   const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/sandbox");
 
   if (!user && !isPublicPath) {
