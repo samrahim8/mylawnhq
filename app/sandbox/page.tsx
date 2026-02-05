@@ -49,17 +49,16 @@ export default function SandboxHero() {
           {/* Left column */}
           <div className="max-w-xl">
             <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-deep-brown leading-[1.1] tracking-tight">
-              THE SMARTEST WAY TO CARE FOR YOUR LAWN
+              GET THE BEST LAWN ON YOUR BLOCK
             </h1>
             <p className="mt-5 text-lg sm:text-xl text-deep-brown/70 leading-relaxed">
-              Get your free 90-day plan&mdash;personalized to your grass, your
-              climate, your goals.
+              A 90-day plan that tells you exactly what to do, when to do it, and what to buy.
             </p>
 
             <ul className="mt-6 space-y-3">
               {[
-                "Week-by-week schedule",
-                "Local weather integrated",
+                "Know exactly what product to buy",
+                "Right timing for your climate",
                 "No credit card required",
               ].map((item) => (
                 <li
@@ -107,11 +106,11 @@ export default function SandboxHero() {
                 <div className="flex items-center gap-2">
                   <span className="text-lawn text-lg">&#127793;</span>
                   <h2 className="font-display font-semibold text-deep-brown text-lg">
-                    30-Second Setup
+                    Get Your Free Plan
                   </h2>
                 </div>
                 <p className="mt-1 text-sm text-deep-brown/50">
-                  Enter your zip and we&rsquo;ll build your free plan.
+                  Enter your zip and we&rsquo;ll build it in 30 seconds.
                 </p>
               </div>
 
