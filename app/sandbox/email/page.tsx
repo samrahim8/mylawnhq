@@ -119,13 +119,33 @@ function EmailCapture() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <p className="text-sm text-deep-brown/50 mb-2">Step 3 of 3</p>
+            <p className="text-sm text-lawn font-medium mb-2">Almost there</p>
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
-              Create your free account
+              Your plan is ready.
             </h1>
-            <p className="mt-2 text-deep-brown/60">
-              Get your personalized lawn care plan.
+            <p className="mt-3 text-deep-brown/70 leading-relaxed">
+              We've built a week-by-week playbook for <span className="font-medium text-deep-brown">{zip || "your area"}</span>.<br className="hidden sm:block" />
+              Create a free account to unlock it.
             </p>
+          </div>
+
+          {/* Value props */}
+          <div className="bg-lawn/5 border border-lawn/10 rounded-xl p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-lawn/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium text-deep-brown">What you'll get:</p>
+                <ul className="mt-1.5 text-deep-brown/60 space-y-1">
+                  <li>• Exact products to buy (no guessing at the store)</li>
+                  <li>• Timing based on your local soil temps</li>
+                  <li>• AI advisor that knows your lawn</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-deep-brown/10 p-6 shadow-sm">
@@ -213,14 +233,23 @@ function EmailCapture() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-5 w-full bg-terracotta text-white font-semibold py-3.5 rounded-lg text-sm hover:bg-terracotta/90 transition-colors tracking-wide disabled:opacity-50"
+                className="mt-5 w-full bg-lawn text-white font-semibold py-3.5 rounded-lg hover:bg-lawn/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {loading ? "Creating account..." : "CREATE FREE ACCOUNT"}
+                {loading ? (
+                  "Unlocking your plan..."
+                ) : (
+                  <>
+                    Get My Lawn Plan
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </>
+                )}
               </button>
             </form>
 
             <p className="mt-4 text-xs text-deep-brown/40 text-center">
-              By continuing, you agree to our Terms and Privacy Policy.
+              Free forever for basic features. No credit card required.
             </p>
           </div>
 
