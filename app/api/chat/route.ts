@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getContextualPrompt } from "@/lib/lawn-knowledge";
 import { WeatherData, CalendarActivity, ChatImage } from "@/types";
+import { createClient } from "@/lib/supabase/server";
+import { checkAiChatUsage, incrementAiChatUsage } from "@/lib/usage";
+import { FREE_TIER_LIMITS } from "@/lib/stripe";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -77,6 +80,36 @@ export async function POST(request: NextRequest) {
         { error: "Messages array is required" },
         { status: 400 }
       );
+    }
+
+    // Check usage limits for authenticated users
+    let userId: string | null = null;
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+
+      if (userId) {
+        const usageCheck = await checkAiChatUsage(userId);
+
+        if (!usageCheck.allowed) {
+          return NextResponse.json(
+            {
+              error: "usage_limit_exceeded",
+              message: `You've used all ${FREE_TIER_LIMITS.AI_CHAT} free AI chat messages this month. Upgrade to Pro for unlimited access.`,
+              usage: {
+                current: usageCheck.currentCount,
+                limit: usageCheck.limit,
+                plan: usageCheck.plan,
+              },
+            },
+            { status: 429 }
+          );
+        }
+      }
+    } catch (authError) {
+      // Continue without auth - allow anonymous usage
+      console.log("No auth context, allowing anonymous chat");
     }
 
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -161,6 +194,16 @@ When the user asks "What should I do today?" or similar questions:
     // Extract text content from response
     const textContent = response.content.find((block) => block.type === "text");
     const content = textContent ? textContent.text : "I apologize, but I couldn't generate a response. Please try again.";
+
+    // Increment usage for authenticated users
+    if (userId) {
+      try {
+        await incrementAiChatUsage(userId);
+      } catch (usageError) {
+        console.error("Failed to increment usage:", usageError);
+        // Don't fail the request if usage tracking fails
+      }
+    }
 
     return NextResponse.json({ content });
   } catch (error) {

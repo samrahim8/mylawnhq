@@ -19,6 +19,7 @@ import WeatherWidget from "@/components/home/WeatherWidget";
 import SoilTemperature from "@/components/home/SoilTemperature";
 import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
+import OnboardingModal from "@/components/home/OnboardingModal";
 import { Clock, Calendar as CalendarIcon, CheckSquare, Cloud, Thermometer, LucideIcon } from "lucide-react";
 
 type TabId = "activities" | "calendar" | "todos" | "weather" | "soil";
@@ -75,6 +76,32 @@ function HomePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQuery = searchParams.get("q");
+  const showOnboarding = searchParams.get("onboarding") === "true";
+
+  // Onboarding modal state
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [onboardingData, setOnboardingData] = useState<{ zipCode?: string; grassType?: string } | null>(null);
+
+  // Check for onboarding on mount
+  useEffect(() => {
+    if (showOnboarding) {
+      // Check localStorage for onboarding data
+      const stored = localStorage.getItem("lawnhq_onboarding");
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          if (data.pending) {
+            setOnboardingData(data);
+            setIsOnboardingOpen(true);
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      }
+      // Remove onboarding param from URL
+      router.replace("/home", { scroll: false });
+    }
+  }, [showOnboarding, router]);
 
   // Calculate tab counts
   const now = new Date();
@@ -564,6 +591,13 @@ function HomePageContent() {
         onClose={() => setIsPhotoModalOpen(false)}
         onAddPhoto={addPhoto}
         existingPhotos={photos}
+      />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        initialData={onboardingData || undefined}
       />
     </div>
   );

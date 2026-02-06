@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ChatImage, EquipmentIdentificationResult } from "@/types";
+import { createClient } from "@/lib/supabase/server";
+import { checkPhotoDiagnosisUsage, incrementPhotoDiagnosisUsage } from "@/lib/usage";
+import { FREE_TIER_LIMITS } from "@/lib/stripe";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -89,6 +92,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check usage limits for authenticated users
+    let userId: string | null = null;
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+
+      if (userId) {
+        const usageCheck = await checkPhotoDiagnosisUsage(userId);
+
+        if (!usageCheck.allowed) {
+          return NextResponse.json(
+            {
+              error: "usage_limit_exceeded",
+              message: `You've used all ${FREE_TIER_LIMITS.PHOTO_DIAGNOSIS} free photo diagnoses this month. Upgrade to Pro for unlimited access.`,
+              success: false,
+              usage: {
+                current: usageCheck.currentCount,
+                limit: usageCheck.limit,
+                plan: usageCheck.plan,
+              },
+            },
+            { status: 429 }
+          );
+        }
+      }
+    } catch (authError) {
+      // Continue without auth - allow anonymous usage
+      console.log("No auth context, allowing anonymous photo diagnosis");
+    }
+
     if (!process.env.ANTHROPIC_API_KEY) {
       // Return mock response for demo mode
       return NextResponse.json({
@@ -156,6 +190,16 @@ export async function POST(request: NextRequest) {
       // Validate required fields
       if (!result.brand || !result.model || !result.type) {
         throw new Error("Missing required fields in response");
+      }
+
+      // Increment usage for authenticated users
+      if (userId) {
+        try {
+          await incrementPhotoDiagnosisUsage(userId);
+        } catch (usageError) {
+          console.error("Failed to increment photo usage:", usageError);
+          // Don't fail the request if usage tracking fails
+        }
       }
 
       return NextResponse.json({

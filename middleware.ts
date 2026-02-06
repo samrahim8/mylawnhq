@@ -40,7 +40,9 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users to login (except for public pages)
   const publicPaths = ["/", "/login", "/signup", "/home", "/chat", "/spreader", "/profile", "/gear"];
-  const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/sandbox");
+  const isPublicPath = publicPaths.includes(request.nextUrl.pathname) ||
+    request.nextUrl.pathname.startsWith("/sandbox") ||
+    request.nextUrl.pathname.startsWith("/admin"); // Admin routes are protected by admin layout
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();

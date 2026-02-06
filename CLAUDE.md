@@ -55,19 +55,64 @@ app/
 │   ├── spreader/        # Spreader calculator
 │   ├── export/          # Data export
 │   └── home/            # Home page (main app entry point)
+├── (admin)/             # Admin dashboard (role-protected)
+│   └── admin/           # Admin pages
+│       ├── page.tsx     # Dashboard with stats
+│       └── users/       # User management
 ├── api/
-│   ├── chat/            # Anthropic Claude chat endpoint
-│   ├── equipment/       # Equipment identification endpoint
-│   └── weather/         # OpenWeatherMap weather endpoint
+│   ├── chat/            # Anthropic Claude chat endpoint (with usage tracking)
+│   ├── equipment/       # Equipment identification endpoint (with usage tracking)
+│   ├── profile/         # Profile CRUD endpoint
+│   ├── subscription/    # Stripe subscription endpoints
+│   │   ├── checkout/    # Create Stripe Checkout session
+│   │   ├── portal/      # Open Stripe Billing Portal
+│   │   └── status/      # Get subscription status
+│   ├── webhooks/stripe/ # Stripe webhook handler
+│   └── admin/           # Admin API endpoints
+│       ├── subscription/ # Update user subscription
+│       └── role/        # Update user role
 ├── auth/
 │   └── callback/        # OAuth callback handler (Google sign-in)
 └── layout.tsx           # Root layout
 lib/
-└── supabase/
-    ├── client.ts        # Browser Supabase client
-    └── server.ts        # Server Supabase client
-middleware.ts            # Route protection (redirects unauthenticated users to /login)
+├── supabase/
+│   ├── client.ts        # Browser Supabase client
+│   └── server.ts        # Server Supabase client
+├── stripe.ts            # Stripe client and plan config
+└── usage.ts             # Usage tracking helpers
+hooks/
+├── useProfile.ts        # Profile hook (syncs with Supabase)
+└── useSubscription.ts   # Subscription status hook
+middleware.ts            # Route protection
+supabase/
+└── migrations/          # Database migrations
+    └── 001_*.sql        # User auth, profiles, subscriptions schema
 ```
+
+## Database Schema
+
+```sql
+-- profiles: User lawn profiles (linked to auth.users)
+profiles (id, email, zip_code, grass_type, lawn_size, sun_exposure,
+          lawn_goal, mower_type, spreader_type, irrigation_system,
+          soil_type, lawn_age, known_issues[], role, created_at, updated_at)
+
+-- subscriptions: Stripe subscription status per user
+subscriptions (id, user_id, plan, status, stripe_customer_id,
+               stripe_subscription_id, billing_interval, current_period_end,
+               trial_end, cancel_at_period_end, created_at)
+
+-- usage: Monthly usage tracking for rate limiting
+usage (id, user_id, period_start, ai_chat_count, photo_diagnosis_count)
+```
+
+## Subscription & Usage Limits
+
+| Feature | Free Tier | Pro Tier |
+|---------|-----------|----------|
+| AI Chat Messages | 5/month | Unlimited |
+| Photo Diagnoses | 3/month | Unlimited |
+| Price | Free | $10/mo or $88/yr |
 
 ## Deployment
 - **Vercel team:** `team-7411` — ALWAYS deploy to this account.
@@ -119,3 +164,14 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Tab styling** — Restyled tabs as folder-style with pill buttons and rounded corners
 - **Empty state font sizes** — Increased font size on empty activities and todo list states
 - **My Gear feature** — New /gear page to add and manage lawn equipment. Supports photo-based AI identification (full equipment or model sticker), manual entry, and automatic owner's manual lookup. Uses localStorage for storage. Added nav item to sidebar under Resources.
+
+### 2026-02-06
+- **Database schema** — Created profiles, subscriptions, and usage tables with RLS policies and auto-create trigger on signup
+- **Profile sync with Supabase** — Modified useProfile hook to sync with database when authenticated, localStorage for sandbox
+- **Profile API** — New /api/profile endpoint for CRUD operations
+- **Stripe integration** — Added Stripe client (lib/stripe.ts), checkout/portal API routes, and webhook handler for subscription events
+- **Subscription hook** — New useSubscription hook for checking plan status and usage limits
+- **Usage tracking** — AI chat and photo diagnosis now track usage per user with monthly limits (Free: 5 chats, 3 photos; Pro: unlimited)
+- **Admin dashboard** — New /admin route with stats (total users, MRR, usage), user list, and individual user management
+- **Admin actions** — Admins can upgrade/downgrade subscriptions and change user roles
+- **Environment variables** — Added STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_YEARLY_PRICE_ID, SUPABASE_SERVICE_ROLE_KEY to .env.example
