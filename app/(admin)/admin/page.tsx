@@ -18,6 +18,11 @@ interface Subscription {
   billing_interval: string | null;
 }
 
+interface UsageRecord {
+  ai_chat_count: number | null;
+  photo_diagnosis_count: number | null;
+}
+
 async function getStats(): Promise<DashboardStats> {
   const supabase = await createClient();
 
@@ -45,8 +50,8 @@ async function getStats(): Promise<DashboardStats> {
     .select("ai_chat_count, photo_diagnosis_count")
     .gte("period_start", currentMonth);
 
-  const totalAiChats = usage?.reduce((sum: number, u) => sum + (u.ai_chat_count || 0), 0) || 0;
-  const totalPhotoDiagnoses = usage?.reduce((sum: number, u) => sum + (u.photo_diagnosis_count || 0), 0) || 0;
+  const totalAiChats = usage?.reduce((sum: number, u: UsageRecord) => sum + (u.ai_chat_count || 0), 0) || 0;
+  const totalPhotoDiagnoses = usage?.reduce((sum: number, u: UsageRecord) => sum + (u.photo_diagnosis_count || 0), 0) || 0;
 
   return {
     totalUsers,
