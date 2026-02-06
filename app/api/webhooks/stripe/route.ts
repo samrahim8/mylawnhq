@@ -4,11 +4,13 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 
-// Use service role key for webhook handling (bypasses RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-load Supabase admin client to avoid build-time errors
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: NextRequest) {
   if (!stripe) {
@@ -101,7 +103,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // Get the next billing date from the latest invoice or items
   const nextBillingDate = stripeSubscription.items.data[0]?.current_period_end;
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from("subscriptions")
     .update({
       plan: "pro",
@@ -126,7 +128,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
 
   // Find subscription by Stripe customer ID
-  const { data: existingSub } = await supabaseAdmin
+  const { data: existingSub } = await getSupabaseAdmin()
     .from("subscriptions")
     .select("user_id")
     .eq("stripe_customer_id", customerId)
@@ -160,7 +162,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   // Get the next billing date from the subscription items
   const nextBillingDate = subscription.items.data[0]?.current_period_end;
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from("subscriptions")
     .update({
       status,
@@ -181,7 +183,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
 
   // Downgrade to free plan
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from("subscriptions")
     .update({
       plan: "free",
@@ -199,7 +201,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   const customerId = invoice.customer as string;
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from("subscriptions")
     .update({
       status: "past_due",

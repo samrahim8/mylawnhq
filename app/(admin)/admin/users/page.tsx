@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 interface User {
   id: string;
   email: string | null;
@@ -17,6 +19,30 @@ interface User {
     ai_chat_count: number;
     photo_diagnosis_count: number;
   };
+}
+
+interface UsageData {
+  user_id: string;
+  ai_chat_count: number | null;
+  photo_diagnosis_count: number | null;
+}
+
+interface ProfileData {
+  id: string;
+  email: string | null;
+  zip_code: string | null;
+  grass_type: string | null;
+  role: string;
+  created_at: string;
+  subscriptions: {
+    plan: string;
+    status: string;
+    billing_interval: string | null;
+  } | {
+    plan: string;
+    status: string;
+    billing_interval: string | null;
+  }[] | null;
 }
 
 async function getUsers(): Promise<User[]> {
@@ -50,13 +76,13 @@ async function getUsers(): Promise<User[]> {
     .gte("period_start", currentMonth);
 
   const usageMap = new Map(
-    usageData?.map(u => [u.user_id, {
+    usageData?.map((u: UsageData) => [u.user_id, {
       ai_chat_count: u.ai_chat_count || 0,
       photo_diagnosis_count: u.photo_diagnosis_count || 0,
     }]) || []
   );
 
-  return profiles.map(p => ({
+  return profiles.map((p: ProfileData) => ({
     id: p.id,
     email: p.email,
     zip_code: p.zip_code,

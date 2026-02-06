@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserProfile } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 const STORAGE_KEY = "lawnhq_profile";
 
@@ -155,7 +156,7 @@ export function useProfile() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: AuthChangeEvent, session: Session | null) => {
         if (event === "SIGNED_IN" && session?.user) {
           setIsAuthenticated(true);
           setUserId(session.user.id);
