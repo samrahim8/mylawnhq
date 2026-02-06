@@ -2,8 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // Skip auth entirely for sandbox routes — no Supabase needed
-  if (request.nextUrl.pathname.startsWith("/sandbox")) {
+  // Skip auth entirely for sandbox and auth callback routes
+  if (request.nextUrl.pathname.startsWith("/sandbox") ||
+      request.nextUrl.pathname.startsWith("/auth")) {
+    return NextResponse.next();
+  }
+
+  // Skip if Supabase env vars are not set
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
     return NextResponse.next();
   }
 
@@ -12,8 +20,8 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
