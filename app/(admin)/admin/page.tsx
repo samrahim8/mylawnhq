@@ -12,6 +12,12 @@ interface DashboardStats {
   totalPhotoDiagnoses: number;
 }
 
+interface Subscription {
+  plan: string;
+  status: string;
+  billing_interval: string | null;
+}
+
 async function getStats(): Promise<DashboardStats> {
   const supabase = await createClient();
 
@@ -20,14 +26,15 @@ async function getStats(): Promise<DashboardStats> {
     .from("subscriptions")
     .select("plan, status, billing_interval");
 
-  const totalUsers = subscriptions?.length || 0;
-  const proUsers = subscriptions?.filter(s => s.plan === "pro" && s.status === "active").length || 0;
-  const trialingUsers = subscriptions?.filter(s => s.status === "trialing").length || 0;
+  const subs = (subscriptions || []) as Subscription[];
+  const totalUsers = subs.length;
+  const proUsers = subs.filter(s => s.plan === "pro" && s.status === "active").length;
+  const trialingUsers = subs.filter(s => s.status === "trialing").length;
   const freeUsers = totalUsers - proUsers - trialingUsers;
 
   // Calculate MRR (Monthly Recurring Revenue)
-  const monthlyPro = subscriptions?.filter(s => s.plan === "pro" && s.billing_interval === "month").length || 0;
-  const yearlyPro = subscriptions?.filter(s => s.plan === "pro" && s.billing_interval === "year").length || 0;
+  const monthlyPro = subs.filter(s => s.plan === "pro" && s.billing_interval === "month").length;
+  const yearlyPro = subs.filter(s => s.plan === "pro" && s.billing_interval === "year").length;
   const monthlyRevenue = monthlyPro * 10;
   const yearlyRevenue = (yearlyPro * 88) / 12; // Spread yearly over months
 
@@ -38,8 +45,8 @@ async function getStats(): Promise<DashboardStats> {
     .select("ai_chat_count, photo_diagnosis_count")
     .gte("period_start", currentMonth);
 
-  const totalAiChats = usage?.reduce((sum, u) => sum + (u.ai_chat_count || 0), 0) || 0;
-  const totalPhotoDiagnoses = usage?.reduce((sum, u) => sum + (u.photo_diagnosis_count || 0), 0) || 0;
+  const totalAiChats = usage?.reduce((sum: number, u) => sum + (u.ai_chat_count || 0), 0) || 0;
+  const totalPhotoDiagnoses = usage?.reduce((sum: number, u) => sum + (u.photo_diagnosis_count || 0), 0) || 0;
 
   return {
     totalUsers,
