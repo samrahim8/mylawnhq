@@ -46,30 +46,35 @@ function EmailCapture() {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
-      <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
-        <div className="w-full max-w-lg">
+      {/* Progress bar */}
+      <div className="w-full bg-deep-brown/5">
+        <div className="h-1 bg-lawn w-2/3" />
+      </div>
+
+      <div className="flex-1 flex flex-col px-4 py-6 sm:py-12 sm:justify-center">
+        <div className="w-full max-w-lg mx-auto">
 
           {/* Plan Preview Card */}
-          <div className="bg-gradient-to-br from-lawn to-lawn/80 rounded-2xl p-5 sm:p-6 mb-6 text-white shadow-lg">
-            <div className="flex items-center gap-2 text-white/80 text-sm mb-3">
+          <div className="bg-gradient-to-br from-lawn to-lawn/80 rounded-2xl p-5 mb-5 text-white shadow-lg">
+            <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Your plan is ready
             </div>
-            <h1 className="font-display text-xl sm:text-2xl font-bold mb-4">
+            <h1 className="font-display text-xl font-bold mb-4">
               {grassLabel} care plan for {zip || "your area"}
             </h1>
 
-            {/* Preview items */}
-            <div className="space-y-2.5">
+            {/* Preview items - compact on mobile */}
+            <div className="space-y-2">
               {[
-                { icon: "📅", text: "Week-by-week schedule through the season" },
-                { icon: "🛒", text: "Exact products to grab at the store" },
-                { icon: "🌡️", text: "Timed to your local soil temps & frost dates" },
+                { icon: "📅", text: "Week-by-week schedule" },
+                { icon: "🛒", text: "Exact products to buy" },
+                { icon: "🌡️", text: "Timed to your weather" },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 bg-white/10 rounded-lg px-3 py-2">
-                  <span className="text-lg">{item.icon}</span>
+                <div key={i} className="flex items-center gap-3 bg-white/10 rounded-lg px-3 py-2.5">
+                  <span className="text-base">{item.icon}</span>
                   <span className="text-sm text-white/90">{item.text}</span>
                 </div>
               ))}
@@ -77,10 +82,10 @@ function EmailCapture() {
           </div>
 
           {/* Email Card */}
-          <div className="bg-white rounded-2xl border border-deep-brown/10 p-5 sm:p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-deep-brown/10 p-5 shadow-sm">
             <form onSubmit={handleSubmit}>
-              <label htmlFor="email" className="block text-sm font-medium text-deep-brown mb-2">
-                Where should we send your plan?
+              <label htmlFor="email" className="block text-base font-medium text-deep-brown mb-3">
+                Where should we send it?
               </label>
               <input
                 id="email"
@@ -92,7 +97,7 @@ function EmailCapture() {
                 }}
                 placeholder="you@email.com"
                 autoFocus
-                className="w-full px-4 py-3.5 rounded-xl border border-deep-brown/15 bg-cream/30 text-deep-brown placeholder:text-deep-brown/40 focus:outline-none focus:ring-2 focus:ring-lawn/30 focus:border-lawn/30 text-lg"
+                className="w-full px-4 py-4 rounded-xl border border-deep-brown/15 bg-cream/30 text-deep-brown placeholder:text-deep-brown/40 focus:outline-none focus:ring-2 focus:ring-lawn/30 focus:border-lawn/30 text-lg"
               />
 
               {error && (
@@ -102,7 +107,7 @@ function EmailCapture() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-4 w-full bg-lawn text-white font-semibold py-4 rounded-xl hover:bg-lawn/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
+                className="mt-4 w-full bg-lawn text-white font-bold py-4 rounded-xl hover:bg-lawn/90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
               >
                 {loading ? (
                   <>
@@ -110,7 +115,7 @@ function EmailCapture() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Loading your plan...
+                    Loading...
                   </>
                 ) : (
                   <>
@@ -123,8 +128,8 @@ function EmailCapture() {
               </button>
             </form>
 
-            {/* Trust signals */}
-            <div className="mt-5 pt-4 border-t border-deep-brown/5 flex items-center justify-center gap-4 text-xs text-deep-brown/40">
+            {/* Trust signals - stack on mobile */}
+            <div className="mt-4 pt-4 border-t border-deep-brown/5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-deep-brown/40">
               <span className="flex items-center gap-1">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -141,7 +146,7 @@ function EmailCapture() {
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Instant access
+                Instant
               </span>
             </div>
           </div>
@@ -158,9 +163,12 @@ function EmailCapture() {
           <div className="mt-4 text-center">
             <button
               onClick={() => router.back()}
-              className="text-sm text-deep-brown/40 hover:text-deep-brown transition-colors"
+              className="inline-flex items-center gap-1 text-sm text-deep-brown/40 hover:text-deep-brown transition-colors py-2 px-4"
             >
-              ← Back
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
             </button>
           </div>
         </div>

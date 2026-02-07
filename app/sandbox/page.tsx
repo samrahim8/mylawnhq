@@ -19,35 +19,95 @@ export default function SandboxHero() {
   };
 
   return (
-    <div className="min-h-screen bg-cream">
-      {/* Nav */}
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+    <div className="min-h-screen bg-cream flex flex-col">
+      {/* Nav - minimal on mobile */}
+      <nav className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between max-w-7xl mx-auto w-full">
         <Logo />
         <div className="hidden sm:flex items-center gap-6 text-sm text-deep-brown/70">
-          <a href="/dashboard" className="hover:text-deep-brown transition-colors">
-            Demo
-          </a>
           <a href="/login" className="hover:text-deep-brown transition-colors">
             Log In
-          </a>
-          <a
-            href="/signup"
-            className="bg-lawn text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-lawn/90 transition-colors"
-          >
-            Sign Up
           </a>
         </div>
       </nav>
 
-      {/* Hero */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 lg:pt-24 pb-16">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      {/* Hero - Mobile first: CTA card at top */}
+      <main className="flex-1 flex flex-col lg:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 lg:pt-12 lg:pb-16">
+
+        {/* Mobile: CTA card first */}
+        <div className="lg:hidden w-full mb-6">
+          <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-5">
+            <div className="text-center mb-5">
+              <h1 className="font-display text-2xl font-bold text-deep-brown leading-tight">
+                Get Your Free<br />Lawn Care Plan
+              </h1>
+              <p className="mt-2 text-sm text-deep-brown/60">
+                Personalized for your zip code
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <input
+                id="zip-mobile"
+                type="text"
+                inputMode="numeric"
+                maxLength={5}
+                placeholder="Enter zip code"
+                value={zip}
+                onChange={(e) => {
+                  setZip(e.target.value.replace(/\D/g, ""));
+                  setError("");
+                }}
+                className="w-full px-4 py-4 rounded-xl border border-deep-brown/15 bg-cream/50 text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:ring-2 focus:ring-lawn/30 focus:border-lawn/50 transition-colors"
+              />
+              {error && (
+                <p className="mt-2 text-sm text-red-600 text-center">{error}</p>
+              )}
+
+              <button
+                type="submit"
+                className="mt-4 w-full bg-terracotta text-white font-bold py-4 px-6 rounded-xl hover:bg-terracotta/90 active:scale-[0.98] transition-all text-base"
+              >
+                GET MY FREE PLAN →
+              </button>
+            </form>
+
+            {/* Social proof - mobile */}
+            <div className="flex items-center justify-center gap-2 mt-4 text-xs text-deep-brown/50">
+              <div className="flex text-ochre text-sm">
+                {"★★★★★".split("").map((s, i) => (
+                  <span key={i}>{s}</span>
+                ))}
+              </div>
+              <span>12,000+ homeowners</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile: Value props below */}
+        <div className="lg:hidden space-y-3 mb-6">
+          {[
+            { icon: "🛒", text: "Exact products to grab at the store" },
+            { icon: "🌡️", text: "Timed to your local weather" },
+            { icon: "💳", text: "100% free, no credit card" },
+          ].map((item) => (
+            <div
+              key={item.text}
+              className="flex items-center gap-3 bg-white/60 rounded-xl px-4 py-3 text-sm text-deep-brown/80"
+            >
+              <span className="text-lg">{item.icon}</span>
+              {item.text}
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Two column layout */}
+        <div className="hidden lg:grid lg:grid-cols-2 gap-16 items-center">
           {/* Left column */}
           <div className="max-w-xl">
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-deep-brown leading-[1.1] tracking-tight">
-              YOUR LAWN CALLED.<br className="hidden lg:block" /> IT WANTS A PLAN.
+            <h1 className="font-display text-5xl lg:text-[3.5rem] font-bold text-deep-brown leading-[1.1] tracking-tight">
+              YOUR LAWN CALLED.<br /> IT WANTS A PLAN.
             </h1>
-            <p className="mt-5 text-lg sm:text-xl text-deep-brown/70 leading-relaxed">
+            <p className="mt-5 text-xl text-deep-brown/70 leading-relaxed">
               Get a week-by-week playbook tuned to your frost dates, soil temps, and the weeds that hit your zip code hardest.
             </p>
 
@@ -81,9 +141,7 @@ export default function SandboxHero() {
               ))}
             </ul>
 
-
-            {/* Social proof - visible on mobile below the card, on desktop here */}
-            <div className="hidden lg:flex items-center gap-3 mt-10 text-sm text-deep-brown/60">
+            <div className="flex items-center gap-3 mt-10 text-sm text-deep-brown/60">
               <div className="flex text-ochre">
                 {"★★★★★".split("").map((s, i) => (
                   <span key={i}>{s}</span>
@@ -96,8 +154,8 @@ export default function SandboxHero() {
           </div>
 
           {/* Right column - CTA card */}
-          <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
-            <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-6 sm:p-8">
+          <div className="w-full max-w-md ml-auto">
+            <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-8">
               <div className="mb-6">
                 <div className="flex items-center gap-2">
                   <LogoIcon className="w-5 h-5" />
@@ -141,19 +199,8 @@ export default function SandboxHero() {
                   GET MY FREE PLAN &rarr;
                 </button>
               </form>
-
             </div>
           </div>
-        </div>
-
-        {/* Social proof - mobile */}
-        <div className="flex lg:hidden items-center justify-center gap-3 mt-10 text-sm text-deep-brown/60">
-          <div className="flex text-ochre">
-            {"★★★★★".split("").map((s, i) => (
-              <span key={i}>{s}</span>
-            ))}
-          </div>
-          <span>12,000+ homeowners</span>
         </div>
       </main>
     </div>

@@ -126,12 +126,12 @@ function OnboardingFlow() {
       <div className="w-full bg-deep-brown/5">
         <div
           className="h-1 bg-lawn transition-all duration-300"
-          style={{ width: `${(currentStepNum / totalSteps) * 100}%` }}
+          style={{ width: `${75 + (currentStepNum / totalSteps) * 25}%` }}
         />
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex flex-col px-4 py-6 sm:py-8 sm:justify-center">
+        <div className="w-full max-w-2xl mx-auto">
           {step === 1 && !showGrassHelper && (
             <StepGrassType
               selected={selections.grassType}
@@ -320,10 +320,10 @@ function GrassHelper({
 /* ─── Step 2: Lawn Size ─── */
 
 const sizeOptions: { value: LawnSize; label: string; desc: string; icon: string }[] = [
-  { value: "small", label: "Small", desc: "< 2,500 sq ft", icon: "&#127968;" },
-  { value: "medium", label: "Medium", desc: "2,500 - 10,000 sq ft", icon: "&#127968;&#127795;" },
-  { value: "large", label: "Large", desc: "> 10,000 sq ft", icon: "&#127968;&#127795;&#127795;" },
-  { value: "not_sure", label: "Not sure", desc: "We'll estimate for you", icon: "&#128204;" },
+  { value: "small", label: "Small", desc: "< 2,500 sq ft", icon: "🏠" },
+  { value: "medium", label: "Medium", desc: "2,500 - 10,000 sq ft", icon: "🏡" },
+  { value: "large", label: "Large", desc: "> 10,000 sq ft", icon: "🏘️" },
+  { value: "not_sure", label: "Not sure", desc: "We'll estimate", icon: "📍" },
 ];
 
 function StepLawnSize({
@@ -335,34 +335,34 @@ function StepLawnSize({
 }) {
   return (
     <div>
-      <h2 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
+      <h2 className="font-display text-2xl font-bold text-deep-brown">
         How big is your lawn?
       </h2>
-      <p className="mt-2 text-deep-brown/60">
-        Don&rsquo;t worry&mdash;a rough estimate is fine.
+      <p className="mt-2 text-deep-brown/60 text-sm sm:text-base">
+        A rough estimate is fine.
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8">
+      {/* Stack on mobile, 2x2 grid on tablet+ */}
+      <div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0 mt-6">
         {sizeOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`rounded-xl border-2 p-4 sm:p-6 text-center transition-all hover:border-lawn/50 hover:shadow-md ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all hover:border-lawn/50 hover:shadow-md active:scale-[0.98] flex items-center gap-4 ${
               selected === opt.value
                 ? "border-lawn bg-lawn/5 shadow-md"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
-            <div
-              className="text-3xl sm:text-4xl mb-3"
-              dangerouslySetInnerHTML={{ __html: opt.icon }}
-            />
-            <p className="font-semibold text-deep-brown text-sm">{opt.label}</p>
-            <p className="text-xs text-deep-brown/50 mt-1">{opt.desc}</p>
+            <span className="text-3xl">{opt.icon}</span>
+            <div>
+              <p className="font-bold text-deep-brown">{opt.label}</p>
+              <p className="text-sm text-deep-brown/50">{opt.desc}</p>
+            </div>
           </button>
         ))}
       </div>
       <p className="mt-4 text-xs text-deep-brown/40 text-center">
-        Tip: A typical suburban front + back yard is &ldquo;Medium&rdquo;
+        Typical suburban yard = Medium
       </p>
     </div>
   );
@@ -371,30 +371,10 @@ function StepLawnSize({
 /* ─── Step 3: Goal ─── */
 
 const goalOptions: { value: LawnGoal; label: string; desc: string; icon: string }[] = [
-  {
-    value: "fix",
-    label: "FIX IT",
-    desc: "I have weeds, bare spots, or other problems",
-    icon: "&#128736;&#65039;",
-  },
-  {
-    value: "maintain",
-    label: "MAINTAIN",
-    desc: "It's decent\u2014I just want to keep it healthy",
-    icon: "&#10024;",
-  },
-  {
-    value: "perfect",
-    label: "PERFECT IT",
-    desc: "I want the best lawn on the block",
-    icon: "&#127942;",
-  },
-  {
-    value: "not_sure",
-    label: "NOT SURE",
-    desc: "Just show me what to do",
-    icon: "&#129300;",
-  },
+  { value: "fix", label: "Fix it", desc: "Weeds, bare spots, or problems", icon: "🔧" },
+  { value: "maintain", label: "Maintain", desc: "Keep it healthy", icon: "✨" },
+  { value: "perfect", label: "Perfect it", desc: "Best lawn on the block", icon: "🏆" },
+  { value: "not_sure", label: "Not sure", desc: "Just show me what to do", icon: "🤔" },
 ];
 
 function StepGoal({
@@ -406,32 +386,27 @@ function StepGoal({
 }) {
   return (
     <div>
-      <h2 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
-        What&rsquo;s your lawn goal?
+      <h2 className="font-display text-2xl font-bold text-deep-brown">
+        What&apos;s your goal?
       </h2>
-      <p className="mt-2 text-deep-brown/60">
+      <p className="mt-2 text-deep-brown/60 text-sm sm:text-base">
         This helps us prioritize your plan.
       </p>
-      <div className="flex flex-col gap-3 mt-8">
+      <div className="space-y-3 mt-6">
         {goalOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`rounded-xl border-2 p-4 sm:p-5 text-left transition-all hover:border-lawn/50 hover:shadow-md flex items-center gap-4 ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all hover:border-lawn/50 hover:shadow-md active:scale-[0.98] flex items-center gap-4 ${
               selected === opt.value
                 ? "border-lawn bg-lawn/5 shadow-md"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
-            <span
-              className="text-2xl flex-shrink-0"
-              dangerouslySetInnerHTML={{ __html: opt.icon }}
-            />
+            <span className="text-2xl flex-shrink-0">{opt.icon}</span>
             <div>
-              <p className="font-semibold text-deep-brown tracking-wide text-sm">
-                {opt.label}
-              </p>
-              <p className="text-sm text-deep-brown/60 mt-0.5">{opt.desc}</p>
+              <p className="font-bold text-deep-brown">{opt.label}</p>
+              <p className="text-sm text-deep-brown/60">{opt.desc}</p>
             </div>
           </button>
         ))}
