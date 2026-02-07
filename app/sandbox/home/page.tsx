@@ -13,16 +13,12 @@ import { usePhotos } from "@/hooks/usePhotos";
 import { useProducts } from "@/hooks/useProducts";
 import YardPhotoModal from "@/components/home/YardPhotoModal";
 import RecentActivities from "@/components/home/RecentActivities";
-import Calendar from "@/components/home/Calendar";
 import TodoList from "@/components/home/TodoList";
-import WeatherWidget from "@/components/home/WeatherWidget";
-import SoilTemperature from "@/components/home/SoilTemperature";
 import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
 
-type TabId = "log" | "calendar" | "todos" | "more";
 type MobileView = "home" | "plan" | "activity" | "tasks";
 
 function HomePageContent() {
@@ -76,9 +72,6 @@ function HomePageContent() {
   const futureEventsCount = activities.filter((a) => a.date > todayStr).length;
   const pendingTodos = todos.filter((t) => !t.completed).slice(0, 3);
   const pendingTodosCount = todos.filter((t) => !t.completed).length;
-
-  // Desktop tab state
-  const [activeTab, setActiveTab] = useState<TabId>("log");
 
   // Mobile view state
   const [mobileView, setMobileView] = useState<MobileView>("home");
@@ -245,107 +238,6 @@ function HomePageContent() {
       other: "Other activity",
     };
     return names[type] || type;
-  };
-
-  // Desktop tab content renderer
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "log":
-        return (
-          <RecentActivities
-            activities={activities}
-            onDeleteActivity={deleteActivity}
-            onOpenActivityModal={handleOpenActivityModal}
-            onEditActivity={handleEditActivity}
-            compact
-          />
-        );
-      case "calendar":
-        return (
-          <Calendar
-            activities={activities}
-            onOpenActivityModal={handleOpenActivityModal}
-            compact
-          />
-        );
-      case "todos":
-        return (
-          <TodoList
-            todos={todos}
-            onAdd={addTodo}
-            onToggle={toggleTodo}
-            onDelete={deleteTodo}
-            onOpenModal={() => setIsTodoModalOpen(true)}
-            compact
-          />
-        );
-      case "more":
-        return (
-          <div className="space-y-4">
-            <WeatherWidget weather={weather} loading={weatherLoading} compact />
-            <SoilTemperature
-              temperature={soilTemp?.current ?? null}
-              trend={soilTemp?.trend ?? []}
-              loading={soilTempLoading}
-              compact
-            />
-            {/* Quick Links */}
-            <div className="pt-2 space-y-2">
-              <Link
-                href="/profile"
-                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.98] transition-transform duration-100"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
-                    <svg className="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <span className="font-medium text-deep-brown">My Profile</span>
-                </div>
-                <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <Link
-                href="/spreader"
-                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.98] transition-transform duration-100"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
-                    <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span className="font-medium text-deep-brown">Spreader Calculator</span>
-                </div>
-                <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <Link
-                href="/gear"
-                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.98] transition-transform duration-100"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center">
-                    <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <span className="font-medium text-deep-brown">My Gear</span>
-                </div>
-                <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
   };
 
   return (
