@@ -1065,7 +1065,7 @@ function HomePageContent() {
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => handleDismissSignup(false)}
+            onClick={() => handleDismissSignup(true)}
           />
 
           {/* Sheet */}
@@ -1118,7 +1118,7 @@ function HomePageContent() {
               </Link>
               <button
                 type="button"
-                onClick={() => handleDismissSignup(false)}
+                onClick={() => handleDismissSignup(true)}
                 className="block w-full py-3 text-deep-brown/60 font-medium text-center active:text-deep-brown transition-colors"
               >
                 Maybe Later
@@ -1134,7 +1134,7 @@ function HomePageContent() {
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => handleDismissSignup(false)}
+            onClick={() => handleDismissSignup(true)}
           />
 
           {/* Modal */}
@@ -1142,7 +1142,7 @@ function HomePageContent() {
             {/* Close button */}
             <button
               type="button"
-              onClick={() => handleDismissSignup(false)}
+              onClick={() => handleDismissSignup(true)}
               className="absolute top-4 right-4 p-2 text-deep-brown/40 hover:text-deep-brown transition-colors rounded-lg hover:bg-deep-brown/5"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1192,7 +1192,7 @@ function HomePageContent() {
             </Link>
             <button
               type="button"
-              onClick={() => handleDismissSignup(false)}
+              onClick={() => handleDismissSignup(true)}
               className="block w-full py-3 text-deep-brown/60 font-medium text-center hover:text-deep-brown transition-colors"
             >
               Maybe Later
