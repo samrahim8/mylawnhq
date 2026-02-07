@@ -206,7 +206,7 @@ export function CreateAccountModal({ isOpen, onClose, onSuccess, trigger }: Crea
         </form>
 
         <p className="mt-4 text-xs text-deep-brown/40 text-center">
-          We'll never share your email or spam you.
+          We&apos;ll never share your email or spam you.
         </p>
       </div>
     </div>

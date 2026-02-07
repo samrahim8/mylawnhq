@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 interface GuestData {
   email: string;
@@ -47,7 +48,7 @@ export function useGuestGate() {
     // Listen for auth changes
     const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event: AuthChangeEvent, session: Session | null) => {
         if (event === "SIGNED_IN" && session?.user) {
           setIsAuthenticated(true);
           setIsGuest(false);
