@@ -13,7 +13,7 @@ function GrassSelection() {
   };
 
   return (
-    <div className="h-dvh bg-cream flex flex-col supports-[height:100dvh]:h-dvh pt-[env(safe-area-inset-top)] overflow-hidden">
+    <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)] overflow-hidden">
       {/* Progress bar - below safe area */}
       <div className="h-1 bg-deep-brown/10">
         <div className="h-full bg-lawn w-1/3 transition-all duration-300" />
@@ -146,7 +146,7 @@ export default function GrassPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-dvh bg-cream flex flex-col pt-[env(safe-area-inset-top)] overflow-hidden">
+        <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)] overflow-hidden">
           <div className="h-1 bg-deep-brown/10">
             <div className="h-full bg-lawn/50 w-1/3" />
           </div>
