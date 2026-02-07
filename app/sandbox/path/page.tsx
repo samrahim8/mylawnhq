@@ -8,75 +8,99 @@ function PathSelection() {
   const searchParams = useSearchParams();
   const zip = searchParams.get("zip") || "";
   const grass = searchParams.get("grass") || "";
+  const grassLabel = grass === "st-augustine" ? "St. Augustine" : "your lawn";
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-lg">
-          <div className="text-center mb-10">
+
+          {/* Progress indicator */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between text-xs text-deep-brown/50 mb-2">
+              <span>Building your plan</span>
+              <span>Almost done</span>
+            </div>
+            <div className="h-2 bg-deep-brown/10 rounded-full overflow-hidden">
+              <div className="h-full bg-lawn rounded-full w-[75%] transition-all" />
+            </div>
+          </div>
+
+          {/* What we know card */}
+          <div className="bg-lawn/5 border border-lawn/15 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 text-sm text-lawn font-medium mb-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              What we know so far
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center bg-white text-deep-brown text-xs font-medium px-2.5 py-1 rounded-full border border-deep-brown/10">
+                📍 {zip}
+              </span>
+              <span className="inline-flex items-center bg-white text-deep-brown text-xs font-medium px-2.5 py-1 rounded-full border border-deep-brown/10">
+                🌱 {grassLabel}
+              </span>
+            </div>
+          </div>
+
+          {/* Header */}
+          <div className="text-center mb-8">
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
-              How would you like to get started?
+              2 more questions to personalize your plan
             </h1>
             <p className="mt-2 text-deep-brown/60">
-              Either way, Chip will build you a free 90-day plan.
+              Takes 30 seconds. Makes your plan 10x more useful.
             </p>
           </div>
 
-          <div className="space-y-4">
-            {/* Novice path */}
-            <button
-              onClick={() => router.push(`/sandbox/onboarding?zip=${zip}&grass=${grass}`)}
-              className="w-full bg-white rounded-xl border-2 border-deep-brown/10 p-5 sm:p-6 text-left transition-all hover:border-lawn/50 hover:shadow-md group"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-lawn/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-lg">&#127793;</span>
-                </div>
-                <div>
-                  <h2 className="font-display font-semibold text-deep-brown text-lg">
-                    Guide me through it
-                  </h2>
-                  <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                    4 quick questions. Chip builds your plan. 30 seconds.
-                  </p>
-                  <span className="inline-block mt-3 text-sm font-medium text-terracotta group-hover:underline">
-                    Start quick setup &rarr;
-                  </span>
-                </div>
+          {/* Primary CTA - Quick path */}
+          <button
+            onClick={() => router.push(`/sandbox/onboarding?zip=${zip}&grass=${grass}`)}
+            className="w-full bg-lawn text-white rounded-xl p-5 text-left transition-all hover:bg-lawn/90 shadow-sm mb-3"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-lg">
+                  Let&apos;s do it
+                </h2>
+                <p className="mt-1 text-sm text-white/80">
+                  Lawn size + your goal. That&apos;s it.
+                </p>
               </div>
-            </button>
+              <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </button>
 
-            {/* Expert path */}
-            <button
-              onClick={() => router.push(`/sandbox/expert?zip=${zip}&grass=${grass}`)}
-              className="w-full bg-white rounded-xl border-2 border-deep-brown/10 p-5 sm:p-6 text-left transition-all hover:border-lawn/50 hover:shadow-md group"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-ochre/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-lg">&#128736;&#65039;</span>
-                </div>
-                <div>
-                  <h2 className="font-display font-semibold text-deep-brown text-lg">
-                    I already know my lawn
-                  </h2>
-                  <p className="mt-1 text-sm text-deep-brown/60 leading-relaxed">
-                    Grass type, equipment, soil info. More detail = better plan.
-                  </p>
-                  <span className="inline-block mt-3 text-sm font-medium text-terracotta group-hover:underline">
-                    Go to detailed form &rarr;
-                  </span>
-                </div>
+          {/* Secondary option */}
+          <button
+            onClick={() => router.push(`/sandbox/expert?zip=${zip}&grass=${grass}`)}
+            className="w-full bg-white border border-deep-brown/10 rounded-xl p-4 text-left transition-all hover:border-deep-brown/20 hover:shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-medium text-deep-brown text-sm">
+                  I want to add more details
+                </h2>
+                <p className="mt-0.5 text-xs text-deep-brown/50">
+                  Equipment, soil type, known issues
+                </p>
               </div>
-            </button>
-          </div>
+              <svg className="w-4 h-4 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </button>
 
           {/* Back link */}
           <div className="mt-8 text-center">
             <button
-              onClick={() => router.push("/sandbox")}
-              className="text-sm text-deep-brown/50 hover:text-deep-brown transition-colors"
+              onClick={() => router.back()}
+              className="text-sm text-deep-brown/40 hover:text-deep-brown transition-colors"
             >
-              &larr; Back
+              ← Back
             </button>
           </div>
         </div>
