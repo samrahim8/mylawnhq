@@ -299,16 +299,9 @@ function HomePageContent() {
 
   return (
     <div className="h-full overflow-y-auto p-3 sm:p-4 lg:p-6">
-      {/* Welcome Section */}
-      <div className="flex-shrink-0 text-center mb-6 sm:mb-8 lg:mb-10 pt-4 sm:pt-8 lg:pt-12">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#7a8b6e] rounded-xl flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-        </div>
-        <h1 className="font-display text-xl sm:text-2xl lg:text-3xl font-semibold text-[#1a1a1a]">
-          Let&apos;s make your neighbors jealous
-        </h1>
+      {/* 90-Day Plan Hero Section */}
+      <div className="flex-shrink-0 max-w-2xl mx-auto w-full pt-4 sm:pt-6 mb-6 sm:mb-8">
+        <LawnPlan />
       </div>
 
       {/* Chat Input Section */}
@@ -510,11 +503,6 @@ function HomePageContent() {
           </svg>
           Spreader Math
         </Link>
-      </div>
-
-      {/* 90-Day Plan Section */}
-      <div className="flex-shrink-0 max-w-2xl mx-auto w-full mb-6 sm:mb-8 px-4 sm:px-0">
-        <LawnPlan />
       </div>
 
       {/* Tab Section */}
