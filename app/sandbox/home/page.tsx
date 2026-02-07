@@ -40,6 +40,8 @@ function HomePageContent() {
 
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [onboardingData, setOnboardingData] = useState<{ zipCode?: string; grassType?: string } | null>(null);
+  const [showSignupSheet, setShowSignupSheet] = useState(false);
+  const [signupDismissed, setSignupDismissed] = useState(false);
 
   useEffect(() => {
     if (showOnboarding) {
@@ -88,6 +90,27 @@ function HomePageContent() {
       router.push(`/chat?q=${encodeURIComponent(initialQuery)}`);
     }
   }, [initialQuery, router]);
+
+  // Show signup prompt after browsing
+  useEffect(() => {
+    const dismissed = localStorage.getItem("lawnhq_signup_dismissed");
+    if (dismissed) {
+      setSignupDismissed(true);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setShowSignupSheet(true);
+    }, 8000); // Show after 8 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleDismissSignup = (permanent: boolean) => {
+    setShowSignupSheet(false);
+    if (permanent) {
+      localStorage.setItem("lawnhq_signup_dismissed", "true");
+      setSignupDismissed(true);
+    }
+  };
 
   const handleOpenActivityModal = useCallback(() => {
     setEditingActivity(null);
@@ -566,6 +589,75 @@ function HomePageContent() {
           </div>
         </div>
       </div>
+
+      {/* Signup Bottom Sheet */}
+      {showSignupSheet && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => handleDismissSignup(false)}
+          />
+
+          {/* Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl animate-slide-up pb-[env(safe-area-inset-bottom)]">
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-10 h-1 bg-deep-brown/20 rounded-full" />
+            </div>
+
+            <div className="px-6 pb-6">
+              {/* Icon */}
+              <div className="w-16 h-16 bg-lawn/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+
+              {/* Content */}
+              <h2 className="font-display text-2xl font-bold text-deep-brown text-center mb-2">
+                Love your plan?
+              </h2>
+              <p className="text-deep-brown/70 text-center mb-6">
+                Create a free account to save it, get reminders, and sync across all your devices.
+              </p>
+
+              {/* Benefits */}
+              <div className="space-y-3 mb-6">
+                {[
+                  { icon: "M5 13l4 4L19 7", text: "Save your 90-day plan forever" },
+                  { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "Weekly care reminders" },
+                  { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Unlimited AI lawn advice" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                      </svg>
+                    </div>
+                    <span className="text-deep-brown">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTAs */}
+              <Link
+                href="/signup"
+                className="block w-full py-4 bg-lawn text-white font-bold text-center rounded-2xl active:scale-[0.98] transition-transform duration-100 mb-3"
+              >
+                Sign Up Free
+              </Link>
+              <button
+                type="button"
+                onClick={() => handleDismissSignup(false)}
+                className="block w-full py-3 text-deep-brown/60 font-medium text-center active:text-deep-brown transition-colors"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       <ActivityModal
