@@ -20,6 +20,7 @@ import SoilTemperature from "@/components/home/SoilTemperature";
 import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
+import { LawnPlan } from "@/components/home/LawnPlan";
 import { Clock, Calendar as CalendarIcon, CheckSquare, Cloud, Thermometer, LucideIcon } from "lucide-react";
 
 type TabId = "activities" | "calendar" | "todos" | "weather" | "soil";
@@ -509,6 +510,11 @@ function HomePageContent() {
           </svg>
           Spreader Math
         </Link>
+      </div>
+
+      {/* 90-Day Plan Section */}
+      <div className="flex-shrink-0 max-w-2xl mx-auto w-full mb-6 sm:mb-8 px-4 sm:px-0">
+        <LawnPlan />
       </div>
 
       {/* Tab Section */}

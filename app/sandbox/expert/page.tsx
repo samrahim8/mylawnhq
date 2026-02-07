@@ -71,7 +71,8 @@ function ExpertFlow() {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    const params = new URLSearchParams({
+
+    const planData = {
       zip: form.zip,
       grassType: form.grassType,
       lawnSize: form.lawnSize,
@@ -85,8 +86,20 @@ function ExpertFlow() {
       ...(form.issues.length > 0 && { issues: form.issues.join(",") }),
       ...(form.soilType && { soilType: form.soilType }),
       ...(form.hasSoilTest && { hasSoilTest: form.hasSoilTest }),
-    });
-    router.push(`/sandbox/plan?${params.toString()}`);
+    };
+
+    // Store plan params for the dashboard
+    localStorage.setItem("lawnhq_plan_params", JSON.stringify(planData));
+
+    // Update profile with selections
+    const existingProfile = JSON.parse(localStorage.getItem("lawnhq_profile") || "{}");
+    localStorage.setItem("lawnhq_profile", JSON.stringify({
+      ...existingProfile,
+      ...planData,
+    }));
+
+    // Go to dashboard
+    router.push("/home");
   };
 
   return (

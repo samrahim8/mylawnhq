@@ -41,15 +41,27 @@ function OnboardingFlow() {
 
   const navigateToPlan = useCallback(
     (finalSelections: Selections, overrideGoal?: string) => {
-      const params = new URLSearchParams({
+      const planData = {
         zip,
         grassType: finalSelections.grassType || "not_sure",
         lawnSize: finalSelections.lawnSize === "not_sure" ? "medium" : (finalSelections.lawnSize || "medium"),
-        sunExposure: "full", // default — refined later via photo analysis
+        sunExposure: "full",
         lawnGoal: overrideGoal || finalSelections.lawnGoal || "maintain",
         path: "novice",
-      });
-      router.push(`/sandbox/plan?${params.toString()}`);
+      };
+
+      // Store plan params for the dashboard
+      localStorage.setItem("lawnhq_plan_params", JSON.stringify(planData));
+
+      // Update profile with selections
+      const existingProfile = JSON.parse(localStorage.getItem("lawnhq_profile") || "{}");
+      localStorage.setItem("lawnhq_profile", JSON.stringify({
+        ...existingProfile,
+        ...planData,
+      }));
+
+      // Go to dashboard
+      router.push("/home");
     },
     [zip, router]
   );
