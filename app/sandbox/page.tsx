@@ -20,7 +20,7 @@ export default function SandboxHero() {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
-      {/* Mobile Layout - Full screen experience */}
+      {/* Mobile Layout */}
       <div className="flex-1 flex flex-col lg:hidden">
         {/* Nav */}
         <nav className="flex items-center justify-between px-5 py-4">
@@ -28,24 +28,21 @@ export default function SandboxHero() {
           <a href="/login" className="text-sm text-deep-brown/60">Log In</a>
         </nav>
 
-        {/* Hero content - takes remaining space */}
-        <div className="flex-1 flex flex-col px-5 pb-8">
-          {/* Top section with headline */}
-          <div className="pt-2">
-            <h1 className="font-display text-[32px] font-bold text-deep-brown leading-[1.1] tracking-tight">
-              YOUR LAWN CALLED.<br />IT WANTS A PLAN.
-            </h1>
-            <p className="mt-4 text-base text-deep-brown/70 leading-relaxed max-w-[280px]">
-              Get a personalized playbook tuned to your zip code, weather, and grass type.
-            </p>
-          </div>
-
-          {/* Spacer to push CTA toward middle-bottom */}
-          <div className="flex-1 min-h-8" />
-
-          {/* CTA Section - the main focus */}
-          <div className="space-y-4">
+        {/* Hero content - vertically centered */}
+        <div className="flex-1 flex flex-col justify-center px-5 pb-8">
+          <div className="space-y-6">
+            {/* Headline */}
             <div>
+              <h1 className="font-display text-[32px] font-bold text-deep-brown leading-[1.1] tracking-tight">
+                YOUR LAWN CALLED.<br />IT WANTS A PLAN.
+              </h1>
+              <p className="mt-3 text-base text-deep-brown/70 leading-relaxed">
+                Get a personalized playbook tuned to your zip code, weather, and grass type.
+              </p>
+            </div>
+
+            {/* CTA Section */}
+            <div className="space-y-3 pt-2">
               <input
                 type="text"
                 inputMode="numeric"
@@ -59,34 +56,34 @@ export default function SandboxHero() {
                 className="w-full h-14 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn transition-colors"
               />
               {error && (
-                <p className="mt-2 text-sm text-red-600 text-center">{error}</p>
+                <p className="text-sm text-red-600 text-center">{error}</p>
               )}
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full h-14 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.98] transition-transform"
+              >
+                GET MY FREE PLAN →
+              </button>
+
+              {/* Social proof */}
+              <div className="flex items-center justify-center gap-2 text-sm text-deep-brown/60">
+                <span className="text-ochre">★★★★★</span>
+                <span>Trusted by 12,000+ homeowners</span>
+              </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="w-full h-14 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.98] transition-transform"
-            >
-              GET MY FREE PLAN →
-            </button>
-
-            {/* Social proof */}
-            <div className="flex items-center justify-center gap-2 text-sm text-deep-brown/60 pt-1">
-              <span className="text-ochre">★★★★★</span>
-              <span>Trusted by 12,000+ homeowners</span>
+            {/* Value props */}
+            <div className="space-y-2 pt-2">
+              {[
+                "✓ Exact products to buy at the store",
+                "✓ Timed to your local weather",
+                "✓ 100% free, no credit card",
+              ].map((text) => (
+                <p key={text} className="text-sm text-deep-brown/60">{text}</p>
+              ))}
             </div>
-          </div>
-
-          {/* Value props at bottom */}
-          <div className="mt-8 space-y-3">
-            {[
-              "✓ Exact products to buy at the store",
-              "✓ Timed to your local weather",
-              "✓ 100% free, no credit card",
-            ].map((text) => (
-              <p key={text} className="text-sm text-deep-brown/60">{text}</p>
-            ))}
           </div>
         </div>
       </div>
