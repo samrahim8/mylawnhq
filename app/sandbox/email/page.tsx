@@ -40,8 +40,9 @@ function EmailCapture() {
       grassType: grass === "st-augustine" ? "st-augustine" : "other",
     }));
 
-    // Send them into the product
-    router.push("/home?welcome=true");
+    // Send them to their 90-day plan
+    const grassType = grass === "st-augustine" ? "st-augustine" : "bermuda";
+    router.push(`/sandbox/plan?zip=${zip}&grassType=${grassType}`);
   };
 
   return (
