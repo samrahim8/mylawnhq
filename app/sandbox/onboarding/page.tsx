@@ -117,7 +117,7 @@ function OnboardingFlow() {
       {/* Progress bar - below safe area */}
       <div className="h-1 bg-deep-brown/10">
         <div
-          className="h-full bg-lawn transition-all duration-300"
+          className="h-full bg-deep-brown/30 transition-all duration-300"
           style={{ width: `${75 + (currentStepNum / totalSteps) * 25}%` }}
         />
       </div>
@@ -465,7 +465,7 @@ export default function OnboardingPage() {
       fallback={
         <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)] overflow-hidden">
           <div className="h-1 bg-deep-brown/10">
-            <div className="h-full bg-lawn/50 w-4/5" />
+            <div className="h-full bg-deep-brown/20 w-4/5" />
           </div>
           <div className="flex-1 flex flex-col justify-center px-5 py-6">
             <div className="space-y-6 animate-pulse">

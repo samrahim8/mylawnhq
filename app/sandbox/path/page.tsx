@@ -13,7 +13,7 @@ function PathSelection() {
     <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)] overflow-hidden">
       {/* Progress bar - below safe area */}
       <div className="h-1 bg-deep-brown/10">
-        <div className="h-full bg-lawn w-3/4 transition-all duration-300" />
+        <div className="h-full bg-deep-brown/30 w-3/4 transition-all duration-300" />
       </div>
 
       {/* Mobile Layout */}
@@ -147,7 +147,7 @@ export default function PathPage() {
       fallback={
         <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)] overflow-hidden">
           <div className="h-1 bg-deep-brown/10">
-            <div className="h-full bg-lawn/50 w-3/4" />
+            <div className="h-full bg-deep-brown/20 w-3/4" />
           </div>
           <div className="flex-1 flex flex-col justify-center px-5 py-6">
             <div className="space-y-6 animate-pulse">
