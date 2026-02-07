@@ -20,7 +20,6 @@ function OnboardingFlow() {
   const zip = searchParams.get("zip") || "";
   const grassFromUrl = searchParams.get("grass") || "";
 
-  // If they already told us grass type, start at step 2 (lawn size)
   const initialGrass: GrassType | null = grassFromUrl === "st-augustine" ? "st_augustine" : grassFromUrl === "other" ? null : null;
   const initialStep = initialGrass ? 2 : 1;
 
@@ -31,12 +30,11 @@ function OnboardingFlow() {
     lawnGoal: null,
   });
 
-  // "Not sure" grass type helper state
   const [showGrassHelper, setShowGrassHelper] = useState(false);
   const [helperAnswers, setHelperAnswers] = useState({
-    dormancy: "", // "year_round" | "dormant"
-    bladeWidth: "", // "fine" | "wide"
-    origin: "", // "planted" | "existing"
+    dormancy: "",
+    bladeWidth: "",
+    origin: "",
   });
 
   const navigateToPlan = useCallback(
@@ -50,17 +48,14 @@ function OnboardingFlow() {
         path: "novice",
       };
 
-      // Store plan params for the dashboard
       localStorage.setItem("lawnhq_plan_params", JSON.stringify(planData));
 
-      // Update profile with selections
       const existingProfile = JSON.parse(localStorage.getItem("lawnhq_profile") || "{}");
       localStorage.setItem("lawnhq_profile", JSON.stringify({
         ...existingProfile,
         ...planData,
       }));
 
-      // Go to dashboard
       router.push("/home");
     },
     [zip, router]
@@ -86,8 +81,7 @@ function OnboardingFlow() {
   );
 
   const handleGrassHelperDone = useCallback(() => {
-    // Auto-suggest grass type based on helper answers
-    let suggested: GrassType = "fescue_kbg"; // safe default
+    let suggested: GrassType = "fescue_kbg";
     if (helperAnswers.dormancy === "dormant" && helperAnswers.bladeWidth === "fine") {
       suggested = "bermuda";
     } else if (helperAnswers.dormancy === "dormant" && helperAnswers.bladeWidth === "wide") {
@@ -109,70 +103,64 @@ function OnboardingFlow() {
       return;
     }
     if (step === initialStep) {
-      // Go back to path selection
       router.push(`/sandbox/path?zip=${zip}&grass=${grassFromUrl}`);
     } else {
       setStep((s) => s - 1);
     }
   };
 
-  // Calculate progress (if we skipped step 1, we have 2 steps total)
   const totalSteps = initialStep === 2 ? 2 : 3;
   const currentStepNum = initialStep === 2 ? step - 1 : step;
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Progress bar */}
-      <div className="w-full bg-deep-brown/5">
+      <div className="h-1.5 bg-deep-brown/10">
         <div
-          className="h-1 bg-lawn transition-all duration-300"
+          className="h-full bg-lawn transition-all duration-300"
           style={{ width: `${75 + (currentStepNum / totalSteps) * 25}%` }}
         />
       </div>
 
-      <div className="flex-1 flex flex-col px-4 py-6 sm:py-8 sm:justify-center">
-        <div className="w-full max-w-2xl mx-auto">
-          {step === 1 && !showGrassHelper && (
-            <StepGrassType
-              selected={selections.grassType}
-              onSelect={(v) => advance("grassType", v)}
-            />
-          )}
-          {step === 1 && showGrassHelper && (
-            <GrassHelper
-              answers={helperAnswers}
-              setAnswers={setHelperAnswers}
-              onDone={handleGrassHelperDone}
-            />
-          )}
-          {step === 2 && (
-            <StepLawnSize
-              selected={selections.lawnSize}
-              onSelect={(v) => advance("lawnSize", v)}
-            />
-          )}
-          {step === 3 && (
-            <StepGoal
-              selected={selections.lawnGoal}
-              onSelect={(v) => advance("lawnGoal", v)}
-            />
-          )}
+      {/* Content */}
+      <div className="flex-1 flex flex-col px-4 py-6 lg:max-w-xl lg:mx-auto lg:w-full lg:py-16 lg:justify-center">
+        {step === 1 && !showGrassHelper && (
+          <StepGrassType
+            selected={selections.grassType}
+            onSelect={(v) => advance("grassType", v)}
+          />
+        )}
+        {step === 1 && showGrassHelper && (
+          <GrassHelper
+            answers={helperAnswers}
+            setAnswers={setHelperAnswers}
+            onDone={handleGrassHelperDone}
+          />
+        )}
+        {step === 2 && (
+          <StepLawnSize
+            selected={selections.lawnSize}
+            onSelect={(v) => advance("lawnSize", v)}
+          />
+        )}
+        {step === 3 && (
+          <StepGoal
+            selected={selections.lawnGoal}
+            onSelect={(v) => advance("lawnGoal", v)}
+          />
+        )}
 
-          {/* Footer */}
-          <div className="flex items-center justify-between mt-8">
-            <button
-              onClick={goBack}
-              className="text-sm text-deep-brown/50 hover:text-deep-brown transition-colors flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-              Back
-            </button>
-            <span className="text-sm text-deep-brown/40">
-              Step {currentStepNum} of {totalSteps}
-            </span>
-          </div>
+        {/* Back button */}
+        <div className="mt-auto pt-8 lg:mt-12">
+          <button
+            onClick={goBack}
+            className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 hover:text-deep-brown py-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
         </div>
       </div>
     </div>
@@ -181,12 +169,12 @@ function OnboardingFlow() {
 
 /* ─── Step 1: Grass Type ─── */
 
-const grassOptions: { value: GrassType; label: string; desc: string; color: string }[] = [
-  { value: "bermuda", label: "Bermuda", desc: "Fine blade, spreads fast", color: "bg-green-600" },
-  { value: "zoysia", label: "Zoysia", desc: "Dense, carpet-like", color: "bg-green-700" },
-  { value: "fescue_kbg", label: "Fescue / KBG", desc: "Thick blades, cool-season", color: "bg-green-500" },
-  { value: "st_augustine", label: "St. Augustine", desc: "Wide blades, warm-season", color: "bg-emerald-600" },
-  { value: "not_sure", label: "Not sure", desc: "We'll help you figure it out", color: "bg-deep-brown/10" },
+const grassOptions: { value: GrassType; label: string; desc: string }[] = [
+  { value: "bermuda", label: "Bermuda", desc: "Fine blade, spreads fast" },
+  { value: "zoysia", label: "Zoysia", desc: "Dense, carpet-like" },
+  { value: "fescue_kbg", label: "Fescue / KBG", desc: "Thick blades, cool-season" },
+  { value: "st_augustine", label: "St. Augustine", desc: "Wide blades, warm-season" },
+  { value: "not_sure", label: "Not sure", desc: "We'll help figure it out" },
 ];
 
 function StepGrassType({
@@ -198,38 +186,30 @@ function StepGrassType({
 }) {
   return (
     <div>
-      <h2 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
-        What does your grass look like?
+      <h2 className="font-display text-[28px] lg:text-4xl font-bold text-deep-brown leading-tight">
+        What type of grass?
       </h2>
       <p className="mt-2 text-deep-brown/60">
-        Pick the closest match&mdash;we&rsquo;ll fine-tune later.
+        Pick the closest match.
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-8">
+      <div className="space-y-3 mt-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
         {grassOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`group relative rounded-xl border-2 p-4 text-left transition-all hover:border-lawn/50 hover:shadow-md ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] flex items-center gap-4 ${
               selected === opt.value
-                ? "border-lawn bg-lawn/5 shadow-md"
+                ? "border-lawn bg-lawn/5"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
-            <div
-              className={`w-full h-20 sm:h-24 rounded-lg mb-3 ${
-                opt.value === "not_sure"
-                  ? "bg-deep-brown/5 flex items-center justify-center"
-                  : opt.color
-              }`}
-            >
-              {opt.value === "not_sure" && (
-                <span className="text-2xl text-deep-brown/30">?</span>
-              )}
+            <div className="w-12 h-12 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">🌿</span>
             </div>
-            <p className="font-semibold text-deep-brown text-sm">
-              {opt.label}
-            </p>
-            <p className="text-xs text-deep-brown/50 mt-0.5">{opt.desc}</p>
+            <div>
+              <p className="font-bold text-deep-brown">{opt.label}</p>
+              <p className="text-sm text-deep-brown/50">{opt.desc}</p>
+            </div>
           </button>
         ))}
       </div>
@@ -237,7 +217,7 @@ function StepGrassType({
   );
 }
 
-/* ─── Grass Helper (for "Not sure") ─── */
+/* ─── Grass Helper ─── */
 
 function GrassHelper({
   answers,
@@ -248,30 +228,27 @@ function GrassHelper({
   setAnswers: React.Dispatch<React.SetStateAction<{ dormancy: string; bladeWidth: string; origin: string }>>;
   onDone: () => void;
 }) {
-  const helperStep =
-    !answers.dormancy ? 0 : !answers.bladeWidth ? 1 : !answers.origin ? 2 : 3;
+  const helperStep = !answers.dormancy ? 0 : !answers.bladeWidth ? 1 : !answers.origin ? 2 : 3;
 
   const setAnswer = (field: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Auto-advance when all 3 are answered
   if (helperStep === 3) {
-    // Use a microtask to avoid setState during render
     setTimeout(onDone, 0);
   }
 
   const questions = [
     {
-      question: "Is your lawn green year-round or does it go brown in winter?",
+      question: "Does your lawn stay green year-round?",
       options: [
-        { value: "year_round", label: "Green year-round" },
-        { value: "dormant", label: "Goes brown / dormant in winter" },
+        { value: "year_round", label: "Yes, green all year" },
+        { value: "dormant", label: "No, goes brown in winter" },
       ],
       field: "dormancy",
     },
     {
-      question: "Are the blades fine/thin or wide/coarse?",
+      question: "How wide are the blades?",
       options: [
         { value: "fine", label: "Fine / thin blades" },
         { value: "wide", label: "Wide / coarse blades" },
@@ -279,10 +256,10 @@ function GrassHelper({
       field: "bladeWidth",
     },
     {
-      question: "Did you plant it or was it already there?",
+      question: "Did you plant it?",
       options: [
-        { value: "planted", label: "I planted it" },
-        { value: "existing", label: "It was already there" },
+        { value: "planted", label: "Yes, I planted it" },
+        { value: "existing", label: "No, it was already there" },
       ],
       field: "origin",
     },
@@ -292,21 +269,21 @@ function GrassHelper({
 
   return (
     <div>
-      <h2 className="font-display text-2xl sm:text-3xl font-bold text-deep-brown">
-        Let Chip figure out your grass type
+      <h2 className="font-display text-[28px] lg:text-4xl font-bold text-deep-brown leading-tight">
+        Let&apos;s figure it out
       </h2>
       <p className="mt-2 text-deep-brown/60">
-        Quick question {helperStep + 1} of 3
+        Question {helperStep + 1} of 3
       </p>
 
-      <div className="mt-8">
-        <p className="font-medium text-deep-brown mb-4">{current.question}</p>
-        <div className="flex flex-col gap-3">
+      <div className="mt-6">
+        <p className="font-semibold text-deep-brown text-lg mb-4">{current.question}</p>
+        <div className="space-y-3">
           {current.options.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setAnswer(current.field, opt.value)}
-              className="rounded-xl border-2 border-deep-brown/10 bg-white p-4 text-left transition-all hover:border-lawn/50 hover:shadow-md text-sm font-medium text-deep-brown"
+              className="w-full rounded-2xl border-2 border-deep-brown/10 bg-white p-4 text-left transition-all active:scale-[0.98] font-medium text-deep-brown"
             >
               {opt.label}
             </button>
@@ -320,10 +297,10 @@ function GrassHelper({
 /* ─── Step 2: Lawn Size ─── */
 
 const sizeOptions: { value: LawnSize; label: string; desc: string; icon: string }[] = [
-  { value: "small", label: "Small", desc: "< 2,500 sq ft", icon: "🏠" },
+  { value: "small", label: "Small", desc: "Under 2,500 sq ft", icon: "🏠" },
   { value: "medium", label: "Medium", desc: "2,500 - 10,000 sq ft", icon: "🏡" },
-  { value: "large", label: "Large", desc: "> 10,000 sq ft", icon: "🏘️" },
-  { value: "not_sure", label: "Not sure", desc: "We'll estimate", icon: "📍" },
+  { value: "large", label: "Large", desc: "Over 10,000 sq ft", icon: "🏘️" },
+  { value: "not_sure", label: "Not sure", desc: "We'll estimate for you", icon: "📍" },
 ];
 
 function StepLawnSize({
@@ -335,21 +312,20 @@ function StepLawnSize({
 }) {
   return (
     <div>
-      <h2 className="font-display text-2xl font-bold text-deep-brown">
+      <h2 className="font-display text-[28px] lg:text-4xl font-bold text-deep-brown leading-tight">
         How big is your lawn?
       </h2>
-      <p className="mt-2 text-deep-brown/60 text-sm sm:text-base">
+      <p className="mt-2 text-deep-brown/60">
         A rough estimate is fine.
       </p>
-      {/* Stack on mobile, 2x2 grid on tablet+ */}
-      <div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0 mt-6">
+      <div className="space-y-3 mt-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
         {sizeOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`w-full rounded-2xl border-2 p-4 text-left transition-all hover:border-lawn/50 hover:shadow-md active:scale-[0.98] flex items-center gap-4 ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] flex items-center gap-4 ${
               selected === opt.value
-                ? "border-lawn bg-lawn/5 shadow-md"
+                ? "border-lawn bg-lawn/5"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
@@ -361,9 +337,6 @@ function StepLawnSize({
           </button>
         ))}
       </div>
-      <p className="mt-4 text-xs text-deep-brown/40 text-center">
-        Typical suburban yard = Medium
-      </p>
     </div>
   );
 }
@@ -371,10 +344,10 @@ function StepLawnSize({
 /* ─── Step 3: Goal ─── */
 
 const goalOptions: { value: LawnGoal; label: string; desc: string; icon: string }[] = [
-  { value: "fix", label: "Fix it", desc: "Weeds, bare spots, or problems", icon: "🔧" },
+  { value: "fix", label: "Fix it", desc: "Weeds, bare spots, problems", icon: "🔧" },
   { value: "maintain", label: "Maintain", desc: "Keep it healthy", icon: "✨" },
   { value: "perfect", label: "Perfect it", desc: "Best lawn on the block", icon: "🏆" },
-  { value: "not_sure", label: "Not sure", desc: "Just show me what to do", icon: "🤔" },
+  { value: "not_sure", label: "Not sure", desc: "Just tell me what to do", icon: "🤔" },
 ];
 
 function StepGoal({
@@ -386,27 +359,27 @@ function StepGoal({
 }) {
   return (
     <div>
-      <h2 className="font-display text-2xl font-bold text-deep-brown">
+      <h2 className="font-display text-[28px] lg:text-4xl font-bold text-deep-brown leading-tight">
         What&apos;s your goal?
       </h2>
-      <p className="mt-2 text-deep-brown/60 text-sm sm:text-base">
-        This helps us prioritize your plan.
+      <p className="mt-2 text-deep-brown/60">
+        This helps prioritize your plan.
       </p>
       <div className="space-y-3 mt-6">
         {goalOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`w-full rounded-2xl border-2 p-4 text-left transition-all hover:border-lawn/50 hover:shadow-md active:scale-[0.98] flex items-center gap-4 ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] flex items-center gap-4 ${
               selected === opt.value
-                ? "border-lawn bg-lawn/5 shadow-md"
+                ? "border-lawn bg-lawn/5"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
-            <span className="text-2xl flex-shrink-0">{opt.icon}</span>
+            <span className="text-2xl">{opt.icon}</span>
             <div>
               <p className="font-bold text-deep-brown">{opt.label}</p>
-              <p className="text-sm text-deep-brown/60">{opt.desc}</p>
+              <p className="text-sm text-deep-brown/50">{opt.desc}</p>
             </div>
           </button>
         ))}
