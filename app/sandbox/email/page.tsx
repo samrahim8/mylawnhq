@@ -42,8 +42,8 @@ function EmailCapture() {
   };
 
   return (
-    <div className="min-h-dvh bg-cream flex flex-col supports-[min-height:100dvh]:min-h-dvh">
-      {/* Progress bar */}
+    <div className="min-h-dvh bg-cream flex flex-col supports-[min-height:100dvh]:min-h-dvh pt-[env(safe-area-inset-top)]">
+      {/* Progress bar - below safe area */}
       <div className="h-1 bg-deep-brown/10">
         <div className="h-full bg-lawn w-2/3 transition-all duration-300" />
       </div>
@@ -251,7 +251,7 @@ export default function EmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-cream flex flex-col">
+        <div className="min-h-dvh bg-cream flex flex-col pt-[env(safe-area-inset-top)]">
           <div className="h-1 bg-deep-brown/10">
             <div className="h-full bg-lawn/50 w-2/3" />
           </div>
