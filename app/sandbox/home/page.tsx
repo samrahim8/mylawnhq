@@ -687,63 +687,265 @@ function HomePageContent() {
         </div>
       )}
 
-      {/* Desktop Layout - Keep original structure */}
+      {/* Desktop Layout - Dashboard with 2-column grid */}
       <div className="hidden lg:block h-full overflow-y-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <LawnPlan />
+        <div className="max-w-6xl mx-auto space-y-6">
 
-          {/* Chat and actions for desktop */}
-          <div className="bg-white rounded-2xl border border-deep-brown/10 p-6">
-            <form onSubmit={handleChatSubmit} className="flex gap-4">
-              <textarea
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Ask me anything about your lawn..."
-                rows={2}
-                className="flex-1 px-4 py-3 text-base border border-deep-brown/10 rounded-xl focus:outline-none focus:border-lawn resize-none"
-              />
-              <button
-                type="submit"
-                disabled={!chatInput.trim()}
-                className="px-6 py-3 bg-lawn text-white font-medium rounded-xl hover:bg-lawn/90 disabled:bg-deep-brown/10 disabled:text-deep-brown/30 transition-colors"
-              >
-                Ask
-              </button>
-            </form>
+          {/* === LEVEL 1: Hero Status Row === */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-deep-brown/60">{getGreeting()}</p>
+              <h1 className="font-display text-2xl font-bold text-deep-brown">
+                {profile?.grassType ? `Your ${profile.grassType} Lawn` : "Your Lawn Dashboard"}
+              </h1>
+            </div>
+            <div className="flex items-center gap-4">
+              {/* Soil temp badge */}
+              {soilTemp && !soilTempLoading && (
+                <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-deep-brown/10">
+                  <svg className="w-5 h-5 text-deep-brown/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
+                  </svg>
+                  <span className="text-deep-brown font-medium">Soil: {soilTemp.current}°F</span>
+                </div>
+              )}
+              {/* Weather badge */}
+              {weather && !weatherLoading && (
+                <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-deep-brown/10">
+                  <svg className="w-5 h-5 text-ochre" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={getWeatherIcon(weather.current?.condition)} />
+                  </svg>
+                  <span className="text-deep-brown font-medium">{weather.current?.temp}°F</span>
+                  <span className="text-deep-brown/50">{weather.location}</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Desktop tab section */}
-          <div className="bg-white rounded-2xl border border-deep-brown/10 overflow-hidden">
-            <div className="flex border-b border-deep-brown/10">
-              {[
-                { id: "log" as TabId, label: "Activity Log", count: recentActivitiesCount },
-                { id: "calendar" as TabId, label: "Calendar", count: futureEventsCount },
-                { id: "todos" as TabId, label: "Tasks", count: pendingTodosCount },
-                { id: "more" as TabId, label: "More", count: null },
-              ].map((tab) => {
-                const isActive = activeTab === tab.id;
-                return (
+          {/* === 2-Column Layout === */}
+          <div className="grid grid-cols-3 gap-6">
+
+            {/* Left Column - Plan + Chat (2/3 width) */}
+            <div className="col-span-2 space-y-6">
+
+              {/* 90-Day Plan Hero */}
+              <LawnPlan />
+
+              {/* Chat Input */}
+              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-deep-brown">Ask AI</h3>
+                    <p className="text-sm text-deep-brown/60">Get instant answers about your lawn</p>
+                  </div>
+                </div>
+                <form onSubmit={handleChatSubmit} className="flex gap-3">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Why are there brown patches in my lawn?"
+                    className="flex-1 px-4 py-3 text-base border border-deep-brown/10 rounded-xl focus:outline-none focus:border-lawn"
+                  />
                   <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "text-lawn border-b-2 border-lawn bg-lawn/5"
-                        : "text-deep-brown/60 hover:text-deep-brown hover:bg-deep-brown/5"
-                    }`}
+                    type="submit"
+                    disabled={!chatInput.trim()}
+                    className="px-6 py-3 bg-lawn text-white font-medium rounded-xl hover:bg-lawn/90 disabled:bg-deep-brown/10 disabled:text-deep-brown/30 transition-colors"
                   >
-                    {tab.label}
-                    {tab.count !== null && tab.count > 0 && (
-                      <span className="ml-2 px-2 py-0.5 bg-terracotta text-white text-xs rounded-full">
-                        {tab.count}
+                    Ask
+                  </button>
+                </form>
+              </div>
+
+              {/* Activity + Tasks Row */}
+              <div className="grid grid-cols-2 gap-6">
+                {/* Recent Activity */}
+                <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-deep-brown">Recent Activity</h3>
+                    {recentActivitiesCount > 0 && (
+                      <span className="text-sm text-deep-brown/50">{recentActivitiesCount} this week</span>
+                    )}
+                  </div>
+                  {recentActivities.length > 0 ? (
+                    <div className="space-y-2">
+                      {recentActivities.slice(0, 5).map((activity) => (
+                        <div
+                          key={activity.id}
+                          onClick={() => handleEditActivity(activity)}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-cream/50 hover:bg-cream cursor-pointer transition-colors"
+                        >
+                          <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-deep-brown text-sm">{getActivityName(activity.type)}</p>
+                            <p className="text-xs text-deep-brown/60">{new Date(activity.date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-deep-brown/50 mb-3">No recent activity</p>
+                      <button
+                        type="button"
+                        onClick={handleOpenActivityModal}
+                        className="text-sm text-lawn font-medium hover:text-lawn/80"
+                      >
+                        + Log your first activity
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tasks */}
+                <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-deep-brown">Tasks</h3>
+                    {pendingTodosCount > 0 && (
+                      <span className="px-2 py-0.5 bg-terracotta text-white text-xs font-medium rounded-full">
+                        {pendingTodosCount} pending
                       </span>
                     )}
-                  </button>
-                );
-              })}
+                  </div>
+                  {pendingTodos.length > 0 ? (
+                    <div className="space-y-2">
+                      {pendingTodos.slice(0, 5).map((todo) => (
+                        <div
+                          key={todo.id}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-cream/50 hover:bg-cream transition-colors"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => toggleTodo(todo.id)}
+                            className="w-6 h-6 rounded-full border-2 border-deep-brown/30 hover:border-lawn flex items-center justify-center flex-shrink-0 transition-colors"
+                          />
+                          <p className="font-medium text-deep-brown text-sm flex-1">{todo.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-deep-brown/50 mb-3">No pending tasks</p>
+                      <button
+                        type="button"
+                        onClick={() => setIsTodoModalOpen(true)}
+                        className="text-sm text-lawn font-medium hover:text-lawn/80"
+                      >
+                        + Add a task
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="p-6 min-h-[400px]">
-              {renderTabContent()}
+
+            {/* Right Column - Quick Actions + Links (1/3 width) */}
+            <div className="space-y-6">
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+                <h3 className="font-semibold text-deep-brown mb-4">Quick Actions</h3>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={handleOpenActivityModal}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+                  >
+                    <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="font-medium text-deep-brown">Log Activity</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+                  >
+                    <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <span className="font-medium text-deep-brown">Upload Photo</span>
+                  </button>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  <button
+                    type="button"
+                    onClick={() => setIsTodoModalOpen(true)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+                  >
+                    <div className="w-10 h-10 bg-ochre/10 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                    </div>
+                    <span className="font-medium text-deep-brown">Add Task</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tools & Resources */}
+              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+                <h3 className="font-semibold text-deep-brown mb-4">Tools</h3>
+                <div className="space-y-2">
+                  <Link
+                    href="/spreader"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+                  >
+                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-deep-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="font-medium text-deep-brown block">Spreader Calculator</span>
+                      <span className="text-xs text-deep-brown/50">Get exact settings</span>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/gear"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+                  >
+                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-deep-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="font-medium text-deep-brown block">My Gear</span>
+                      <span className="text-xs text-deep-brown/50">Equipment & manuals</span>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+                  >
+                    <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
+                      <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="font-medium text-deep-brown block">My Profile</span>
+                      <span className="text-xs text-deep-brown/50">Lawn settings</span>
+                    </div>
+                  </Link>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
