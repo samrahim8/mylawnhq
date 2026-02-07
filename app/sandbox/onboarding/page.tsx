@@ -56,7 +56,7 @@ function OnboardingFlow() {
         ...planData,
       }));
 
-      router.push("/home");
+      router.push("/sandbox/home");
     },
     [zip, router]
   );
