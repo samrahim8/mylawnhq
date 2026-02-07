@@ -33,25 +33,30 @@ export default function SandboxHero() {
       {/* Hero - Mobile first: CTA card at top */}
       <main className="flex-1 flex flex-col lg:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 lg:pt-12 lg:pb-16">
 
-        {/* Mobile: CTA card first */}
+        {/* Mobile: Hero + CTA */}
         <div className="lg:hidden w-full mb-6">
-          <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-5">
-            <div className="text-center mb-5">
-              <h1 className="font-display text-2xl font-bold text-deep-brown leading-tight">
-                Get Your Free<br />Lawn Care Plan
-              </h1>
-              <p className="mt-2 text-sm text-deep-brown/60">
-                Personalized for your zip code
-              </p>
-            </div>
+          {/* Hero headline */}
+          <div className="text-center mb-6">
+            <h1 className="font-display text-3xl font-bold text-deep-brown leading-tight tracking-tight">
+              YOUR LAWN CALLED.<br />IT WANTS A PLAN.
+            </h1>
+            <p className="mt-3 text-deep-brown/70">
+              Week-by-week playbook tuned to your zip code.
+            </p>
+          </div>
 
+          {/* CTA card */}
+          <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-lg p-5">
             <form onSubmit={handleSubmit}>
+              <label className="block text-sm font-medium text-deep-brown/70 mb-2 text-center">
+                Enter your zip to get started
+              </label>
               <input
                 id="zip-mobile"
                 type="text"
                 inputMode="numeric"
                 maxLength={5}
-                placeholder="Enter zip code"
+                placeholder="e.g. 78701"
                 value={zip}
                 onChange={(e) => {
                   setZip(e.target.value.replace(/\D/g, ""));
@@ -71,7 +76,7 @@ export default function SandboxHero() {
               </button>
             </form>
 
-            {/* Social proof - mobile */}
+            {/* Social proof */}
             <div className="flex items-center justify-center gap-2 mt-4 text-xs text-deep-brown/50">
               <div className="flex text-ochre text-sm">
                 {"★★★★★".split("").map((s, i) => (
@@ -81,23 +86,23 @@ export default function SandboxHero() {
               <span>12,000+ homeowners</span>
             </div>
           </div>
-        </div>
 
-        {/* Mobile: Value props below */}
-        <div className="lg:hidden space-y-3 mb-6">
-          {[
-            { icon: "🛒", text: "Exact products to grab at the store" },
-            { icon: "🌡️", text: "Timed to your local weather" },
-            { icon: "💳", text: "100% free, no credit card" },
-          ].map((item) => (
-            <div
-              key={item.text}
-              className="flex items-center gap-3 bg-white/60 rounded-xl px-4 py-3 text-sm text-deep-brown/80"
-            >
-              <span className="text-lg">{item.icon}</span>
-              {item.text}
-            </div>
-          ))}
+          {/* Value props */}
+          <div className="mt-6 space-y-2.5">
+            {[
+              { icon: "🛒", text: "Tells you exactly which bag to grab" },
+              { icon: "🌡️", text: "Timed to your local weather & soil temps" },
+              { icon: "✓", text: "100% free, no credit card" },
+            ].map((item) => (
+              <div
+                key={item.text}
+                className="flex items-center gap-3 text-sm text-deep-brown/70"
+              >
+                <span className="text-base w-6 text-center">{item.icon}</span>
+                {item.text}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Desktop: Two column layout */}
