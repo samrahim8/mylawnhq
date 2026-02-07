@@ -590,12 +590,12 @@ function HomePageContent() {
         </div>
       </div>
 
-      {/* Signup Bottom Sheet */}
+      {/* Signup Bottom Sheet (Mobile) */}
       {showSignupSheet && (
         <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
             onClick={() => handleDismissSignup(false)}
           />
 
@@ -655,6 +655,79 @@ function HomePageContent() {
                 Maybe Later
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Signup Modal (Desktop) */}
+      {showSignupSheet && (
+        <div className="fixed inset-0 z-50 hidden lg:flex items-center justify-center p-8">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => handleDismissSignup(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full animate-fade-in p-8">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => handleDismissSignup(false)}
+              className="absolute top-4 right-4 p-2 text-deep-brown/40 hover:text-deep-brown transition-colors rounded-lg hover:bg-deep-brown/5"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Icon */}
+            <div className="w-20 h-20 bg-lawn/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+
+            {/* Content */}
+            <h2 className="font-display text-3xl font-bold text-deep-brown text-center mb-3">
+              Love your plan?
+            </h2>
+            <p className="text-deep-brown/70 text-center text-lg mb-8">
+              Create a free account to save it, get reminders, and sync across all your devices.
+            </p>
+
+            {/* Benefits */}
+            <div className="space-y-4 mb-8">
+              {[
+                { icon: "M5 13l4 4L19 7", text: "Save your 90-day plan forever" },
+                { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "Weekly care reminders" },
+                { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Unlimited AI lawn advice" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                    </svg>
+                  </div>
+                  <span className="text-deep-brown text-lg">{item.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTAs */}
+            <Link
+              href="/signup"
+              className="block w-full py-4 bg-lawn text-white font-bold text-center rounded-2xl hover:bg-lawn/90 transition-colors mb-3"
+            >
+              Sign Up Free
+            </Link>
+            <button
+              type="button"
+              onClick={() => handleDismissSignup(false)}
+              className="block w-full py-3 text-deep-brown/60 font-medium text-center hover:text-deep-brown transition-colors"
+            >
+              Maybe Later
+            </button>
           </div>
         </div>
       )}
