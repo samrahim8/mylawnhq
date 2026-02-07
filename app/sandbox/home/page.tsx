@@ -23,6 +23,7 @@ import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
 
 type TabId = "log" | "calendar" | "todos" | "more";
+type MobileView = "home" | "plan" | "activity" | "tasks";
 
 function HomePageContent() {
   const { profile, isSetUp } = useProfile();
@@ -65,14 +66,24 @@ function HomePageContent() {
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const todayStr = now.toISOString().split("T")[0];
-  const recentActivitiesCount = activities.filter((a) => {
+  const recentActivitiesFiltered = activities.filter((a) => {
     const actDate = new Date(a.date);
     return actDate >= sevenDaysAgo && actDate <= now;
-  }).length;
+  });
+  const recentActivities = recentActivitiesFiltered.slice(0, 3); // Only show 3 for preview
+  const recentActivitiesCount = recentActivitiesFiltered.length;
+  const upcomingActivities = activities.filter((a) => a.date > todayStr).slice(0, 3);
   const futureEventsCount = activities.filter((a) => a.date > todayStr).length;
+  const pendingTodos = todos.filter((t) => !t.completed).slice(0, 3);
   const pendingTodosCount = todos.filter((t) => !t.completed).length;
 
+  // Desktop tab state
   const [activeTab, setActiveTab] = useState<TabId>("log");
+
+  // Mobile view state
+  const [mobileView, setMobileView] = useState<MobileView>("home");
+  const [fabOpen, setFabOpen] = useState(false);
+
   const [chatInput, setChatInput] = useState(initialQuery || "");
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<CalendarActivity | null>(null);
@@ -115,6 +126,7 @@ function HomePageContent() {
   const handleOpenActivityModal = useCallback(() => {
     setEditingActivity(null);
     setIsActivityModalOpen(true);
+    setFabOpen(false);
   }, []);
 
   const handleEditActivity = useCallback((activity: CalendarActivity) => {
@@ -145,6 +157,7 @@ function HomePageContent() {
       };
       reader.readAsDataURL(file);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      setFabOpen(false);
     },
     [addPhoto]
   );
@@ -201,6 +214,40 @@ function HomePageContent() {
     }
   };
 
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+  // Get weather icon
+  const getWeatherIcon = (condition?: string) => {
+    if (!condition) return "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z";
+    const c = condition.toLowerCase();
+    if (c.includes("rain") || c.includes("drizzle")) return "M19.5 10a4.5 4.5 0 10-7.34-5.2A5.5 5.5 0 004 10.5 4 4 0 005 18h13a3 3 0 001.5-5.6zM8 15v2m4-2v4m4-4v2";
+    if (c.includes("cloud")) return "M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z";
+    if (c.includes("snow")) return "M12 3v18m0-18l-3 3m3-3l3 3m-6 12l3-3m3 3l-3-3m-6-9h18M3 12l3-3m-3 3l3 3m12-6l3 3m-3-3l3-3";
+    return "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z";
+  };
+
+  // Get human-readable activity name
+  const getActivityName = (type: CalendarActivity["type"]) => {
+    const names: Record<CalendarActivity["type"], string> = {
+      mow: "Mowed lawn",
+      water: "Watered",
+      fertilize: "Fertilized",
+      aerate: "Aerated",
+      pest: "Pest control",
+      weedControl: "Weed control",
+      seed: "Seeded",
+      other: "Other activity",
+    };
+    return names[type] || type;
+  };
+
+  // Desktop tab content renderer
   const renderTabContent = () => {
     switch (activeTab) {
       case "log":
@@ -303,7 +350,7 @@ function HomePageContent() {
 
   return (
     <>
-      {/* Mobile Layout */}
+      {/* Mobile Layout - Lawn Status Dashboard */}
       <div className="fixed inset-0 bg-cream flex flex-col lg:hidden">
         {/* Safe area top */}
         <div className="bg-cream pt-[env(safe-area-inset-top)]" />
@@ -311,222 +358,334 @@ function HomePageContent() {
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-4 space-y-4">
-            {/* Setup prompt banner */}
-            {!isSetUp && (
-              <Link
-                href="/profile"
-                className="flex items-center justify-between p-4 bg-terracotta rounded-2xl active:scale-[0.98] transition-transform duration-100"
-              >
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            {/* === LEVEL 1: Hero Status Card === */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+              <div className="flex items-center justify-between">
+                {/* Greeting + Lawn status */}
+                <div>
+                  <p className="text-deep-brown/60 text-sm">{getGreeting()}</p>
+                  <h1 className="font-display text-xl font-bold text-deep-brown">
+                    {profile?.grassType ? `Your ${profile.grassType}` : "Your Lawn"}
+                  </h1>
+                </div>
+                {/* Weather badge */}
+                {weather && !weatherLoading ? (
+                  <div className="flex items-center gap-2 bg-cream rounded-xl px-3 py-2">
+                    <svg className="w-5 h-5 text-ochre" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={getWeatherIcon(weather.current?.condition)} />
+                    </svg>
+                    <span className="font-semibold text-deep-brown">{weather.current?.temp}°</span>
+                  </div>
+                ) : weatherLoading ? (
+                  <div className="w-16 h-10 bg-deep-brown/10 rounded-xl animate-pulse" />
+                ) : null}
+              </div>
+
+              {/* Soil temp inline if available */}
+              {soilTemp && !soilTempLoading && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-deep-brown/70">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
                   </svg>
-                  <span className="text-white font-semibold">Complete your profile</span>
+                  <span>Soil: {soilTemp.current}°F</span>
+                  {soilTemp.current >= 55 && <span className="text-lawn font-medium">· Good for seeding</span>}
+                </div>
+              )}
+            </div>
+
+            {/* === LEVEL 1: Next Up Card (from 90-day plan) === */}
+            <Link
+              href="#"
+              onClick={(e) => { e.preventDefault(); setMobileView("plan"); }}
+              className="block bg-lawn rounded-2xl p-4 active:scale-[0.98] transition-transform duration-100"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white/80 text-sm font-medium">Next Up</p>
+                    <p className="text-white font-bold text-lg">View Your 90-Day Plan</p>
+                  </div>
                 </div>
                 <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </Link>
-            )}
+              </div>
+            </Link>
 
-            {/* 90-Day Plan */}
-            <LawnPlan />
-
-            {/* Chat Input Card */}
+            {/* === LEVEL 2: Compact Chat Input === */}
             <div className="bg-white rounded-2xl border border-deep-brown/10 overflow-hidden">
-              <form onSubmit={handleChatSubmit}>
-                {/* Image previews */}
-                {chatImages.length > 0 && (
-                  <div className="flex gap-2 px-4 pt-3 flex-wrap">
-                    {chatImages.map((img) => (
-                      <div key={img.id} className="relative">
-                        <img
-                          src={img.preview}
-                          alt="Upload preview"
-                          className="w-16 h-16 object-cover rounded-xl border border-deep-brown/10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeChatImage(img.id)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm active:scale-95"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Hidden inputs */}
+              <form onSubmit={handleChatSubmit} className="flex items-center gap-2 p-3">
                 <input ref={chatFileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleChatImageUpload} className="hidden" />
                 <input ref={chatCameraInputRef} type="file" accept="image/jpeg,image/png" capture="environment" onChange={handleChatImageUpload} className="hidden" />
-
-                {/* Textarea */}
-                <div className="relative">
-                  {!chatInput && !isChatFocused && chatImages.length === 0 && (
-                    <div className="absolute left-4 top-4 text-base text-deep-brown/40 pointer-events-none flex items-center">
-                      <span>Ask me anything about your lawn...</span>
-                    </div>
-                  )}
-                  <textarea
-                    ref={textareaRef}
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onFocus={() => setIsChatFocused(true)}
-                    onBlur={() => setIsChatFocused(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleChatSubmit(e);
-                      }
-                    }}
-                    rows={2}
-                    className="w-full px-4 py-4 text-base text-deep-brown focus:outline-none bg-transparent resize-none"
-                  />
-                </div>
-
-                {/* Bottom action row */}
-                <div className="flex items-center justify-between px-3 pb-3">
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => chatFileInputRef.current?.click()}
-                      disabled={chatImages.length >= 4}
-                      className="p-3 rounded-xl text-lawn active:bg-lawn/10 transition-colors disabled:text-deep-brown/20"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => chatCameraInputRef.current?.click()}
-                      disabled={chatImages.length >= 4}
-                      className="p-3 rounded-xl text-lawn active:bg-lawn/10 transition-colors disabled:text-deep-brown/20"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={!chatInput.trim() && chatImages.length === 0}
-                    className={`p-3 rounded-xl transition-all active:scale-95 ${
-                      chatInput.trim() || chatImages.length > 0
-                        ? "bg-lawn text-white"
-                        : "bg-deep-brown/10 text-deep-brown/30"
-                    }`}
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => chatCameraInputRef.current?.click()}
+                  className="p-2 rounded-xl text-lawn active:bg-lawn/10 transition-colors flex-shrink-0"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask anything about your lawn..."
+                  className="flex-1 text-base text-deep-brown placeholder:text-deep-brown/40 focus:outline-none bg-transparent min-w-0"
+                />
+                <button
+                  type="submit"
+                  disabled={!chatInput.trim()}
+                  className={`p-2 rounded-xl transition-all flex-shrink-0 ${
+                    chatInput.trim()
+                      ? "bg-lawn text-white active:scale-95"
+                      : "text-deep-brown/30"
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
               </form>
             </div>
 
-            {/* Quick Actions - 2x2 grid */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* === LEVEL 3: Preview Cards === */}
+
+            {/* Recent Activity Preview */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-deep-brown">Recent Activity</h2>
+                <button
+                  type="button"
+                  onClick={() => setMobileView("activity")}
+                  className="text-sm text-lawn font-medium active:text-lawn/70"
+                >
+                  See all
+                </button>
+              </div>
+              {recentActivities.length > 0 ? (
+                <div className="space-y-2">
+                  {recentActivities.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-center gap-3 p-2 rounded-xl bg-cream/50"
+                    >
+                      <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-deep-brown text-sm truncate">{getActivityName(activity.type)}</p>
+                        <p className="text-xs text-deep-brown/60">{new Date(activity.date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-deep-brown/50 text-sm py-4 text-center">No recent activity</p>
+              )}
+            </div>
+
+            {/* Upcoming Tasks Preview */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-deep-brown">
+                  Tasks
+                  {pendingTodosCount > 0 && (
+                    <span className="ml-2 px-2 py-0.5 bg-terracotta text-white text-xs rounded-full">
+                      {pendingTodosCount}
+                    </span>
+                  )}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setMobileView("tasks")}
+                  className="text-sm text-lawn font-medium active:text-lawn/70"
+                >
+                  See all
+                </button>
+              </div>
+              {pendingTodos.length > 0 ? (
+                <div className="space-y-2">
+                  {pendingTodos.map((todo) => (
+                    <div
+                      key={todo.id}
+                      className="flex items-center gap-3 p-2 rounded-xl bg-cream/50"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleTodo(todo.id)}
+                        className="w-6 h-6 rounded-full border-2 border-deep-brown/30 flex items-center justify-center flex-shrink-0 active:scale-95"
+                      />
+                      <p className="font-medium text-deep-brown text-sm flex-1 truncate">{todo.text}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-deep-brown/50 text-sm py-4 text-center">No pending tasks</p>
+              )}
+            </div>
+
+            {/* Bottom padding for FAB + nav */}
+            <div className="h-32" />
+          </div>
+        </div>
+
+        {/* FAB (Floating Action Button) */}
+        <div className="absolute right-4 bottom-24 z-40" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          {/* FAB menu items */}
+          {fabOpen && (
+            <div className="absolute bottom-16 right-0 space-y-2 animate-fade-in">
               <button
                 type="button"
                 onClick={handleOpenActivityModal}
-                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border border-deep-brown/10 active:scale-95 transition-transform"
               >
-                <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span className="font-medium text-deep-brown text-sm">Log Activity</span>
+                <span className="font-medium text-deep-brown text-sm whitespace-nowrap">Log Activity</span>
               </button>
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+                onClick={() => { fileInputRef.current?.click(); }}
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border border-deep-brown/10 active:scale-95 transition-transform"
               >
-                <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 bg-terracotta/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span className="font-medium text-deep-brown text-sm">Add Photo</span>
+                <span className="font-medium text-deep-brown text-sm whitespace-nowrap">Add Photo</span>
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
               <button
                 type="button"
-                onClick={() => setIsTodoModalOpen(true)}
-                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+                onClick={() => { setIsTodoModalOpen(true); setFabOpen(false); }}
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border border-deep-brown/10 active:scale-95 transition-transform"
               >
-                <div className="w-10 h-10 bg-ochre/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 bg-ochre/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </div>
-                <span className="font-medium text-deep-brown text-sm">Add Task</span>
+                <span className="font-medium text-deep-brown text-sm whitespace-nowrap">Add Task</span>
               </button>
-              <Link
-                href="/spreader"
-                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
-              >
-                <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-deep-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <span className="font-medium text-deep-brown text-sm">Spreader</span>
-              </Link>
             </div>
+          )}
 
-            {/* Tab Content */}
-            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 min-h-[300px]">
-              {renderTabContent()}
-            </div>
-
-            {/* Bottom padding for tab bar */}
-            <div className="h-20" />
-          </div>
+          {/* FAB button */}
+          <button
+            type="button"
+            onClick={() => setFabOpen(!fabOpen)}
+            className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 ${
+              fabOpen ? "bg-deep-brown rotate-45" : "bg-lawn"
+            }`}
+          >
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         </div>
 
-        {/* Bottom Tab Bar - Fixed */}
+        {/* FAB backdrop */}
+        {fabOpen && (
+          <div
+            className="absolute inset-0 z-30"
+            onClick={() => setFabOpen(false)}
+          />
+        )}
+
+        {/* Bottom Nav Bar */}
         <div className="bg-white border-t border-deep-brown/10 pb-[env(safe-area-inset-bottom)]">
           <div className="flex">
             {[
-              { id: "log" as TabId, label: "Log", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", count: recentActivitiesCount },
-              { id: "calendar" as TabId, label: "Calendar", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", count: futureEventsCount },
-              { id: "todos" as TabId, label: "Tasks", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4", count: pendingTodosCount },
-              { id: "more" as TabId, label: "More", icon: "M4 6h16M4 12h16M4 18h16", count: null },
-            ].map((tab) => {
-              const isActive = activeTab === tab.id;
+              { id: "home" as MobileView, label: "Home", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
+              { id: "plan" as MobileView, label: "Plan", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
+              { id: "activity" as MobileView, label: "Activity", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { id: "tasks" as MobileView, label: "Tasks", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
+            ].map((nav) => {
+              const isActive = mobileView === nav.id;
               return (
                 <button
-                  key={tab.id}
+                  key={nav.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setMobileView(nav.id)}
                   className={`flex-1 flex flex-col items-center justify-center py-3 min-h-[56px] active:bg-deep-brown/5 transition-colors ${
                     isActive ? "text-lawn" : "text-deep-brown/50"
                   }`}
                 >
-                  <div className="relative">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
-                    </svg>
-                    {tab.count !== null && tab.count > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                        {tab.count > 9 ? "9+" : tab.count}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium mt-1">{tab.label}</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={nav.icon} />
+                  </svg>
+                  <span className="text-xs font-medium mt-1">{nav.label}</span>
                 </button>
               );
             })}
           </div>
         </div>
       </div>
+
+      {/* Mobile Full-Screen Views (Plan, Activity, Tasks) */}
+      {mobileView !== "home" && (
+        <div className="fixed inset-0 bg-cream z-50 flex flex-col lg:hidden">
+          {/* Safe area + header */}
+          <div className="bg-white border-b border-deep-brown/10 pt-[env(safe-area-inset-top)]">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <button
+                type="button"
+                onClick={() => setMobileView("home")}
+                className="p-2 -ml-2 rounded-xl active:bg-deep-brown/5"
+              >
+                <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <h1 className="font-display text-lg font-bold text-deep-brown">
+                {mobileView === "plan" && "Your 90-Day Plan"}
+                {mobileView === "activity" && "Activity Log"}
+                {mobileView === "tasks" && "Tasks"}
+              </h1>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {mobileView === "plan" && <LawnPlan />}
+            {mobileView === "activity" && (
+              <RecentActivities
+                activities={activities}
+                onDeleteActivity={deleteActivity}
+                onOpenActivityModal={handleOpenActivityModal}
+                onEditActivity={handleEditActivity}
+                compact
+              />
+            )}
+            {mobileView === "tasks" && (
+              <TodoList
+                todos={todos}
+                onAdd={addTodo}
+                onToggle={toggleTodo}
+                onDelete={deleteTodo}
+                onOpenModal={() => setIsTodoModalOpen(true)}
+                compact
+              />
+            )}
+          </div>
+
+          {/* Bottom safe area */}
+          <div className="pb-[env(safe-area-inset-bottom)]" />
+        </div>
+      )}
 
       {/* Desktop Layout - Keep original structure */}
       <div className="hidden lg:block h-full overflow-y-auto p-6">
@@ -768,13 +927,31 @@ export default function HomePage() {
       fallback={
         <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)]">
           <div className="flex-1 px-4 py-4 space-y-4 animate-pulse">
-            <div className="h-48 bg-deep-brown/10 rounded-2xl" />
-            <div className="h-32 bg-deep-brown/10 rounded-2xl" />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
-              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
-              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
-              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+            {/* Hero status skeleton */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 w-24 bg-deep-brown/10 rounded" />
+                  <div className="h-6 w-32 bg-deep-brown/10 rounded" />
+                </div>
+                <div className="h-10 w-16 bg-deep-brown/10 rounded-xl" />
+              </div>
+            </div>
+            {/* Next up skeleton */}
+            <div className="h-20 bg-lawn/20 rounded-2xl" />
+            {/* Chat input skeleton */}
+            <div className="h-14 bg-white rounded-2xl border border-deep-brown/10" />
+            {/* Activity preview skeleton */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 space-y-3">
+              <div className="h-5 w-32 bg-deep-brown/10 rounded" />
+              <div className="h-12 bg-cream rounded-xl" />
+              <div className="h-12 bg-cream rounded-xl" />
+            </div>
+            {/* Tasks preview skeleton */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 space-y-3">
+              <div className="h-5 w-24 bg-deep-brown/10 rounded" />
+              <div className="h-10 bg-cream rounded-xl" />
+              <div className="h-10 bg-cream rounded-xl" />
             </div>
           </div>
           <div className="h-20 bg-white border-t border-deep-brown/10" />
