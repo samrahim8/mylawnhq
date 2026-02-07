@@ -533,6 +533,83 @@ function HomePageContent() {
               )}
             </div>
 
+            {/* Pro Tools - Locked (Mobile) */}
+            <div className="bg-gradient-to-b from-white to-cream/50 rounded-2xl border border-deep-brown/10 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-deep-brown">Pro Tools</h2>
+                <div className="flex items-center gap-1 text-xs text-deep-brown/50">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span>Locked</span>
+                </div>
+              </div>
+
+              {/* Horizontal scroll of locked tools */}
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+                {/* Spreader Calc */}
+                <div className="flex-shrink-0 w-32 p-3 rounded-xl bg-deep-brown/5">
+                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center mb-2 relative">
+                    <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
+                      <svg className="w-2 h-2 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="font-medium text-deep-brown/60 text-sm">Spreader</p>
+                  <p className="text-xs text-deep-brown/40">Exact settings</p>
+                </div>
+
+                {/* My Gear */}
+                <div className="flex-shrink-0 w-32 p-3 rounded-xl bg-deep-brown/5">
+                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center mb-2 relative">
+                    <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
+                      <svg className="w-2 h-2 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="font-medium text-deep-brown/60 text-sm">My Gear</p>
+                  <p className="text-xs text-deep-brown/40">Equipment</p>
+                </div>
+
+                {/* Photo Diagnosis */}
+                <div className="flex-shrink-0 w-32 p-3 rounded-xl bg-deep-brown/5">
+                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center mb-2 relative">
+                    <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
+                      <svg className="w-2 h-2 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="font-medium text-deep-brown/60 text-sm">Photo AI</p>
+                  <p className="text-xs text-deep-brown/40">Diagnose issues</p>
+                </div>
+              </div>
+
+              {/* Unlock CTA */}
+              <Link
+                href="/signup"
+                className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-lawn text-white font-semibold rounded-xl active:scale-[0.98] transition-transform"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                </svg>
+                Sign Up to Unlock
+              </Link>
+            </div>
+
             {/* Bottom padding for FAB + nav */}
             <div className="h-32" />
           </div>
@@ -896,54 +973,85 @@ function HomePageContent() {
                 </div>
               </div>
 
-              {/* Tools & Resources */}
-              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
-                <h3 className="font-semibold text-deep-brown mb-4">Tools</h3>
-                <div className="space-y-2">
-                  <Link
-                    href="/spreader"
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-deep-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Pro Tools - Locked */}
+              <div className="bg-gradient-to-b from-white to-cream/50 rounded-2xl border border-deep-brown/10 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-deep-brown">Pro Tools</h3>
+                  <div className="flex items-center gap-1 text-xs text-deep-brown/50">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Locked</span>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {/* Spreader Calculator - Locked */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-deep-brown/5 opacity-75">
+                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center relative">
+                      <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
                     </div>
                     <div>
-                      <span className="font-medium text-deep-brown block">Spreader Calculator</span>
-                      <span className="text-xs text-deep-brown/50">Get exact settings</span>
+                      <span className="font-medium text-deep-brown/60 block">Spreader Calculator</span>
+                      <span className="text-xs text-deep-brown/40">Get exact dial settings for your model</span>
                     </div>
-                  </Link>
-                  <Link
-                    href="/gear"
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-deep-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  </div>
+
+                  {/* My Gear - Locked */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-deep-brown/5 opacity-75">
+                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center relative">
+                      <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
                     </div>
                     <div>
-                      <span className="font-medium text-deep-brown block">My Gear</span>
-                      <span className="text-xs text-deep-brown/50">Equipment & manuals</span>
+                      <span className="font-medium text-deep-brown/60 block">My Gear</span>
+                      <span className="text-xs text-deep-brown/40">Track equipment & find manuals</span>
                     </div>
-                  </Link>
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </div>
+
+                  {/* Photo Diagnosis - Locked */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-deep-brown/5 opacity-75">
+                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center relative">
+                      <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
                     </div>
                     <div>
-                      <span className="font-medium text-deep-brown block">My Profile</span>
-                      <span className="text-xs text-deep-brown/50">Lawn settings</span>
+                      <span className="font-medium text-deep-brown/60 block">Photo Diagnosis</span>
+                      <span className="text-xs text-deep-brown/40">AI identifies lawn problems</span>
                     </div>
-                  </Link>
+                  </div>
                 </div>
+
+                {/* Unlock CTA */}
+                <Link
+                  href="/signup"
+                  className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-lawn text-white font-semibold rounded-xl hover:bg-lawn/90 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                  </svg>
+                  Sign Up to Unlock
+                </Link>
               </div>
 
             </div>
