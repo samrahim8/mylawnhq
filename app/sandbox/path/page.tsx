@@ -7,6 +7,7 @@ function PathSelection() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const zip = searchParams.get("zip") || "";
+  const grass = searchParams.get("grass") || "";
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -24,7 +25,7 @@ function PathSelection() {
           <div className="space-y-4">
             {/* Novice path */}
             <button
-              onClick={() => router.push(`/sandbox/onboarding?zip=${zip}`)}
+              onClick={() => router.push(`/sandbox/onboarding?zip=${zip}&grass=${grass}`)}
               className="w-full bg-white rounded-xl border-2 border-deep-brown/10 p-5 sm:p-6 text-left transition-all hover:border-lawn/50 hover:shadow-md group"
             >
               <div className="flex items-start gap-4">
@@ -47,7 +48,7 @@ function PathSelection() {
 
             {/* Expert path */}
             <button
-              onClick={() => router.push(`/sandbox/expert?zip=${zip}`)}
+              onClick={() => router.push(`/sandbox/expert?zip=${zip}&grass=${grass}`)}
               className="w-full bg-white rounded-xl border-2 border-deep-brown/10 p-5 sm:p-6 text-left transition-all hover:border-lawn/50 hover:shadow-md group"
             >
               <div className="flex items-start gap-4">

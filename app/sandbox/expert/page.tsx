@@ -23,9 +23,13 @@ function ExpertFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Pre-fill grass type if provided from earlier step
+  const grassFromUrl = searchParams.get("grass") || "";
+  const initialGrassType = grassFromUrl === "st-augustine" ? "st_augustine" : "";
+
   const [form, setForm] = useState<ExpertFormData>({
     zip: searchParams.get("zip") || "",
-    grassType: "",
+    grassType: initialGrassType,
     lawnSize: "",
     sunExposure: "",
     lawnAge: "",

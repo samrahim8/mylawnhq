@@ -18,10 +18,15 @@ function OnboardingFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const zip = searchParams.get("zip") || "";
+  const grassFromUrl = searchParams.get("grass") || "";
 
-  const [step, setStep] = useState(1);
+  // If they already told us grass type, start at step 2 (lawn size)
+  const initialGrass: GrassType | null = grassFromUrl === "st-augustine" ? "st_augustine" : grassFromUrl === "other" ? null : null;
+  const initialStep = initialGrass ? 2 : 1;
+
+  const [step, setStep] = useState(initialStep);
   const [selections, setSelections] = useState<Selections>({
-    grassType: null,
+    grassType: initialGrass,
     lawnSize: null,
     lawnGoal: null,
   });
@@ -91,12 +96,17 @@ function OnboardingFlow() {
       setShowGrassHelper(false);
       return;
     }
-    if (step === 1) {
-      router.push("/sandbox/path" + (zip ? `?zip=${zip}` : ""));
+    if (step === initialStep) {
+      // Go back to path selection
+      router.push(`/sandbox/path?zip=${zip}&grass=${grassFromUrl}`);
     } else {
       setStep((s) => s - 1);
     }
   };
+
+  // Calculate progress (if we skipped step 1, we have 2 steps total)
+  const totalSteps = initialStep === 2 ? 2 : 3;
+  const currentStepNum = initialStep === 2 ? step - 1 : step;
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -104,7 +114,7 @@ function OnboardingFlow() {
       <div className="w-full bg-deep-brown/5">
         <div
           className="h-1 bg-lawn transition-all duration-300"
-          style={{ width: `${(step / 3) * 100}%` }}
+          style={{ width: `${(currentStepNum / totalSteps) * 100}%` }}
         />
       </div>
 
@@ -148,7 +158,7 @@ function OnboardingFlow() {
               Back
             </button>
             <span className="text-sm text-deep-brown/40">
-              Step {step} of 3
+              Step {currentStepNum} of {totalSteps}
             </span>
           </div>
         </div>
