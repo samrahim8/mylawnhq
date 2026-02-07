@@ -21,49 +21,8 @@ import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
-import { Clock, Calendar as CalendarIcon, CheckSquare, Cloud, Thermometer, LucideIcon } from "lucide-react";
 
-type TabId = "activities" | "calendar" | "todos" | "weather" | "soil";
-
-interface Tab {
-  id: TabId;
-  label: string;
-  mobileLabel: string;
-  icon: LucideIcon;
-}
-
-const tabs: Tab[] = [
-  {
-    id: "activities",
-    label: "The Log",
-    mobileLabel: "The Log",
-    icon: Clock,
-  },
-  {
-    id: "calendar",
-    label: "Calendar",
-    mobileLabel: "Calendar",
-    icon: CalendarIcon,
-  },
-  {
-    id: "todos",
-    label: "To Do",
-    mobileLabel: "To Do",
-    icon: CheckSquare,
-  },
-  {
-    id: "weather",
-    label: "Weather",
-    mobileLabel: "Weather",
-    icon: Cloud,
-  },
-  {
-    id: "soil",
-    label: "Soil Temp",
-    mobileLabel: "Soil Temp",
-    icon: Thermometer,
-  },
-];
+type TabId = "log" | "calendar" | "todos" | "more";
 
 function HomePageContent() {
   const { profile, isSetUp } = useProfile();
@@ -79,14 +38,11 @@ function HomePageContent() {
   const initialQuery = searchParams.get("q");
   const showOnboarding = searchParams.get("onboarding") === "true";
 
-  // Onboarding modal state
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [onboardingData, setOnboardingData] = useState<{ zipCode?: string; grassType?: string } | null>(null);
 
-  // Check for onboarding on mount
   useEffect(() => {
     if (showOnboarding) {
-      // Check localStorage for onboarding data
       const stored = localStorage.getItem("lawnhq_onboarding");
       if (stored) {
         try {
@@ -99,29 +55,22 @@ function HomePageContent() {
           // Ignore parse errors
         }
       }
-      // Remove onboarding param from URL
-      router.replace("/home", { scroll: false });
+      router.replace("/sandbox/home", { scroll: false });
     }
   }, [showOnboarding, router]);
 
-  // Calculate tab counts
+  // Calculate counts
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const todayStr = now.toISOString().split("T")[0];
-
-  // The Log: activities in the past 7 days
   const recentActivitiesCount = activities.filter((a) => {
     const actDate = new Date(a.date);
     return actDate >= sevenDaysAgo && actDate <= now;
   }).length;
-
-  // Calendar: future events (date > today)
   const futureEventsCount = activities.filter((a) => a.date > todayStr).length;
-
-  // To Do: incomplete todos
   const pendingTodosCount = todos.filter((t) => !t.completed).length;
 
-  const [activeTab, setActiveTab] = useState<TabId>("activities");
+  const [activeTab, setActiveTab] = useState<TabId>("log");
   const [chatInput, setChatInput] = useState(initialQuery || "");
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<CalendarActivity | null>(null);
@@ -134,22 +83,11 @@ function HomePageContent() {
   const chatCameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // If there's an initial query from the landing page, auto-redirect to chat
   useEffect(() => {
     if (initialQuery) {
       router.push(`/chat?q=${encodeURIComponent(initialQuery)}`);
     }
   }, [initialQuery, router]);
-
-  // Check if user has yard photos (photos with area tag)
-  const yardPhotos = photos.filter((p) =>
-    p.area && ["front", "back", "left-side", "right-side"].includes(p.area)
-  );
-  const hasAllYardPhotos = yardPhotos.length >= 4;
-
-  // Get first name for greeting
-  const firstName = profile?.zipCode ? "there" : "there"; // Could be enhanced with actual user name
-
 
   const handleOpenActivityModal = useCallback(() => {
     setEditingActivity(null);
@@ -177,20 +115,13 @@ function HomePageContent() {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = async (event) => {
         const url = event.target?.result as string;
-        await addPhoto({
-          url,
-          date: new Date().toISOString(),
-        });
+        await addPhoto({ url, date: new Date().toISOString() });
       };
       reader.readAsDataURL(file);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     },
     [addPhoto]
   );
@@ -201,18 +132,16 @@ function HomePageContent() {
         reject(new Error("Please upload a JPEG, PNG, GIF, or WebP image"));
         return;
       }
-      const maxSize = 5 * 1024 * 1024;
-      if (file.size > maxSize) {
+      if (file.size > 5 * 1024 * 1024) {
         reject(new Error("Image must be smaller than 5MB"));
         return;
       }
       const reader = new FileReader();
       reader.onload = (ev) => {
         const dataUrl = ev.target?.result as string;
-        const base64 = dataUrl.split(",")[1];
         resolve({
           id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          data: base64,
+          data: dataUrl.split(",")[1],
           mimeType: file.type as ChatImage["mimeType"],
           preview: dataUrl,
         });
@@ -241,7 +170,6 @@ function HomePageContent() {
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (chatInput.trim() || chatImages.length > 0) {
-      // Store images in sessionStorage to pass to chat page
       if (chatImages.length > 0) {
         sessionStorage.setItem("pendingChatImages", JSON.stringify(chatImages));
       }
@@ -252,7 +180,7 @@ function HomePageContent() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "activities":
+      case "log":
         return (
           <RecentActivities
             activities={activities}
@@ -281,16 +209,69 @@ function HomePageContent() {
             compact
           />
         );
-      case "weather":
-        return <WeatherWidget weather={weather} loading={weatherLoading} compact />;
-      case "soil":
+      case "more":
         return (
-          <SoilTemperature
-            temperature={soilTemp?.current ?? null}
-            trend={soilTemp?.trend ?? []}
-            loading={soilTempLoading}
-            compact
-          />
+          <div className="space-y-4">
+            <WeatherWidget weather={weather} loading={weatherLoading} compact />
+            <SoilTemperature
+              temperature={soilTemp?.current ?? null}
+              trend={soilTemp?.trend ?? []}
+              loading={soilTempLoading}
+              compact
+            />
+            {/* Quick Links */}
+            <div className="pt-2 space-y-2">
+              <Link
+                href="/profile"
+                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.98] transition-transform duration-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-deep-brown">My Profile</span>
+                </div>
+                <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <Link
+                href="/spreader"
+                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.98] transition-transform duration-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-deep-brown">Spreader Calculator</span>
+                </div>
+                <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <Link
+                href="/gear"
+                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.98] transition-transform duration-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-deep-brown">My Gear</span>
+                </div>
+                <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
         );
       default:
         return null;
@@ -298,270 +279,295 @@ function HomePageContent() {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-3 sm:p-4 lg:p-6">
-      {/* 90-Day Plan Hero Section */}
-      <div className="flex-shrink-0 max-w-2xl mx-auto w-full pt-4 sm:pt-6 mb-6 sm:mb-8">
-        <LawnPlan />
-      </div>
+    <>
+      {/* Mobile Layout */}
+      <div className="fixed inset-0 bg-cream flex flex-col lg:hidden">
+        {/* Safe area top */}
+        <div className="bg-cream pt-[env(safe-area-inset-top)]" />
 
-      {/* Chat Input Section */}
-      <div className="flex-shrink-0 max-w-2xl mx-auto w-full mb-4 sm:mb-6">
-        <div className="bg-white rounded-2xl border border-[#e5e5e5] shadow-sm overflow-hidden">
-          {/* Burnt Orange Banner */}
-          {!isSetUp ? (
-            <Link
-              href="/profile"
-              className="w-full flex items-center justify-between px-4 py-2.5 bg-[#c17f59] hover:bg-[#b06f49] transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 py-4 space-y-4">
+            {/* Setup prompt banner */}
+            {!isSetUp && (
+              <Link
+                href="/profile"
+                className="flex items-center justify-between p-4 bg-terracotta rounded-2xl active:scale-[0.98] transition-transform duration-100"
+              >
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span className="text-white font-semibold">Complete your profile</span>
+                </div>
+                <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-                <span className="text-sm text-white font-semibold">
-                  Unlock the full toolkit — your grass will thank you.
-                </span>
-              </div>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </Link>
-          ) : (
-            <div className="w-full h-2 bg-[#c17f59]" />
-          )}
+              </Link>
+            )}
 
-          {/* Chat Input */}
-          <form onSubmit={handleChatSubmit} className="relative">
-            {/* Image preview */}
-            {chatImages.length > 0 && (
-              <div className="flex gap-2 px-4 pt-3 flex-wrap">
-                {chatImages.map((img) => (
-                  <div key={img.id} className="relative group">
-                    <img
-                      src={img.preview}
-                      alt="Upload preview"
-                      className="w-16 h-16 object-cover rounded-lg border border-[#e5e5e5]"
-                    />
+            {/* 90-Day Plan */}
+            <LawnPlan />
+
+            {/* Chat Input Card */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 overflow-hidden">
+              <form onSubmit={handleChatSubmit}>
+                {/* Image previews */}
+                {chatImages.length > 0 && (
+                  <div className="flex gap-2 px-4 pt-3 flex-wrap">
+                    {chatImages.map((img) => (
+                      <div key={img.id} className="relative">
+                        <img
+                          src={img.preview}
+                          alt="Upload preview"
+                          className="w-16 h-16 object-cover rounded-xl border border-deep-brown/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeChatImage(img.id)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm active:scale-95"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Hidden inputs */}
+                <input ref={chatFileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleChatImageUpload} className="hidden" />
+                <input ref={chatCameraInputRef} type="file" accept="image/jpeg,image/png" capture="environment" onChange={handleChatImageUpload} className="hidden" />
+
+                {/* Textarea */}
+                <div className="relative">
+                  {!chatInput && !isChatFocused && chatImages.length === 0 && (
+                    <div className="absolute left-4 top-4 text-base text-deep-brown/40 pointer-events-none flex items-center">
+                      <span>Ask me anything about your lawn...</span>
+                    </div>
+                  )}
+                  <textarea
+                    ref={textareaRef}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onFocus={() => setIsChatFocused(true)}
+                    onBlur={() => setIsChatFocused(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleChatSubmit(e);
+                      }
+                    }}
+                    rows={2}
+                    className="w-full px-4 py-4 text-base text-deep-brown focus:outline-none bg-transparent resize-none"
+                  />
+                </div>
+
+                {/* Bottom action row */}
+                <div className="flex items-center justify-between px-3 pb-3">
+                  <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => removeChatImage(img.id)}
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                      onClick={() => chatFileInputRef.current?.click()}
+                      disabled={chatImages.length >= 4}
+                      className="p-3 rounded-xl text-lawn active:bg-lawn/10 transition-colors disabled:text-deep-brown/20"
                     >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => chatCameraInputRef.current?.click()}
+                      disabled={chatImages.length >= 4}
+                      className="p-3 rounded-xl text-lawn active:bg-lawn/10 transition-colors disabled:text-deep-brown/20"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </button>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Hidden file inputs for chat */}
-            <input
-              ref={chatFileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              multiple
-              onChange={handleChatImageUpload}
-              className="hidden"
-            />
-            <input
-              ref={chatCameraInputRef}
-              type="file"
-              accept="image/jpeg,image/png"
-              capture="environment"
-              onChange={handleChatImageUpload}
-              className="hidden"
-            />
-
-            {/* Custom placeholder with blinking cursor */}
-            {!chatInput && !isChatFocused && chatImages.length === 0 && (
-              <div
-                className="absolute left-4 top-4 text-base text-[#a3a3a3] pointer-events-none flex items-center"
-                onClick={() => textareaRef.current?.focus()}
-              >
-                <span>Talk to me, grass whisperer.</span>
-                <span className="ml-0.5 w-0.5 h-5 bg-[#7a8b6e] animate-pulse" />
-              </div>
-            )}
-            <textarea
-              ref={textareaRef}
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onFocus={() => setIsChatFocused(true)}
-              onBlur={() => setIsChatFocused(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleChatSubmit(e);
-                }
-              }}
-              placeholder={chatImages.length > 0 ? "Add a question about your photo..." : ""}
-              rows={3}
-              className="w-full px-4 py-4 pr-14 text-base text-[#1a1a1a] placeholder-[#a3a3a3] focus:outline-none bg-transparent resize-none"
-            />
-
-            {/* Bottom buttons row */}
-            <div className="absolute left-3 bottom-3 flex items-center gap-1">
-              {/* Photo upload button */}
-              <button
-                type="button"
-                onClick={() => chatFileInputRef.current?.click()}
-                disabled={chatImages.length >= 4}
-                className={`p-2 rounded-lg transition-colors ${
-                  chatImages.length >= 4
-                    ? "text-[#d4d4d4] cursor-not-allowed"
-                    : "text-[#7a8b6e] hover:bg-[#7a8b6e]/10"
-                }`}
-                title="Upload photo"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </button>
-              {/* Camera button */}
-              <button
-                type="button"
-                onClick={() => chatCameraInputRef.current?.click()}
-                disabled={chatImages.length >= 4}
-                className={`p-2 rounded-lg transition-colors ${
-                  chatImages.length >= 4
-                    ? "text-[#d4d4d4] cursor-not-allowed"
-                    : "text-[#7a8b6e] hover:bg-[#7a8b6e]/10"
-                }`}
-                title="Take photo"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={!chatInput.trim() && chatImages.length === 0}
-              className={`absolute right-3 bottom-3 p-2 rounded-lg transition-colors ${
-                chatInput.trim() || chatImages.length > 0
-                  ? "bg-[#7a8b6e] hover:bg-[#6a7b5e] text-white"
-                  : "bg-[#e5e5e5] text-[#a3a3a3] cursor-not-allowed"
-              }`}
-              aria-label="Send message"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Quick Action Buttons */}
-      <div className="flex-shrink-0 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3 mb-6 sm:mb-8 max-w-md sm:max-w-2xl mx-auto px-4 sm:px-0">
-        <button
-          type="button"
-          onClick={handleOpenActivityModal}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Log it
-        </button>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Pic of Proof
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handlePhotoUpload}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => setIsTodoModalOpen(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-          Add Task
-        </button>
-        <Link
-          href="/spreader"
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-[#f8f6f3] text-[#525252] hover:text-[#7a8b6e] rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#e5e5e5]"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          Spreader Math
-        </Link>
-      </div>
-
-      {/* Tab Section */}
-      <div className="flex-shrink-0 max-w-4xl mx-auto w-full">
-        {/* Tab Header - Folder Style */}
-        <div className="flex gap-1">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-
-            // Get count for tabs that have them
-            let count: number | null = null;
-            if (tab.id === "activities") count = recentActivitiesCount;
-            if (tab.id === "calendar") count = futureEventsCount;
-            if (tab.id === "todos") count = pendingTodosCount;
-
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-3 text-[10px] sm:text-sm font-medium whitespace-nowrap transition-all duration-200 rounded-t-xl ${
-                  isActive
-                    ? "bg-[#8B9D82] text-white border-2 border-[#8B9D82] border-b-0 relative z-10"
-                    : "bg-white text-stone-600 hover:bg-stone-50 border-2 border-stone-200 border-b-stone-300"
-                }`}
-              >
-                <Icon
-                  size={16}
-                  strokeWidth={2}
-                  className={isActive ? "text-white" : "text-[#C17F59]"}
-                />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.mobileLabel}</span>
-                {count !== null && count > 0 && (
-                  <span
-                    className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
-                      isActive
-                        ? "bg-[#a8b89e] text-white"
-                        : "bg-[#C17F59] text-white"
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim() && chatImages.length === 0}
+                    className={`p-3 rounded-xl transition-all active:scale-95 ${
+                      chatInput.trim() || chatImages.length > 0
+                        ? "bg-lawn text-white"
+                        : "bg-deep-brown/10 text-deep-brown/30"
                     }`}
                   >
-                    {count}
-                  </span>
-                )}
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Quick Actions - 2x2 grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleOpenActivityModal}
+                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+              >
+                <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <span className="font-medium text-deep-brown text-sm">Log Activity</span>
               </button>
-            );
-          })}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+              >
+                <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="font-medium text-deep-brown text-sm">Add Photo</span>
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+              <button
+                type="button"
+                onClick={() => setIsTodoModalOpen(true)}
+                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+              >
+                <div className="w-10 h-10 bg-ochre/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+                <span className="font-medium text-deep-brown text-sm">Add Task</span>
+              </button>
+              <Link
+                href="/spreader"
+                className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-deep-brown/10 active:scale-[0.97] transition-transform duration-100"
+              >
+                <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-deep-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="font-medium text-deep-brown text-sm">Spreader</span>
+              </Link>
+            </div>
+
+            {/* Tab Content */}
+            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 min-h-[300px]">
+              {renderTabContent()}
+            </div>
+
+            {/* Bottom padding for tab bar */}
+            <div className="h-20" />
+          </div>
         </div>
 
-        {/* Tab Content */}
-        <div className="bg-white rounded-b-2xl border-2 border-stone-300 border-t-0 -mt-px">
-          <div className="p-3 sm:p-4 min-h-[350px]">
-            {renderTabContent()}
+        {/* Bottom Tab Bar - Fixed */}
+        <div className="bg-white border-t border-deep-brown/10 pb-[env(safe-area-inset-bottom)]">
+          <div className="flex">
+            {[
+              { id: "log" as TabId, label: "Log", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", count: recentActivitiesCount },
+              { id: "calendar" as TabId, label: "Calendar", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", count: futureEventsCount },
+              { id: "todos" as TabId, label: "Tasks", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4", count: pendingTodosCount },
+              { id: "more" as TabId, label: "More", icon: "M4 6h16M4 12h16M4 18h16", count: null },
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex flex-col items-center justify-center py-3 min-h-[56px] active:bg-deep-brown/5 transition-colors ${
+                    isActive ? "text-lawn" : "text-deep-brown/50"
+                  }`}
+                >
+                  <div className="relative">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
+                    </svg>
+                    {tab.count !== null && tab.count > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {tab.count > 9 ? "9+" : tab.count}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs font-medium mt-1">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Activity Modal */}
+      {/* Desktop Layout - Keep original structure */}
+      <div className="hidden lg:block h-full overflow-y-auto p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <LawnPlan />
+
+          {/* Chat and actions for desktop */}
+          <div className="bg-white rounded-2xl border border-deep-brown/10 p-6">
+            <form onSubmit={handleChatSubmit} className="flex gap-4">
+              <textarea
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Ask me anything about your lawn..."
+                rows={2}
+                className="flex-1 px-4 py-3 text-base border border-deep-brown/10 rounded-xl focus:outline-none focus:border-lawn resize-none"
+              />
+              <button
+                type="submit"
+                disabled={!chatInput.trim()}
+                className="px-6 py-3 bg-lawn text-white font-medium rounded-xl hover:bg-lawn/90 disabled:bg-deep-brown/10 disabled:text-deep-brown/30 transition-colors"
+              >
+                Ask
+              </button>
+            </form>
+          </div>
+
+          {/* Desktop tab section */}
+          <div className="bg-white rounded-2xl border border-deep-brown/10 overflow-hidden">
+            <div className="flex border-b border-deep-brown/10">
+              {[
+                { id: "log" as TabId, label: "Activity Log", count: recentActivitiesCount },
+                { id: "calendar" as TabId, label: "Calendar", count: futureEventsCount },
+                { id: "todos" as TabId, label: "Tasks", count: pendingTodosCount },
+                { id: "more" as TabId, label: "More", count: null },
+              ].map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "text-lawn border-b-2 border-lawn bg-lawn/5"
+                        : "text-deep-brown/60 hover:text-deep-brown hover:bg-deep-brown/5"
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.count !== null && tab.count > 0 && (
+                      <span className="ml-2 px-2 py-0.5 bg-terracotta text-white text-xs rounded-full">
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="p-6 min-h-[400px]">
+              {renderTabContent()}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
       <ActivityModal
         isOpen={isActivityModalOpen}
         onClose={handleCloseActivityModal}
@@ -571,29 +577,23 @@ function HomePageContent() {
         savedProducts={products}
         onAddProduct={addProduct}
       />
-
-      {/* Todo Modal */}
       <TodoModal
         isOpen={isTodoModalOpen}
         onClose={() => setIsTodoModalOpen(false)}
         onAdd={addTodo}
       />
-
-      {/* Yard Photo Modal */}
       <YardPhotoModal
         isOpen={isPhotoModalOpen}
         onClose={() => setIsPhotoModalOpen(false)}
         onAddPhoto={addPhoto}
         existingPhotos={photos}
       />
-
-      {/* Onboarding Modal */}
       <OnboardingModal
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
         initialData={onboardingData || undefined}
       />
-    </div>
+    </>
   );
 }
 
@@ -601,8 +601,18 @@ export default function HomePage() {
   return (
     <Suspense
       fallback={
-        <div className="h-full flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-[#7a8b6e] border-t-transparent rounded-full animate-spin" />
+        <div className="fixed inset-0 bg-cream flex flex-col pt-[env(safe-area-inset-top)]">
+          <div className="flex-1 px-4 py-4 space-y-4 animate-pulse">
+            <div className="h-48 bg-deep-brown/10 rounded-2xl" />
+            <div className="h-32 bg-deep-brown/10 rounded-2xl" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+              <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+            </div>
+          </div>
+          <div className="h-20 bg-white border-t border-deep-brown/10" />
         </div>
       }
     >
