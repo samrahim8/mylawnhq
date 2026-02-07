@@ -113,9 +113,9 @@ function OnboardingFlow() {
   const currentStepNum = initialStep === 2 ? step - 1 : step;
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col">
+    <div className="min-h-dvh bg-cream flex flex-col supports-[min-height:100dvh]:min-h-dvh">
       {/* Progress bar */}
-      <div className="h-1.5 bg-deep-brown/10">
+      <div className="h-1 bg-deep-brown/10">
         <div
           className="h-full bg-lawn transition-all duration-300"
           style={{ width: `${75 + (currentStepNum / totalSteps) * 25}%` }}
@@ -123,40 +123,45 @@ function OnboardingFlow() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="flex-1 flex flex-col justify-center px-5 py-8 lg:hidden">
-        <div className="space-y-6">
-          {step === 1 && !showGrassHelper && (
-            <StepGrassType
-              selected={selections.grassType}
-              onSelect={(v) => advance("grassType", v)}
-            />
-          )}
-          {step === 1 && showGrassHelper && (
-            <GrassHelper
-              answers={helperAnswers}
-              setAnswers={setHelperAnswers}
-              onDone={handleGrassHelperDone}
-            />
-          )}
-          {step === 2 && (
-            <StepLawnSize
-              selected={selections.lawnSize}
-              onSelect={(v) => advance("lawnSize", v)}
-            />
-          )}
-          {step === 3 && (
-            <StepGoal
-              selected={selections.lawnGoal}
-              onSelect={(v) => advance("lawnGoal", v)}
-            />
-          )}
+      <div className="flex-1 flex flex-col lg:hidden">
+        {/* Content - vertically centered */}
+        <div className="flex-1 flex flex-col justify-center px-5 py-6">
+          <div className="space-y-6">
+            {step === 1 && !showGrassHelper && (
+              <StepGrassType
+                selected={selections.grassType}
+                onSelect={(v) => advance("grassType", v)}
+              />
+            )}
+            {step === 1 && showGrassHelper && (
+              <GrassHelper
+                answers={helperAnswers}
+                setAnswers={setHelperAnswers}
+                onDone={handleGrassHelperDone}
+              />
+            )}
+            {step === 2 && (
+              <StepLawnSize
+                selected={selections.lawnSize}
+                onSelect={(v) => advance("lawnSize", v)}
+              />
+            )}
+            {step === 3 && (
+              <StepGoal
+                selected={selections.lawnGoal}
+                onSelect={(v) => advance("lawnGoal", v)}
+              />
+            )}
+          </div>
+        </div>
 
-          {/* Back button */}
+        {/* Back button - fixed to bottom thumb zone */}
+        <div className="px-5 pb-[max(16px,env(safe-area-inset-bottom))]">
           <button
             onClick={goBack}
-            className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 py-2"
+            className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 min-h-[44px] active:text-deep-brown transition-colors duration-100"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             Back
@@ -200,7 +205,7 @@ function OnboardingFlow() {
           <div className="mt-12">
             <button
               onClick={goBack}
-              className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 hover:text-deep-brown py-2"
+              className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 hover:text-deep-brown py-2 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -234,12 +239,12 @@ function StepGrassType({
   isDesktop?: boolean;
 }) {
   return (
-    <div className="space-y-6">
+    <>
       <div>
-        <h2 className={`font-display font-bold text-deep-brown leading-tight ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
+        <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           What type of grass?
         </h2>
-        <p className="mt-2 text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/60">
           Pick the closest match.
         </p>
       </div>
@@ -249,7 +254,7 @@ function StepGrassType({
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] flex items-center gap-4 ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.97] duration-100 flex items-center gap-4 ${
               selected === opt.value
                 ? "border-lawn bg-lawn/5"
                 : "border-deep-brown/10 bg-white"
@@ -258,14 +263,14 @@ function StepGrassType({
             <div className="w-12 h-12 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
               <span className="text-2xl">🌿</span>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="font-bold text-deep-brown">{opt.label}</p>
               <p className="text-sm text-deep-brown/50">{opt.desc}</p>
             </div>
           </button>
         ))}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -322,12 +327,12 @@ function GrassHelper({
   const current = questions[Math.min(helperStep, 2)];
 
   return (
-    <div className="space-y-6">
+    <>
       <div>
-        <h2 className={`font-display font-bold text-deep-brown leading-tight ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
+        <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           Let&apos;s figure it out
         </h2>
-        <p className="mt-2 text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/60">
           Question {helperStep + 1} of 3
         </p>
       </div>
@@ -339,14 +344,14 @@ function GrassHelper({
             <button
               key={opt.value}
               onClick={() => setAnswer(current.field, opt.value)}
-              className="w-full rounded-2xl border-2 border-deep-brown/10 bg-white p-4 text-left transition-all active:scale-[0.98] font-medium text-deep-brown"
+              className="w-full rounded-2xl border-2 border-deep-brown/10 bg-white p-4 text-left transition-all active:scale-[0.97] duration-100 font-medium text-deep-brown min-h-[56px]"
             >
               {opt.label}
             </button>
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -369,12 +374,12 @@ function StepLawnSize({
   isDesktop?: boolean;
 }) {
   return (
-    <div className="space-y-6">
+    <>
       <div>
-        <h2 className={`font-display font-bold text-deep-brown leading-tight ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
+        <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           How big is your lawn?
         </h2>
-        <p className="mt-2 text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/60">
           A rough estimate is fine.
         </p>
       </div>
@@ -384,21 +389,21 @@ function StepLawnSize({
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] flex items-center gap-4 ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.97] duration-100 flex items-center gap-4 ${
               selected === opt.value
                 ? "border-lawn bg-lawn/5"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
             <span className="text-3xl">{opt.icon}</span>
-            <div>
+            <div className="min-w-0">
               <p className="font-bold text-deep-brown">{opt.label}</p>
               <p className="text-sm text-deep-brown/50">{opt.desc}</p>
             </div>
           </button>
         ))}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -421,12 +426,12 @@ function StepGoal({
   isDesktop?: boolean;
 }) {
   return (
-    <div className="space-y-6">
+    <>
       <div>
-        <h2 className={`font-display font-bold text-deep-brown leading-tight ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
+        <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           What&apos;s your goal?
         </h2>
-        <p className="mt-2 text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/60">
           This helps prioritize your plan.
         </p>
       </div>
@@ -436,21 +441,21 @@ function StepGoal({
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
-            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] flex items-center gap-4 ${
+            className={`w-full rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.97] duration-100 flex items-center gap-4 ${
               selected === opt.value
                 ? "border-lawn bg-lawn/5"
                 : "border-deep-brown/10 bg-white"
             }`}
           >
             <span className="text-2xl">{opt.icon}</span>
-            <div>
+            <div className="min-w-0">
               <p className="font-bold text-deep-brown">{opt.label}</p>
               <p className="text-sm text-deep-brown/50">{opt.desc}</p>
             </div>
           </button>
         ))}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -458,7 +463,7 @@ export default function OnboardingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="min-h-dvh bg-cream flex items-center justify-center">
           <div className="text-deep-brown/40">Loading...</div>
         </div>
       }

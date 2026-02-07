@@ -19,24 +19,26 @@ export default function SandboxHero() {
   };
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col">
+    <div className="min-h-dvh bg-cream flex flex-col supports-[min-height:100dvh]:min-h-dvh">
       {/* Mobile Layout */}
       <div className="flex-1 flex flex-col lg:hidden">
-        {/* Nav */}
-        <nav className="flex items-center justify-between px-5 py-4">
+        {/* Nav - thin, respects safe area */}
+        <nav className="flex items-center justify-between px-5 pt-[max(16px,env(safe-area-inset-top))] pb-3">
           <Logo />
-          <a href="/login" className="text-sm text-deep-brown/60">Log In</a>
+          <a href="/login" className="text-sm text-deep-brown/60 min-h-[44px] min-w-[44px] flex items-center justify-end">
+            Log In
+          </a>
         </nav>
 
         {/* Hero content - vertically centered */}
-        <div className="flex-1 flex flex-col justify-center px-5 pb-8">
+        <div className="flex-1 flex flex-col justify-center px-5">
           <div className="space-y-6">
             {/* Headline */}
             <div>
               <h1 className="font-display text-[32px] font-bold text-deep-brown leading-[1.1] tracking-tight">
                 YOUR LAWN CALLED.<br />IT WANTS A PLAN.
               </h1>
-              <p className="mt-3 text-base text-deep-brown/70 leading-relaxed">
+              <p className="mt-3 text-base text-deep-brown/70 leading-relaxed max-w-[320px]">
                 Get a personalized playbook tuned to your zip code, weather, and grass type.
               </p>
             </div>
@@ -53,7 +55,7 @@ export default function SandboxHero() {
                   setZip(e.target.value.replace(/\D/g, ""));
                   setError("");
                 }}
-                className="w-full h-14 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn transition-colors"
+                className="w-full h-14 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn focus:ring-0 transition-colors"
               />
               {error && (
                 <p className="text-sm text-red-600 text-center">{error}</p>
@@ -62,7 +64,7 @@ export default function SandboxHero() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="w-full h-14 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.98] transition-transform"
+                className="w-full h-14 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.97] transition-transform duration-100"
               >
                 GET MY FREE PLAN →
               </button>
@@ -86,13 +88,16 @@ export default function SandboxHero() {
             </div>
           </div>
         </div>
+
+        {/* Bottom safe area padding */}
+        <div className="h-[env(safe-area-inset-bottom,8px)] min-h-2" />
       </div>
 
       {/* Desktop Layout */}
       <div className="hidden lg:flex lg:flex-col lg:min-h-screen">
         <nav className="max-w-6xl mx-auto w-full px-8 py-5 flex items-center justify-between">
           <Logo />
-          <a href="/login" className="text-sm text-deep-brown/60 hover:text-deep-brown">Log In</a>
+          <a href="/login" className="text-sm text-deep-brown/60 hover:text-deep-brown transition-colors">Log In</a>
         </nav>
 
         <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-12 grid grid-cols-2 gap-16 items-center">
