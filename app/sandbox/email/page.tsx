@@ -54,16 +54,16 @@ function EmailCapture() {
         <div className="flex-1 flex flex-col justify-center px-5 py-6">
           <div className="space-y-6">
             {/* Success banner */}
-            <div className="bg-lawn rounded-2xl p-4 text-white">
+            <div className="bg-white rounded-2xl p-4 border-2 border-deep-brown/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <div>
-                  <p className="font-bold">{grassLabel} plan ready</p>
-                  <p className="text-sm text-white/80">Personalized for {zip}</p>
+                  <p className="font-bold text-deep-brown">{grassLabel} plan ready</p>
+                  <p className="text-sm text-deep-brown/70">Personalized for {zip}</p>
                 </div>
               </div>
             </div>
@@ -156,16 +156,16 @@ function EmailCapture() {
       <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:px-8 lg:py-16">
         <div className="w-full max-w-md">
           {/* Success banner */}
-          <div className="bg-lawn rounded-2xl p-5 text-white mb-6">
+          <div className="bg-white rounded-2xl p-5 border border-deep-brown/10 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
-                <p className="font-bold">{grassLabel} plan ready</p>
-                <p className="text-sm text-white/80">Personalized for {zip}</p>
+                <p className="font-bold text-deep-brown">{grassLabel} plan ready</p>
+                <p className="text-sm text-deep-brown/70">Personalized for {zip}</p>
               </div>
             </div>
           </div>
