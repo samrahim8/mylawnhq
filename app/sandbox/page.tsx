@@ -25,7 +25,7 @@ export default function SandboxHero() {
         {/* Nav - thin, respects safe area */}
         <nav className="flex items-center justify-between px-5 pt-[max(16px,env(safe-area-inset-top))] pb-3">
           <Logo />
-          <a href="/login" className="text-sm text-deep-brown/60 min-h-[44px] min-w-[44px] flex items-center justify-end">
+          <a href="/login" className="text-sm text-deep-brown/70 min-h-[44px] min-w-[44px] flex items-center justify-end">
             Log In
           </a>
         </nav>
@@ -70,7 +70,7 @@ export default function SandboxHero() {
               </button>
 
               {/* Social proof */}
-              <div className="flex items-center justify-center gap-2 text-sm text-deep-brown/60">
+              <div className="flex items-center justify-center gap-2 text-sm text-deep-brown/70">
                 <span className="text-ochre">★★★★★</span>
                 <span>Trusted by 12,000+ homeowners</span>
               </div>
@@ -83,7 +83,7 @@ export default function SandboxHero() {
                 "✓ Timed to your local weather",
                 "✓ 100% free, no credit card",
               ].map((text) => (
-                <p key={text} className="text-sm text-deep-brown/60">{text}</p>
+                <p key={text} className="text-sm text-deep-brown/70">{text}</p>
               ))}
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function SandboxHero() {
       <div className="hidden lg:flex lg:flex-col lg:min-h-screen">
         <nav className="max-w-6xl mx-auto w-full px-8 py-5 flex items-center justify-between">
           <Logo />
-          <a href="/login" className="text-sm text-deep-brown/60 hover:text-deep-brown transition-colors">Log In</a>
+          <a href="/login" className="text-sm text-deep-brown/70 hover:text-deep-brown transition-colors">Log In</a>
         </nav>
 
         <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-12 grid grid-cols-2 gap-16 items-center">
@@ -126,7 +126,7 @@ export default function SandboxHero() {
               ))}
             </ul>
 
-            <div className="flex items-center gap-3 mt-10 text-sm text-deep-brown/60">
+            <div className="flex items-center gap-3 mt-10 text-sm text-deep-brown/70">
               <span className="text-ochre">★★★★★</span>
               <span>Trusted by 12,000+ homeowners · 4.9 rating</span>
             </div>

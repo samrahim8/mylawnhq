@@ -244,7 +244,7 @@ function StepGrassType({
         <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           What type of grass?
         </h2>
-        <p className="mt-2 text-base text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/70">
           Pick the closest match.
         </p>
       </div>
@@ -332,7 +332,7 @@ function GrassHelper({
         <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           Let&apos;s figure it out
         </h2>
-        <p className="mt-2 text-base text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/70">
           Question {helperStep + 1} of 3
         </p>
       </div>
@@ -379,7 +379,7 @@ function StepLawnSize({
         <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           How big is your lawn?
         </h2>
-        <p className="mt-2 text-base text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/70">
           A rough estimate is fine.
         </p>
       </div>
@@ -431,7 +431,7 @@ function StepGoal({
         <h2 className={`font-display font-bold text-deep-brown leading-[1.1] ${isDesktop ? "text-4xl" : "text-[28px]"}`}>
           What&apos;s your goal?
         </h2>
-        <p className="mt-2 text-base text-deep-brown/60">
+        <p className="mt-2 text-base text-deep-brown/70">
           This helps prioritize your plan.
         </p>
       </div>
@@ -463,8 +463,24 @@ export default function OnboardingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-cream flex items-center justify-center">
-          <div className="text-deep-brown/40">Loading...</div>
+        <div className="min-h-dvh bg-cream flex flex-col">
+          <div className="h-1 bg-deep-brown/10">
+            <div className="h-full bg-lawn/50 w-4/5" />
+          </div>
+          <div className="flex-1 flex flex-col justify-center px-5 py-6">
+            <div className="space-y-6 animate-pulse">
+              <div>
+                <div className="h-8 bg-deep-brown/10 rounded-lg w-3/4" />
+                <div className="h-4 bg-deep-brown/10 rounded-lg w-1/2 mt-3" />
+              </div>
+              <div className="space-y-3">
+                <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+                <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+                <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+                <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+              </div>
+            </div>
+          </div>
         </div>
       }
     >

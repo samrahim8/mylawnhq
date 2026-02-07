@@ -29,7 +29,7 @@ function GrassSelection() {
               <h1 className="font-display text-[28px] font-bold text-deep-brown leading-[1.1]">
                 What type of grass?
               </h1>
-              <p className="mt-2 text-base text-deep-brown/60">
+              <p className="mt-2 text-base text-deep-brown/70">
                 Pick the closest match — we&apos;ll fine-tune later.
               </p>
             </div>
@@ -45,7 +45,7 @@ function GrassSelection() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-deep-brown text-lg">St. Augustine</h2>
-                  <p className="text-sm text-deep-brown/60">Wide, flat blades. Popular in the South.</p>
+                  <p className="text-sm text-deep-brown/70">Wide, flat blades. Popular in the South.</p>
                 </div>
                 <svg className="w-5 h-5 text-deep-brown/30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -61,7 +61,7 @@ function GrassSelection() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-deep-brown text-lg">Something Else</h2>
-                  <p className="text-sm text-deep-brown/60">Bermuda, Zoysia, Fescue, or not sure.</p>
+                  <p className="text-sm text-deep-brown/70">Bermuda, Zoysia, Fescue, or not sure.</p>
                 </div>
                 <svg className="w-5 h-5 text-deep-brown/30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -92,7 +92,7 @@ function GrassSelection() {
             <h1 className="font-display text-4xl font-bold text-deep-brown leading-[1.1]">
               What type of grass?
             </h1>
-            <p className="mt-2 text-lg text-deep-brown/60">
+            <p className="mt-2 text-lg text-deep-brown/70">
               Pick the closest match — we&apos;ll fine-tune later.
             </p>
           </div>
@@ -107,7 +107,7 @@ function GrassSelection() {
               </div>
               <div className="p-4 text-center">
                 <h2 className="font-display font-bold text-deep-brown text-lg">St. Augustine</h2>
-                <p className="text-sm text-deep-brown/60 mt-0.5">Wide, flat blades. Popular in the South.</p>
+                <p className="text-sm text-deep-brown/70 mt-0.5">Wide, flat blades. Popular in the South.</p>
               </div>
             </button>
 
@@ -120,7 +120,7 @@ function GrassSelection() {
               </div>
               <div className="p-4 text-center">
                 <h2 className="font-display font-bold text-deep-brown text-lg">Something Else</h2>
-                <p className="text-sm text-deep-brown/60 mt-0.5">Bermuda, Zoysia, Fescue, or not sure.</p>
+                <p className="text-sm text-deep-brown/70 mt-0.5">Bermuda, Zoysia, Fescue, or not sure.</p>
               </div>
             </button>
           </div>
@@ -146,8 +146,22 @@ export default function GrassPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-cream flex items-center justify-center">
-          <div className="text-deep-brown/40">Loading...</div>
+        <div className="min-h-dvh bg-cream flex flex-col">
+          <div className="h-1 bg-deep-brown/10">
+            <div className="h-full bg-lawn/50 w-1/3" />
+          </div>
+          <div className="flex-1 flex flex-col justify-center px-5 py-6">
+            <div className="space-y-6 animate-pulse">
+              <div>
+                <div className="h-8 bg-deep-brown/10 rounded-lg w-3/4" />
+                <div className="h-4 bg-deep-brown/10 rounded-lg w-1/2 mt-3" />
+              </div>
+              <div className="space-y-3">
+                <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+                <div className="h-20 bg-deep-brown/10 rounded-2xl" />
+              </div>
+            </div>
+          </div>
         </div>
       }
     >

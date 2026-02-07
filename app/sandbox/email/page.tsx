@@ -73,12 +73,16 @@ function EmailCapture() {
               <h1 className="font-display text-2xl font-bold text-deep-brown mb-1 leading-[1.1]">
                 Where should we send it?
               </h1>
-              <p className="text-base text-deep-brown/60 mb-4">
+              <p className="text-base text-deep-brown/70 mb-4">
                 We&apos;ll email you the full plan.
               </p>
 
               <form onSubmit={handleSubmit}>
+                <label htmlFor="email-mobile" className="block text-sm font-medium text-deep-brown/70 mb-2">
+                  Email address
+                </label>
                 <input
+                  id="email-mobile"
                   type="email"
                   value={email}
                   onChange={(e) => {
@@ -171,7 +175,7 @@ function EmailCapture() {
             <h1 className="font-display text-2xl font-bold text-deep-brown mb-1">
               Where should we send it?
             </h1>
-            <p className="text-sm text-deep-brown/60 mb-4">
+            <p className="text-sm text-deep-brown/70 mb-4">
               We&apos;ll email you the full plan.
             </p>
 
@@ -247,8 +251,21 @@ export default function EmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-cream flex items-center justify-center">
-          <div className="text-deep-brown/40">Loading...</div>
+        <div className="min-h-dvh bg-cream flex flex-col">
+          <div className="h-1 bg-deep-brown/10">
+            <div className="h-full bg-lawn/50 w-2/3" />
+          </div>
+          <div className="flex-1 flex flex-col justify-center px-5 py-6">
+            <div className="space-y-6 animate-pulse">
+              <div className="h-24 bg-lawn/20 rounded-2xl" />
+              <div>
+                <div className="h-7 bg-deep-brown/10 rounded-lg w-3/4" />
+                <div className="h-4 bg-deep-brown/10 rounded-lg w-1/2 mt-2" />
+                <div className="h-14 bg-deep-brown/10 rounded-2xl mt-4" />
+                <div className="h-14 bg-deep-brown/10 rounded-2xl mt-3" />
+              </div>
+            </div>
+          </div>
         </div>
       }
     >
