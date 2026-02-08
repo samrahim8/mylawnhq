@@ -703,6 +703,29 @@ function HomePageContent() {
             </div>
           </div>
 
+          {/* === LEVEL 1: Next Up CTA Card === */}
+          <a
+            href="#desktop-plan"
+            className="block bg-lawn rounded-2xl p-5 hover:bg-lawn/95 transition-colors group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white/80 text-sm font-medium">Next Up</p>
+                  <p className="text-white font-bold text-xl">View Your 90-Day Plan</p>
+                </div>
+              </div>
+              <svg className="w-6 h-6 text-white/70 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </a>
+
           {/* === 2-Column Layout === */}
           <div className="grid grid-cols-3 gap-6">
 
@@ -710,7 +733,9 @@ function HomePageContent() {
             <div className="col-span-2 space-y-6">
 
               {/* 90-Day Plan Hero */}
-              <LawnPlan />
+              <div id="desktop-plan">
+                <LawnPlan />
+              </div>
 
               {/* Chat Input */}
               <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
