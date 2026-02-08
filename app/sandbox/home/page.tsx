@@ -240,6 +240,18 @@ function HomePageContent() {
     return names[type] || type;
   };
 
+  // Format grass type for display
+  const formatGrassType = (type?: string) => {
+    if (!type) return null;
+    const names: Record<string, string> = {
+      "bermuda": "Bermuda",
+      "zoysia": "Zoysia",
+      "st-augustine": "St. Augustine",
+      "fescue-kbg": "Fescue/KBG",
+    };
+    return names[type] || type.charAt(0).toUpperCase() + type.slice(1).replace(/[-_]/g, " ");
+  };
+
   return (
     <>
       {/* Mobile Layout - Lawn Status Dashboard */}
@@ -257,7 +269,7 @@ function HomePageContent() {
                 <div>
                   <p className="text-deep-brown/60 text-sm">{getGreeting()}</p>
                   <h1 className="font-display text-xl font-bold text-deep-brown">
-                    {profile?.grassType ? `Your ${profile.grassType}` : "Your Lawn"}
+                    {profile?.grassType ? `Your ${formatGrassType(profile.grassType)}` : "Your Lawn"}
                   </h1>
                 </div>
                 {/* Weather badge */}
@@ -665,7 +677,7 @@ function HomePageContent() {
             <div>
               <p className="text-deep-brown/60">{getGreeting()}</p>
               <h1 className="font-display text-2xl font-bold text-deep-brown">
-                {profile?.grassType ? `Your ${profile.grassType} Lawn` : "Your Lawn Dashboard"}
+                {profile?.grassType ? `Your ${formatGrassType(profile.grassType)} Lawn` : "Your Lawn Dashboard"}
               </h1>
             </div>
             <div className="flex items-center gap-4">
