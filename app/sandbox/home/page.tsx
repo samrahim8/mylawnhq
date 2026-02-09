@@ -518,15 +518,18 @@ function HomePageContent() {
               onClick={handleOpenActivityModal}
               className="w-full bg-white rounded-2xl border border-deep-brown/10 p-4 flex items-center gap-3 active:scale-[0.98] transition-transform"
             >
-              <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="w-10 h-10 bg-lawn rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
               </div>
-              <div className="text-left">
-                <span className="text-sm font-medium text-deep-brown">Log Activity</span>
-                <p className="text-xs text-deep-brown/50">Record mowing, watering, fertilizing...</p>
+              <div className="text-left flex-1">
+                <span className="text-sm font-semibold text-deep-brown">Log Activity</span>
+                <p className="text-xs text-deep-brown/50">Did you mow, water, or fertilize?</p>
               </div>
+              <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </button>
 
             {/* Bottom padding for nav */}
