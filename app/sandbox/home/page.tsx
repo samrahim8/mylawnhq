@@ -794,7 +794,7 @@ function HomePageContent() {
               </div>
 
               {/* Quick Actions Row */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={handleOpenActivityModal}
@@ -806,31 +806,6 @@ function HomePageContent() {
                     </svg>
                   </div>
                   <span className="text-sm font-medium text-deep-brown">Log Activity</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => chatFileInputRef.current?.click()}
-                  className="bg-white rounded-2xl border border-deep-brown/10 p-5 flex flex-col items-center gap-3 hover:border-terracotta/30 hover:shadow-md transition-all group"
-                >
-                  <div className="w-12 h-12 bg-terracotta/10 rounded-xl flex items-center justify-center group-hover:bg-terracotta/20 transition-colors">
-                    <svg className="w-6 h-6 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-deep-brown">Upload Photo</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsTodoModalOpen(true)}
-                  className="bg-white rounded-2xl border border-deep-brown/10 p-5 flex flex-col items-center gap-3 hover:border-ochre/30 hover:shadow-md transition-all group"
-                >
-                  <div className="w-12 h-12 bg-ochre/10 rounded-xl flex items-center justify-center group-hover:bg-ochre/20 transition-colors">
-                    <svg className="w-6 h-6 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-deep-brown">Add Task</span>
                 </button>
                 <Link
                   href="/chat"
