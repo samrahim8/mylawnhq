@@ -438,8 +438,8 @@ function HomePageContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="font-display font-bold text-deep-brown text-lg">All tasks complete!</p>
-                <p className="text-deep-brown/60 mt-1">{nextTask.completedCount} tasks done this season</p>
+                <p className="font-display font-bold text-deep-brown text-lg">All done — your lawn thanks you.</p>
+                <p className="text-deep-brown/60 mt-1">{nextTask.completedCount} tasks crushed this season</p>
               </div>
             ) : (
               <Link
@@ -453,8 +453,8 @@ function HomePageContent() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-white/80 text-sm font-medium">Get Started</p>
-                    <p className="text-white font-bold text-lg">Create Your 90-Day Plan</p>
+                    <p className="text-white/80 text-sm font-medium">Let&apos;s get growing</p>
+                    <p className="text-white font-bold text-lg">Build Your 90-Day Plan</p>
                   </div>
                 </div>
               </Link>
@@ -477,7 +477,7 @@ function HomePageContent() {
                       ?
                     </button>
                   </div>
-                  <p className="text-xs text-deep-brown/60">Your personal lawn expert</p>
+                  <p className="text-xs text-deep-brown/60">He knows his stuff. Promise.</p>
                 </div>
               </div>
               <form onSubmit={handleChatSubmit} className="flex gap-2">
@@ -525,7 +525,7 @@ function HomePageContent() {
               </div>
               <div className="text-left flex-1">
                 <span className="text-sm font-semibold text-deep-brown">Log Activity</span>
-                <p className="text-xs text-deep-brown/50">Did you mow, water, or fertilize?</p>
+                <p className="text-xs text-deep-brown/50">Track what you&apos;ve done — it all adds up.</p>
               </div>
               <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -619,7 +619,7 @@ function HomePageContent() {
             <div>
               <p className="text-deep-brown/60">{getGreeting()}</p>
               <h1 className="font-display text-2xl font-bold text-deep-brown">
-                {profile?.grassType ? `Your ${formatGrassType(profile.grassType)} Lawn` : "Your Lawn Dashboard"}
+                {profile?.grassType ? `Your ${formatGrassType(profile.grassType)} Lawn` : "Your Lawn"}
               </h1>
             </div>
             <div className="flex items-center gap-3">
@@ -700,8 +700,8 @@ function HomePageContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <p className="font-display font-bold text-deep-brown text-xl">All tasks complete!</p>
-                  <p className="text-deep-brown/60 mt-1">{nextTask.completedCount} tasks done this season</p>
+                  <p className="font-display font-bold text-deep-brown text-xl">All done — your lawn thanks you.</p>
+                  <p className="text-deep-brown/60 mt-1">{nextTask.completedCount} tasks crushed this season</p>
                 </div>
               ) : (
                 <Link
@@ -715,8 +715,8 @@ function HomePageContent() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-white/80 text-sm font-medium">Get Started</p>
-                      <p className="text-white font-bold text-xl">Create Your 90-Day Plan</p>
+                      <p className="text-white/80 text-sm font-medium">Let&apos;s get growing</p>
+                      <p className="text-white font-bold text-xl">Build Your 90-Day Plan</p>
                     </div>
                   </div>
                 </Link>
@@ -739,7 +739,7 @@ function HomePageContent() {
                         ?
                       </button>
                     </div>
-                    <p className="text-sm text-deep-brown/60">Your personal lawn expert</p>
+                    <p className="text-sm text-deep-brown/60">He knows his stuff. Promise.</p>
                   </div>
                 </div>
                 <form onSubmit={handleChatSubmit} className="flex gap-3">
@@ -890,13 +890,13 @@ function HomePageContent() {
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-sm text-deep-brown/50">No recent activity</p>
+                    <p className="text-sm text-deep-brown/50">Nothing logged yet — no judgment.</p>
                     <button
                       type="button"
                       onClick={handleOpenActivityModal}
                       className="text-sm text-lawn font-medium mt-1 hover:text-lawn/80"
                     >
-                      Log your first activity
+                      Log your first one
                     </button>
                   </div>
                 )}
@@ -946,10 +946,10 @@ function HomePageContent() {
 
               {/* Content */}
               <h2 className="font-display text-2xl font-bold text-deep-brown text-center mb-2">
-                Love your plan?
+                Liking what you see?
               </h2>
               <p className="text-deep-brown/70 text-center mb-6">
-                Create a free account to save it, get reminders, and sync across all your devices.
+                Sign up to save your plan, get nudges before each step, and keep everything in one place.
               </p>
 
               {/* Benefits */}
@@ -957,7 +957,7 @@ function HomePageContent() {
                 {[
                   { icon: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z", text: "Snap a photo, get instant diagnosis" },
                   { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Ask Larry anything about your lawn" },
-                  { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "Weekly reminders so you never miss a task" },
+                  { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "We'll nudge you before each step — so you don't have to remember" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -1020,10 +1020,10 @@ function HomePageContent() {
 
             {/* Content */}
             <h2 className="font-display text-3xl font-bold text-deep-brown text-center mb-3">
-              Love your plan?
+              Liking what you see?
             </h2>
             <p className="text-deep-brown/70 text-center text-lg mb-8">
-              Create a free account to save it, get reminders, and sync across all your devices.
+              Sign up to save your plan, get nudges before each step, and keep everything in one place.
             </p>
 
             {/* Benefits */}
@@ -1031,7 +1031,7 @@ function HomePageContent() {
               {[
                 { icon: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z", text: "Snap a photo, get instant diagnosis" },
                 { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Ask Larry anything about your lawn" },
-                { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "Weekly reminders so you never miss a task" },
+                { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "We'll nudge you before each step — so you don't have to remember" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -1121,7 +1121,7 @@ function HomePageContent() {
               Who&apos;s Larry?
             </h2>
             <p className="text-deep-brown/70 text-center mb-4">
-              Larry is your personal lawn care expert, powered by AI.
+              Larry&apos;s the neighbor who actually knows what he&apos;s talking about.
             </p>
 
             {/* What Larry knows */}
@@ -1145,7 +1145,7 @@ function HomePageContent() {
             </div>
 
             <p className="text-xs text-deep-brown/50 text-center">
-              Ask Larry anything — he&apos;s here to help you get the lawn of your dreams.
+              Ask him anything. He won&apos;t judge. (We&apos;ve all killed grass before.)
             </p>
 
             {/* CTA */}

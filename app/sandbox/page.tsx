@@ -296,7 +296,7 @@ export default function SandboxHero() {
       setError("Please enter a valid 5-digit zip code");
       return;
     }
-    router.push(`/sandbox/grass?zip=${zip}`);
+    router.push(`/sandbox/onboarding-v2?zip=${zip}`);
   };
 
   return (
