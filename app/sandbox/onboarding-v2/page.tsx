@@ -10,7 +10,7 @@ import type { RegionInfo } from "@/lib/zip-climate";
    Types
    ═══════════════════════════════════════════ */
 
-type GrassKey = "bermuda" | "zoysia" | "st_augustine" | "cool_season" | "not_sure";
+type GrassKey = "bermuda" | "zoysia" | "st_augustine" | "fescue" | "kentucky_bluegrass" | "bentgrass" | "not_sure";
 type FlowStep = 1 | 2 | 3;
 
 interface OnboardingState {
@@ -37,28 +37,42 @@ const GRASS_OPTIONS: {
     label: "Bermuda",
     subtitle: "Fine blades, dense, gray-green hue",
     colors: "from-[#3d7a2e] to-[#5a9e45]",
-    image: "/images/grass/bermuda-grass.jpg",
+    image: "/images/grass/bermuda-grass.png",
   },
   {
     key: "zoysia",
     label: "Zoysia",
     subtitle: "Thick, carpet-like, stiff dark green blades",
     colors: "from-[#2d6b3a] to-[#4a8f5e]",
-    image: "/images/grass/zoysia-grass.jpg",
+    image: "/images/grass/zoysia-grass.png",
   },
   {
     key: "st_augustine",
     label: "St. Augustine",
     subtitle: "Broad, flat blades — coarse and thick",
     colors: "from-[#3b7d4a] to-[#5ba36a]",
-    image: "/images/grass/st-augustine-grass.jpg",
+    image: "/images/grass/st-augustine-grass.png",
   },
   {
-    key: "cool_season",
-    label: "Cool Season",
-    subtitle: "Fescue, Bluegrass, Rye — the northern mix",
+    key: "fescue",
+    label: "Fescue",
+    subtitle: "Bunching grass, shade-tolerant, cool-season",
     colors: "from-[#4a7a5e] to-[#6b9e7a]",
-    image: "/images/grass/cool-season-grass.jpg",
+    image: "/images/grass/fescue.png",
+  },
+  {
+    key: "kentucky_bluegrass",
+    label: "Kentucky Bluegrass",
+    subtitle: "Dark green, self-spreading, classic lawn",
+    colors: "from-[#2e6b4a] to-[#4a8f6e]",
+    image: "/images/grass/kentucky-bluegrass.png",
+  },
+  {
+    key: "bentgrass",
+    label: "Bentgrass",
+    subtitle: "Ultra-fine, low-cut, golf-course quality",
+    colors: "from-[#3a7050] to-[#5a9470]",
+    image: "/images/grass/bentgrass.png",
   },
   {
     key: "not_sure",
@@ -72,6 +86,9 @@ const GRASS_LABELS: Record<string, string> = {
   bermuda: "Bermuda",
   zoysia: "Zoysia",
   st_augustine: "St. Augustine",
+  fescue: "Fescue",
+  kentucky_bluegrass: "Kentucky Bluegrass",
+  bentgrass: "Bentgrass",
   cool_season: "Cool Season Mix",
   not_sure: "Your lawn",
 };
@@ -141,11 +158,11 @@ function getWeeklyTasks(grass: string, region: string) {
         { task: "Mow and bag clippings this cut", detail: "Bag when applying granular products" },
       ],
     },
-    cool_season: {
+    fescue: {
       thisWeek: [
-        { task: `Mow at 3–3.5"`, detail: "Taller grass shades out weeds and retains moisture." },
+        { task: `Mow at 3–3.5"`, detail: "Taller fescue shades out weeds and retains moisture." },
         { task: "Apply pre-emergent if soil is near 55°F", detail: "Timing is everything — don't miss the window." },
-        { task: "Overseed any bare spots now", detail: "Cool season grasses germinate best in spring and fall." },
+        { task: "Overseed any bare or thin spots", detail: "Fescue is a bunching grass — it doesn't spread on its own." },
       ],
       nextWeek: [
         { task: "First spring fertilizer", detail: "Balanced 10-10-10 or starter fert for overseeded areas" },
@@ -153,7 +170,37 @@ function getWeeklyTasks(grass: string, region: string) {
       ],
       week3: [
         { task: "Spot-spray broadleaf weeds", detail: "2,4-D + triclopyr for dandelions and clover" },
-        { task: "Aerate if soil is compacted", detail: "Core aeration opens up root zones" },
+        { task: "Aerate if soil is compacted", detail: "Core aeration opens up root zones for fescue" },
+      ],
+    },
+    kentucky_bluegrass: {
+      thisWeek: [
+        { task: `Mow at 2.5–3"`, detail: "KBG likes a moderate height — not too tall, not too short." },
+        { task: "Apply pre-emergent if soil is near 55°F", detail: "Timing is everything — don't miss the window." },
+        { task: "Check for snow mold damage", detail: "Rake out matted areas to promote spring green-up." },
+      ],
+      nextWeek: [
+        { task: "First spring fertilizer", detail: "Slow-release nitrogen — Milorganite or 24-0-6" },
+        { task: "Begin regular mowing schedule", detail: "Every 5–7 days as growth picks up" },
+      ],
+      week3: [
+        { task: "Spot-spray broadleaf weeds", detail: "2,4-D + triclopyr for dandelions and clover" },
+        { task: "Plan fall overseeding", detail: "KBG spreads via rhizomes but benefits from overseeding thin spots" },
+      ],
+    },
+    bentgrass: {
+      thisWeek: [
+        { task: `Mow at 0.5–1"`, detail: "Bentgrass thrives low — keep it tight like a putting green." },
+        { task: "Apply pre-emergent if soil is near 55°F", detail: "Timing is everything — don't miss the window." },
+        { task: "Light topdressing with sand", detail: "Smooth the surface and improve drainage." },
+      ],
+      nextWeek: [
+        { task: "Begin fungicide program", detail: "Bentgrass is disease-prone — preventive apps of azoxystrobin" },
+        { task: "Start frequent mowing schedule", detail: "Every 2–3 days to maintain low cut height" },
+      ],
+      week3: [
+        { task: "Light fertilizer application", detail: "Spoon-feed with 0.25 lb N / 1,000 sq ft every 2 weeks" },
+        { task: "Aerate if soil is compacted", detail: "Core aeration is critical for bentgrass health" },
       ],
     },
   };
@@ -275,8 +322,10 @@ function OnboardingFlow() {
 
   const acceptSuggestion = useCallback(() => {
     if (!state.region) return;
-    const key = state.region.suggestedGrassKey as GrassKey;
-    const label = state.region.suggestedGrass;
+    // Map cool_season suggestion to fescue (most common cool-season grass)
+    const rawKey = state.region.suggestedGrassKey;
+    const key = (rawKey === "cool_season" ? "fescue" : rawKey) as GrassKey;
+    const label = rawKey === "cool_season" ? "Fescue" : state.region.suggestedGrass;
     setState((prev) => ({ ...prev, grassType: key, grassLabel: label }));
     track("onboarding_grass_selected", { grassType: key, usedNotSure: true, suggested: true });
     setShowNotSure(false);
@@ -285,8 +334,10 @@ function OnboardingFlow() {
 
   const defaultSuggestion = useCallback(() => {
     if (!state.region) return;
-    const key = state.region.suggestedGrassKey as GrassKey;
-    const label = state.region.suggestedGrass;
+    // Map cool_season suggestion to fescue (most common cool-season grass)
+    const rawKey = state.region.suggestedGrassKey;
+    const key = (rawKey === "cool_season" ? "fescue" : rawKey) as GrassKey;
+    const label = rawKey === "cool_season" ? "Fescue" : state.region.suggestedGrass;
     setState((prev) => ({ ...prev, grassType: key, grassLabel: label }));
     track("onboarding_grass_selected", { grassType: key, usedNotSure: true, suggested: false, defaulted: true });
     setShowNotSure(false);
@@ -303,8 +354,8 @@ function OnboardingFlow() {
       setEmailError("");
       setState((prev) => ({ ...prev, email }));
 
-      // Map grass key for plan generator (cool_season → fescue_kbg)
-      const planGrassType = state.grassType === "cool_season" ? "fescue_kbg" : (state.grassType || "not_sure");
+      // Map grass key for plan generator
+      const planGrassType = state.grassType || "not_sure";
 
       // Store plan params so the home page renders the full 90-day plan
       localStorage.setItem(
