@@ -1,8 +1,289 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
+
+/* ── Dashboard Card ── */
+function DashboardCard() {
+  return (
+    <div className="bg-white rounded-xl shadow-xl border-2 border-[#c17f59] p-2.5 w-40 h-[220px] overflow-hidden">
+      <div className="flex items-center gap-1.5 mb-1.5 pb-1.5 border-b border-[#f0f0f0]">
+        <div className="w-5 h-5 bg-[#7a8b6e] rounded-lg flex items-center justify-center">
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+        </div>
+        <span className="font-display font-semibold text-xs text-[#1a1a1a]">LawnHQ</span>
+      </div>
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#7a8b6e]"></div>
+          <span className="text-[9px] text-[#525252]">Fertilize Schedule</span>
+          <span className="ml-auto text-[9px] text-[#7a8b6e] font-medium">Active</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#c17f59]"></div>
+          <span className="text-[9px] text-[#525252]">Soil Temp</span>
+          <span className="ml-auto text-[9px] text-[#525252]">68&deg;F</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a]"></div>
+          <span className="text-[9px] text-[#525252]">Mowing Height</span>
+          <span className="ml-auto text-[9px] text-[#525252]">1.5&quot;</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#a3a3a3]"></div>
+          <span className="text-[9px] text-[#525252]">Watering</span>
+          <span className="ml-auto text-[9px] text-[#7a8b6e] font-medium">On Track</span>
+        </div>
+      </div>
+      <div className="mt-2 pt-2 border-t border-[#f0f0f0]">
+        <div className="flex justify-between text-[8px] text-[#a3a3a3] mb-1">
+          <span>Lawn Health</span>
+          <span className="text-[#7a8b6e] font-medium">92%</span>
+        </div>
+        <div className="h-1 bg-[#f0f0f0] rounded-full overflow-hidden">
+          <div className="h-full w-[92%] bg-gradient-to-r from-[#7a8b6e] to-[#8a9b7e] rounded-full"></div>
+        </div>
+      </div>
+      <div className="mt-2 pt-2 border-t border-[#f0f0f0]">
+        <div className="flex items-center gap-1 mb-1">
+          <svg className="w-2.5 h-2.5 text-[#c17f59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          <span className="text-[8px] font-medium text-[#1a1a1a]">Ask Larry</span>
+        </div>
+        <div className="bg-[#f8f6f3] rounded-md px-1.5 py-1 flex items-center gap-1">
+          <span className="text-[7px] text-[#a3a3a3]">What fertilizer should I use?</span>
+          <svg className="w-2 h-2 text-[#c17f59] ml-auto" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Chat Card ── */
+function ChatCard() {
+  return (
+    <div className="bg-white rounded-xl shadow-xl border-2 border-[#c17f59] p-2.5 w-40 h-[220px] overflow-hidden">
+      <div className="flex items-center gap-1.5 mb-1.5 pb-1.5 border-b border-[#f0f0f0]">
+        <div className="w-5 h-5 bg-[#c17f59] rounded-lg flex items-center justify-center">
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <span className="font-display font-semibold text-xs text-[#1a1a1a]">Ask Larry</span>
+      </div>
+      <div className="space-y-1.5">
+        {/* User message */}
+        <div className="flex justify-end">
+          <div className="bg-[#7a8b6e] rounded-lg rounded-br-sm px-2 py-1 max-w-[85%]">
+            <span className="text-[8px] text-white leading-tight block">Brown spots on my lawn?</span>
+          </div>
+        </div>
+        {/* Photo thumbnail */}
+        <div className="flex justify-end">
+          <div className="w-10 h-7 bg-[#e8e0d8] rounded-md overflow-hidden">
+            <div className="w-full h-full bg-gradient-to-br from-[#8a7a60] to-[#6b8a5e] flex items-center justify-center">
+              <svg className="w-3 h-3 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        {/* AI reply */}
+        <div className="flex justify-start">
+          <div className="bg-[#f8f6f3] rounded-lg rounded-bl-sm px-2 py-1.5 max-w-[90%]">
+            <span className="text-[8px] text-[#525252] leading-tight block">Looks like <span className="font-semibold text-[#c17f59]">dollar spot fungus</span>. Here&apos;s what to do...</span>
+          </div>
+        </div>
+      </div>
+      {/* Input bar */}
+      <div className="mt-1.5 pt-1.5 border-t border-[#f0f0f0]">
+        <div className="bg-[#f8f6f3] rounded-md px-1.5 py-1 flex items-center gap-1">
+          <svg className="w-2 h-2 text-[#a3a3a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          </svg>
+          <span className="text-[7px] text-[#a3a3a3]">Ask anything...</span>
+          <svg className="w-2 h-2 text-[#c17f59] ml-auto" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Activity Log Card ── */
+function ActivityLogCard() {
+  return (
+    <div className="bg-white rounded-xl shadow-xl border-2 border-[#c17f59] p-2.5 w-40 h-[220px] overflow-hidden">
+      <div className="flex items-center gap-1.5 mb-1.5 pb-1.5 border-b border-[#f0f0f0]">
+        <div className="w-5 h-5 bg-[#525252] rounded-lg flex items-center justify-center">
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <span className="font-display font-semibold text-xs text-[#1a1a1a]">Activity Log</span>
+      </div>
+      <div className="space-y-1.5">
+        {/* Today */}
+        <div className="flex items-start gap-1.5">
+          <div className="mt-0.5 w-2.5 h-2.5 rounded-full bg-[#7a8b6e] flex items-center justify-center flex-shrink-0">
+            <svg className="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-[8px] text-[#1a1a1a] font-medium block">Mowed front yard</span>
+            <span className="text-[7px] text-[#a3a3a3]">Today &middot; 2.5&quot;</span>
+          </div>
+        </div>
+        {/* 3 days ago */}
+        <div className="flex items-start gap-1.5">
+          <div className="mt-0.5 w-2.5 h-2.5 rounded-full bg-[#c17f59] flex items-center justify-center flex-shrink-0">
+            <svg className="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-[8px] text-[#1a1a1a] font-medium block">Applied fertilizer</span>
+            <span className="text-[7px] text-[#a3a3a3]">3 days ago &middot; PGF Complete</span>
+          </div>
+        </div>
+        {/* 5 days ago */}
+        <div className="flex items-start gap-1.5">
+          <div className="mt-0.5 w-2.5 h-2.5 rounded-full bg-[#5b9bd5] flex items-center justify-center flex-shrink-0">
+            <svg className="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-[8px] text-[#1a1a1a] font-medium block">Watered</span>
+            <span className="text-[7px] text-[#a3a3a3]">5 days ago &middot; 30 min</span>
+          </div>
+        </div>
+      </div>
+      {/* Log button */}
+      <div className="mt-1.5 pt-1.5 border-t border-[#f0f0f0]">
+        <div className="bg-[#7a8b6e] rounded-md py-1 flex items-center justify-center">
+          <span className="text-[8px] font-medium text-white leading-none">+ Log Activity</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Spreader Card ── */
+function SpreaderCard() {
+  return (
+    <div className="bg-white rounded-xl shadow-xl border-2 border-[#c17f59] p-2.5 w-40 h-[220px] overflow-hidden">
+      <div className="flex items-center gap-1.5 mb-1.5 pb-1.5 border-b border-[#f0f0f0]">
+        <div className="w-5 h-5 bg-[#7a8b6e] rounded-lg flex items-center justify-center">
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <span className="font-display font-semibold text-xs text-[#1a1a1a]">Spreader Calc</span>
+      </div>
+      {/* Product */}
+      <div className="mb-1">
+        <span className="text-[7px] text-[#a3a3a3] uppercase tracking-wider">Product</span>
+        <span className="text-[9px] text-[#1a1a1a] font-medium block">Andersons PGF Complete</span>
+      </div>
+      {/* Spreader */}
+      <div className="mb-1">
+        <span className="text-[7px] text-[#a3a3a3] uppercase tracking-wider">Spreader</span>
+        <span className="text-[9px] text-[#1a1a1a] font-medium block">Earthway 2600A</span>
+      </div>
+      {/* Setting */}
+      <div className="bg-[#f8f6f3] rounded-md px-2 py-1 mb-1 text-center">
+        <span className="text-[7px] text-[#a3a3a3] block">Setting</span>
+        <span className="text-[12px] text-[#1a1a1a] font-bold">15</span>
+      </div>
+      {/* Coverage */}
+      <div className="pt-1 border-t border-[#f0f0f0]">
+        <div className="flex justify-between items-center">
+          <span className="text-[7px] text-[#a3a3a3]">Coverage</span>
+          <span className="text-[8px] text-[#7a8b6e] font-medium">5,000 sq ft</span>
+        </div>
+        <div className="flex justify-between items-center mt-0.5">
+          <span className="text-[7px] text-[#a3a3a3]">Bags Needed</span>
+          <span className="text-[9px] text-[#c17f59] font-bold">2 bags</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Rotating Preview Carousel ── */
+function PreviewCardCarousel() {
+  const [activeCard, setActiveCard] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const cards = [DashboardCard, ChatCard, ActivityLogCard, SpreaderCard];
+
+  const advance = useCallback(() => {
+    setActiveCard((prev) => (prev + 1) % cards.length);
+  }, [cards.length]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const id = setInterval(advance, 4000);
+    return () => clearInterval(id);
+  }, [isPaused, advance]);
+
+  return (
+    <div
+      className="flex flex-col items-center gap-1"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Arrow In */}
+      <div className="flex items-center text-[#7a8b6e]">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </div>
+
+      {/* Card container — fixed height to prevent layout shift */}
+      <div className="relative w-40 h-[220px]">
+        {cards.map((Card, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              i === activeCard ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+          >
+            <Card />
+          </div>
+        ))}
+      </div>
+
+      {/* Arrow Out */}
+      <div className="flex items-center text-[#7a8b6e]">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </div>
+
+      {/* Dot Indicators */}
+      <div className="flex items-center gap-1.5 mt-0.5">
+        {cards.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveCard(i)}
+            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+              i === activeCard ? "bg-[#c17f59] scale-125" : "bg-[#d4d4d4]"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function SandboxHero() {
   const [zip, setZip] = useState("");
@@ -74,8 +355,8 @@ export default function SandboxHero() {
         {/* Mobile Before/After */}
         <div className="px-5 pb-2">
           <div className="mb-2">
-            <div className="w-8 h-0.5 bg-[#1a1a1a] mb-2"></div>
-            <p className="font-display text-sm font-semibold text-[#1a1a1a]">Real yards. Real results.</p>
+            <div className="w-8 h-0.5 bg-[#c17f59] mb-2"></div>
+            <p className="font-display text-sm font-semibold text-[#1a1a1a]">Real <span className="text-[#7a8b6e]">yards</span>. Real <span className="text-[#7a8b6e]">results</span>.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="relative">
@@ -184,9 +465,9 @@ export default function SandboxHero() {
           {/* Before/After Section - same width as hero */}
           <div className="mt-5 pt-8 border-t border-deep-brown/10">
             <div className="mb-2">
-              <div className="w-10 h-0.5 bg-[#1a1a1a] mb-3"></div>
+              <div className="w-10 h-0.5 bg-[#c17f59] mb-3"></div>
               <h2 className="font-display text-xl font-semibold text-[#1a1a1a]">
-                Real yards. Real results.
+                Real <span className="text-[#7a8b6e]">yards</span>. Real <span className="text-[#7a8b6e]">results</span>.
               </h2>
             </div>
 
@@ -208,86 +489,8 @@ export default function SandboxHero() {
                 <p className="mt-1.5 text-xs text-[#737373] italic">March &mdash; &ldquo;I don&apos;t even know where to start.&rdquo;</p>
               </div>
 
-              {/* Center LawnHQ Dashboard Card */}
-              <div className="flex flex-col items-center gap-1">
-                {/* Arrow In */}
-                <div className="flex items-center text-[#7a8b6e]">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-
-                {/* Dashboard Card */}
-                <div className="bg-white rounded-xl shadow-xl border-2 border-[#c17f59] p-3 w-44">
-                  {/* Header */}
-                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#f0f0f0]">
-                    <div className="w-6 h-6 bg-[#7a8b6e] rounded-lg flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                      </svg>
-                    </div>
-                    <span className="font-display font-semibold text-xs text-[#1a1a1a]">LawnHQ</span>
-                  </div>
-
-                  {/* Mini Dashboard Content */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#7a8b6e]"></div>
-                      <span className="text-[9px] text-[#525252]">Fertilize Schedule</span>
-                      <span className="ml-auto text-[9px] text-[#7a8b6e] font-medium">Active</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#c17f59]"></div>
-                      <span className="text-[9px] text-[#525252]">Soil Temp</span>
-                      <span className="ml-auto text-[9px] text-[#525252]">68&deg;F</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a]"></div>
-                      <span className="text-[9px] text-[#525252]">Mowing Height</span>
-                      <span className="ml-auto text-[9px] text-[#525252]">1.5&quot;</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#a3a3a3]"></div>
-                      <span className="text-[9px] text-[#525252]">Watering</span>
-                      <span className="ml-auto text-[9px] text-[#7a8b6e] font-medium">On Track</span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="mt-2 pt-2 border-t border-[#f0f0f0]">
-                    <div className="flex justify-between text-[8px] text-[#a3a3a3] mb-1">
-                      <span>Lawn Health</span>
-                      <span className="text-[#7a8b6e] font-medium">92%</span>
-                    </div>
-                    <div className="h-1 bg-[#f0f0f0] rounded-full overflow-hidden">
-                      <div className="h-full w-[92%] bg-gradient-to-r from-[#7a8b6e] to-[#8a9b7e] rounded-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Ask AI Section */}
-                  <div className="mt-2 pt-2 border-t border-[#f0f0f0]">
-                    <div className="flex items-center gap-1 mb-1">
-                      <svg className="w-2.5 h-2.5 text-[#c17f59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      <span className="text-[8px] font-medium text-[#1a1a1a]">Ask AI</span>
-                    </div>
-                    <div className="bg-[#f8f6f3] rounded-md px-1.5 py-1 flex items-center gap-1">
-                      <span className="text-[7px] text-[#a3a3a3]">What fertilizer should I use?</span>
-                      <svg className="w-2 h-2 text-[#c17f59] ml-auto" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Arrow Out */}
-                <div className="flex items-center text-[#7a8b6e]">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
+              {/* Center Rotating Preview Cards */}
+              <PreviewCardCarousel />
 
               {/* After Image */}
               <div>
