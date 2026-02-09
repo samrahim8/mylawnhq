@@ -513,7 +513,7 @@ function HomePageContent() {
             </div>
 
             {/* === Quick Actions Row === */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={handleOpenActivityModal}
@@ -524,7 +524,7 @@ function HomePageContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-deep-brown">Log</span>
+                <span className="text-xs font-medium text-deep-brown">Log Activity</span>
               </button>
               <button
                 type="button"
@@ -537,19 +537,7 @@ function HomePageContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-deep-brown">Photo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsTodoModalOpen(true)}
-                className="bg-white rounded-2xl border border-deep-brown/10 p-4 flex flex-col items-center gap-2 active:scale-95 transition-transform"
-              >
-                <div className="w-10 h-10 bg-ochre/10 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <span className="text-xs font-medium text-deep-brown">Task</span>
+                <span className="text-xs font-medium text-deep-brown">Snap Photo</span>
               </button>
             </div>
 
