@@ -169,7 +169,7 @@ export function LawnPlan() {
               >
                 <div className={`flex items-center justify-between px-4 py-4 transition-colors ${
                   expandedMonths[idx]
-                    ? "bg-deep-brown text-white"
+                    ? "bg-lawn/10 text-deep-brown"
                     : "bg-white text-deep-brown active:bg-cream/50"
                 }`}>
                   <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export function LawnPlan() {
                     </span>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       expandedMonths[idx]
-                        ? "bg-white/20 text-white"
+                        ? "bg-lawn/20 text-lawn"
                         : "bg-deep-brown/5 text-deep-brown/50"
                     }`}>
                       {monthCompletedCount}/{monthTaskCount}
@@ -186,7 +186,7 @@ export function LawnPlan() {
                   </div>
                   <svg
                     className={`w-5 h-5 transition-transform ${expandedMonths[idx] ? "rotate-180" : ""} ${
-                      expandedMonths[idx] ? "text-white/70" : "text-deep-brown/30"
+                      expandedMonths[idx] ? "text-lawn" : "text-deep-brown/30"
                     }`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                   >
