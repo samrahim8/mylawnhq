@@ -432,48 +432,48 @@ function OnboardingFlow() {
            STEP 1: Grass Type Picker
            ════════════════════════════════ */}
         {step === 1 && (
-          <div className="fixed inset-0 bg-cream flex flex-col overflow-y-auto">
+          <div className="fixed inset-0 bg-cream flex flex-col overflow-hidden">
             {/* Spacer for progress bar */}
             <div className="h-1 flex-shrink-0" />
 
-            <div className="flex-1 flex flex-col justify-center px-5 py-8 lg:py-12">
-              <div className="w-full max-w-xl mx-auto">
+            <div className="flex-1 flex flex-col justify-center px-4 py-3 sm:py-5 lg:py-8">
+              <div className="w-full max-w-lg mx-auto">
                 {!showNotSure ? (
                   <>
                     {/* Header */}
-                    <div className="mb-8">
-                      <h1 className="font-display text-[28px] lg:text-4xl font-bold text-deep-brown leading-[1.1]">
+                    <div className="mb-3 sm:mb-5">
+                      <h1 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-deep-brown leading-[1.1]">
                         What&apos;s growing in your yard?
                       </h1>
-                      <p className="mt-2 text-base text-deep-brown/60">
+                      <p className="mt-1 text-sm text-deep-brown/60">
                         This helps us dial in your plan. Not sure? No worries.
                       </p>
                     </div>
 
                     {/* Grass cards grid */}
-                    <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       {GRASS_OPTIONS.map((g) => (
                         <button
                           key={g.key}
                           onClick={() => selectGrass(g.key)}
-                          className={`rounded-2xl border-2 border-deep-brown/10 bg-white text-left transition-all duration-150 active:scale-[0.97] hover:border-terracotta hover:shadow-md overflow-hidden ${
+                          className={`rounded-xl border border-deep-brown/10 bg-white text-left transition-all duration-150 active:scale-[0.97] hover:border-terracotta hover:shadow-md overflow-hidden ${
                             g.key === "not_sure" ? "col-span-2" : ""
                           }`}
                         >
                           {/* Swatch / Photo */}
                           <div
-                            className={`h-24 lg:h-28 bg-gradient-to-br ${g.colors} flex items-center justify-center relative overflow-hidden`}
+                            className={`h-16 sm:h-20 bg-gradient-to-br ${g.colors} flex items-center justify-center relative overflow-hidden`}
                           >
                             {g.image ? (
                               <img
                                 src={g.image}
                                 alt={`${g.label} grass texture`}
-                                className="absolute inset-0 w-full h-full object-cover"
+                                className="absolute inset-0 w-full h-full object-cover scale-105"
                                 loading="lazy"
                               />
                             ) : g.key === "not_sure" ? (
                               <svg
-                                className="w-10 h-10 text-deep-brown/40"
+                                className="w-8 h-8 text-deep-brown/40"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -488,11 +488,11 @@ function OnboardingFlow() {
                             ) : null}
                           </div>
                           {/* Label */}
-                          <div className="p-3 lg:p-4">
-                            <p className="font-display font-bold text-deep-brown text-sm lg:text-base">
+                          <div className="px-2.5 py-1.5 sm:p-3">
+                            <p className="font-display font-bold text-deep-brown text-xs sm:text-sm">
                               {g.label}
                             </p>
-                            <p className="text-xs lg:text-sm text-deep-brown/50 mt-0.5">
+                            <p className="text-[11px] sm:text-xs text-deep-brown/50 mt-0.5 leading-tight">
                               {g.subtitle}
                             </p>
                           </div>
