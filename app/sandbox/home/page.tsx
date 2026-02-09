@@ -524,16 +524,28 @@ function HomePageContent() {
               <form onSubmit={handleChatSubmit} className="flex gap-2">
                 <input ref={chatFileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleChatImageUpload} className="hidden" />
                 <input ref={chatCameraInputRef} type="file" accept="image/jpeg,image/png" capture="environment" onChange={handleChatImageUpload} className="hidden" />
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Why are there brown patches?"
-                  className="flex-1 px-4 py-3 text-base border border-deep-brown/10 rounded-xl focus:outline-none focus:border-lawn bg-cream/50 min-w-0"
-                />
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 border border-deep-brown/10 rounded-xl focus-within:border-lawn bg-cream/50">
+                  <button
+                    type="button"
+                    onClick={() => chatCameraInputRef.current?.click()}
+                    className="p-1.5 text-deep-brown/40 hover:text-lawn active:scale-95 transition-all rounded-lg hover:bg-lawn/10"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Why are there brown patches?"
+                    className="flex-1 text-base bg-transparent focus:outline-none min-w-0"
+                  />
+                </div>
                 <button
                   type="submit"
-                  disabled={!chatInput.trim()}
+                  disabled={!chatInput.trim() && chatImages.length === 0}
                   className="px-4 py-3 bg-lawn text-white font-medium rounded-xl disabled:bg-deep-brown/10 disabled:text-deep-brown/30 active:scale-95 transition-all"
                 >
                   Ask
@@ -764,16 +776,28 @@ function HomePageContent() {
                   </div>
                 </div>
                 <form onSubmit={handleChatSubmit} className="flex gap-3">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Why are there brown patches in my lawn?"
-                    className="flex-1 px-4 py-3.5 text-base border border-deep-brown/10 rounded-xl focus:outline-none focus:border-lawn focus:ring-2 focus:ring-lawn/10 bg-cream/30"
-                  />
+                  <div className="flex-1 flex items-center gap-2 px-3 py-2.5 border border-deep-brown/10 rounded-xl focus-within:border-lawn focus-within:ring-2 focus-within:ring-lawn/10 bg-cream/30">
+                    <button
+                      type="button"
+                      onClick={() => chatFileInputRef.current?.click()}
+                      className="p-1.5 text-deep-brown/40 hover:text-lawn transition-all rounded-lg hover:bg-lawn/10"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Why are there brown patches in my lawn?"
+                      className="flex-1 text-base bg-transparent focus:outline-none"
+                    />
+                  </div>
                   <button
                     type="submit"
-                    disabled={!chatInput.trim()}
+                    disabled={!chatInput.trim() && chatImages.length === 0}
                     className="px-6 py-3.5 bg-lawn text-white font-semibold rounded-xl hover:bg-lawn/90 disabled:bg-deep-brown/10 disabled:text-deep-brown/30 transition-colors"
                   >
                     Ask
