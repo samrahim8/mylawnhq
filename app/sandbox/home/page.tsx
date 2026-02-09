@@ -512,34 +512,22 @@ function HomePageContent() {
               </form>
             </div>
 
-            {/* === Quick Actions Row === */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={handleOpenActivityModal}
-                className="bg-white rounded-2xl border border-deep-brown/10 p-4 flex flex-col items-center gap-2 active:scale-95 transition-transform"
-              >
-                <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <span className="text-xs font-medium text-deep-brown">Log Activity</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => chatCameraInputRef.current?.click()}
-                className="bg-white rounded-2xl border border-deep-brown/10 p-4 flex flex-col items-center gap-2 active:scale-95 transition-transform"
-              >
-                <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <span className="text-xs font-medium text-deep-brown">Snap Photo</span>
-              </button>
-            </div>
+            {/* === Log Activity Button === */}
+            <button
+              type="button"
+              onClick={handleOpenActivityModal}
+              className="w-full bg-white rounded-2xl border border-deep-brown/10 p-4 flex items-center gap-3 active:scale-[0.98] transition-transform"
+            >
+              <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <span className="text-sm font-medium text-deep-brown">Log Activity</span>
+                <p className="text-xs text-deep-brown/50">Record mowing, watering, fertilizing...</p>
+              </div>
+            </button>
 
             {/* Bottom padding for nav */}
             <div className="h-20" />
