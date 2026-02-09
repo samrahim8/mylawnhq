@@ -20,7 +20,7 @@ import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
 import { getSamplePlan, type PlanMonth } from "@/app/sandbox/plan/samplePlan";
 
-type MobileView = "home" | "plan" | "activity" | "tasks";
+type MobileView = "home" | "plan" | "activity";
 
 function HomePageContent() {
   const { profile, isSetUp } = useProfile();
@@ -556,7 +556,6 @@ function HomePageContent() {
               { id: "home" as MobileView, label: "Home", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
               { id: "plan" as MobileView, label: "Plan", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
               { id: "activity" as MobileView, label: "Activity", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-              { id: "tasks" as MobileView, label: "Tasks", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
             ].map((nav) => {
               const isActive = mobileView === nav.id;
               return (
@@ -597,7 +596,6 @@ function HomePageContent() {
               <h1 className="font-display text-lg font-bold text-deep-brown">
                 {mobileView === "plan" && "Your 90-Day Plan"}
                 {mobileView === "activity" && "Activity Log"}
-                {mobileView === "tasks" && "Tasks"}
               </h1>
             </div>
           </div>
@@ -611,16 +609,6 @@ function HomePageContent() {
                 onDeleteActivity={deleteActivity}
                 onOpenActivityModal={handleOpenActivityModal}
                 onEditActivity={handleEditActivity}
-                compact
-              />
-            )}
-            {mobileView === "tasks" && (
-              <TodoList
-                todos={todos}
-                onAdd={addTodo}
-                onToggle={toggleTodo}
-                onDelete={deleteTodo}
-                onOpenModal={() => setIsTodoModalOpen(true)}
                 compact
               />
             )}
@@ -915,42 +903,6 @@ function HomePageContent() {
                 )}
               </div>
 
-              {/* Pending Tasks Preview */}
-              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-display font-bold text-deep-brown">My Tasks</h3>
-                  {pendingTodosCount > 0 && (
-                    <span className="text-xs font-medium bg-ochre/10 text-ochre px-2 py-1 rounded-full">
-                      {pendingTodosCount} pending
-                    </span>
-                  )}
-                </div>
-                {pendingTodos.length > 0 ? (
-                  <div className="space-y-2">
-                    {pendingTodos.map((todo) => (
-                      <div key={todo.id} className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleTodo(todo.id)}
-                          className="w-5 h-5 rounded-md border-2 border-deep-brown/20 flex items-center justify-center flex-shrink-0 hover:border-lawn hover:bg-lawn/10 transition-colors"
-                        />
-                        <span className="text-sm text-deep-brown truncate">{todo.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-deep-brown/50">No pending tasks</p>
-                    <button
-                      type="button"
-                      onClick={() => setIsTodoModalOpen(true)}
-                      className="text-sm text-lawn font-medium mt-1 hover:text-lawn/80"
-                    >
-                      Add a task
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
