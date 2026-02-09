@@ -661,7 +661,7 @@ function HomePageContent() {
                 <button
                   type="button"
                   onClick={() => document.getElementById('desktop-full-plan')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="flex items-center gap-2 bg-lawn text-white rounded-xl px-4 py-2.5 font-medium hover:bg-lawn/90 transition-colors"
+                  className="flex items-center gap-2 bg-white text-deep-brown/70 rounded-xl px-4 py-2.5 font-medium border border-deep-brown/10 hover:border-lawn/30 hover:text-lawn transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
