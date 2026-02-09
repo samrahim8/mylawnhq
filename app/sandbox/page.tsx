@@ -38,7 +38,7 @@ export default function SandboxHero() {
                 YOUR LAWN CALLED.<br />IT WANTS A PLAN.
               </h1>
               <p className="mt-2 text-sm text-deep-brown/70 leading-relaxed max-w-[320px]">
-                Get a personalized playbook tuned to your zip code, weather, and grass type.
+                A week-by-week playbook built for your zip code — what to buy, when to apply, and when to just kick back.
               </p>
             </div>
 
@@ -66,11 +66,7 @@ export default function SandboxHero() {
               >
                 GET MY FREE PLAN →
               </button>
-
-              <div className="flex items-center justify-center gap-2 text-sm text-deep-brown/70">
-                <span className="text-ochre">★★★★★</span>
-                <span>Trusted by 12,000+ homeowners</span>
-              </div>
+              <p className="text-xs text-deep-brown/40 text-center flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" /></svg>No credit card required.</p>
             </div>
           </div>
         </div>
@@ -79,7 +75,7 @@ export default function SandboxHero() {
         <div className="px-5 pb-2">
           <div className="mb-2">
             <div className="w-8 h-0.5 bg-[#1a1a1a] mb-2"></div>
-            <p className="font-display text-sm font-semibold text-[#1a1a1a]">Real results <span className="font-normal text-[#737373]">— From patchy to perfect.</span></p>
+            <p className="font-display text-sm font-semibold text-[#1a1a1a]">Real yards. Real results.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="relative">
@@ -121,14 +117,14 @@ export default function SandboxHero() {
                 YOUR LAWN CALLED.<br />IT WANTS A PLAN.
               </h1>
               <p className="mt-3 text-base text-deep-brown/70 leading-relaxed">
-                Get a week-by-week playbook tuned to your frost dates, soil temps, and the weeds that hit your zip code hardest.
+                A week-by-week playbook built for your zip code — what to buy, when to apply, and when to just kick back.
               </p>
 
               <ul className="mt-3 space-y-1.5">
                 {[
-                  "Tells you exactly which bag to grab at the store",
-                  "Timed to your local weather and soil temps",
-                  "No credit card required",
+                  "Know exactly what to do and when \u2014 personalized to your lawn.",
+                  "Get instant answers \u2014 snap a photo or ask anything.",
+                  "Track everything \u2014 no more guessing what you put down last month.",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-deep-brown/80">
                     <span className="w-4 h-4 rounded-full bg-lawn/10 flex items-center justify-center flex-shrink-0">
@@ -153,13 +149,10 @@ export default function SandboxHero() {
                   30-Second Setup
                 </h2>
                 <p className="text-sm text-deep-brown/50 mb-3">
-                  Enter your zip and we&apos;ll build your plan.
+                  Punch in your zip. We&apos;ll handle the rest.
                 </p>
 
                 <form onSubmit={handleSubmit}>
-                  <label htmlFor="zip-desktop" className="block text-sm font-medium text-deep-brown/70 mb-1.5">
-                    Zip code
-                  </label>
                   <input
                     id="zip-desktop"
                     type="text"
@@ -182,36 +175,37 @@ export default function SandboxHero() {
                   >
                     GET MY FREE PLAN →
                   </button>
+                  <p className="mt-2 text-xs text-deep-brown/40 text-center flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" /></svg>No credit card required.</p>
                 </form>
               </div>
             </div>
           </div>
 
           {/* Before/After Section - same width as hero */}
-          <div className="mt-3 pt-2 border-t border-deep-brown/10">
-            <div className="mb-1.5">
-              <div className="w-10 h-0.5 bg-[#1a1a1a] mb-2"></div>
-              <div className="flex items-baseline gap-3">
-                <h2 className="font-display text-xl font-semibold text-[#1a1a1a]">
-                  Real results
-                </h2>
-                <p className="text-sm text-[#737373]">From patchy to perfect.</p>
-              </div>
+          <div className="mt-5 pt-8 border-t border-deep-brown/10">
+            <div className="mb-2">
+              <div className="w-10 h-0.5 bg-[#1a1a1a] mb-3"></div>
+              <h2 className="font-display text-xl font-semibold text-[#1a1a1a]">
+                Real yards. Real results.
+              </h2>
             </div>
 
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
               {/* Before Image */}
-              <div className="relative">
-                <div className="aspect-[16/10] overflow-hidden rounded-xl">
-                  <img
-                    src="/lawn-before.jpg"
-                    alt="Lawn before using LawnHQ"
-                    className="w-full h-full object-cover"
-                  />
+              <div>
+                <div className="relative">
+                  <div className="aspect-[16/10] overflow-hidden rounded-xl">
+                    <img
+                      src="/lawn-before.jpg"
+                      alt="Lawn before using LawnHQ"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[#525252] text-[10px] font-medium tracking-wider uppercase px-2 py-1 rounded">
+                    Before
+                  </span>
                 </div>
-                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[#525252] text-[10px] font-medium tracking-wider uppercase px-2 py-1 rounded">
-                  Before
-                </span>
+                <p className="mt-1.5 text-xs text-[#737373] italic">March &mdash; &ldquo;I don&apos;t even know where to start.&rdquo;</p>
               </div>
 
               {/* Center LawnHQ Dashboard Card */}
@@ -296,23 +290,25 @@ export default function SandboxHero() {
               </div>
 
               {/* After Image */}
-
-              <div className="relative">
-                <div className="aspect-[16/10] overflow-hidden rounded-xl">
-                  <img
-                    src="/lawn-after.jpg"
-                    alt="Lawn after using LawnHQ"
-                    className="w-full h-full object-cover"
-                  />
+              <div>
+                <div className="relative">
+                  <div className="aspect-[16/10] overflow-hidden rounded-xl">
+                    <img
+                      src="/lawn-after.jpg"
+                      alt="Lawn after using LawnHQ"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute top-3 left-3 bg-[#c17f59]/90 backdrop-blur-sm text-white text-[10px] font-medium tracking-wider uppercase px-2 py-1 rounded">
+                    After
+                  </span>
+                  <div className="absolute bottom-3 right-3 bg-[#7a8b6e] text-white rounded-full p-1.5 shadow-lg">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 </div>
-                <span className="absolute top-3 left-3 bg-[#c17f59]/90 backdrop-blur-sm text-white text-[10px] font-medium tracking-wider uppercase px-2 py-1 rounded">
-                  After
-                </span>
-                <div className="absolute bottom-3 right-3 bg-[#7a8b6e] text-white rounded-full p-1.5 shadow-lg">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
+                <p className="mt-1.5 text-xs text-[#737373] italic">September &mdash; &ldquo;My neighbor asked what my secret is.&rdquo;</p>
               </div>
             </div>
           </div>
