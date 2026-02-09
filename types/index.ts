@@ -197,3 +197,143 @@ export const EQUIPMENT_TYPES = [
 ] as const;
 
 export type EquipmentType = typeof EQUIPMENT_TYPES[number];
+
+// ============================================
+// Knowledge Base Entities (Section 10 Schema)
+// ============================================
+
+export type ToleranceLevel = "low" | "moderate" | "good" | "high";
+export type GrassCategory = "cool_season" | "warm_season";
+export type GerminationSpeed = "slow" | "moderate" | "fast";
+export type ThatchProduction = "low" | "moderate" | "significant";
+
+export interface GrassType {
+  id: string;
+  name: string;
+  category: GrassCategory;
+  spread_method: "tillers" | "tillers_and_rhizomes";
+  cutting_height_min: number;
+  cutting_height_max: number;
+  drought_tolerance: ToleranceLevel;
+  traffic_tolerance: ToleranceLevel;
+  shade_tolerance: ToleranceLevel;
+  heat_tolerance: ToleranceLevel;
+  cold_tolerance: ToleranceLevel;
+  sun_preference: string;
+  n_requirement: string;
+  germination_speed: GerminationSpeed;
+  thatch_production: ThatchProduction;
+  description: string;
+  notes: string;
+}
+
+export type Season =
+  | "winter"
+  | "late_winter"
+  | "early_spring"
+  | "spring"
+  | "summer"
+  | "late_summer"
+  | "fall"
+  | "late_fall";
+
+export interface SeasonalTask {
+  id: string;
+  season: Season;
+  task_name: string;
+  task_description: string;
+  grass_category: GrassCategory | "both";
+  priority: number;
+  soil_temp_trigger: number | null;
+  air_temp_trigger: string | null;
+  products: string[];
+  warnings: string | null;
+}
+
+export type KBProductType =
+  | "fertilizer"
+  | "supplement"
+  | "soil_amendment"
+  | "pre_emergent"
+  | "pest_control"
+  | "fungicide"
+  | "weed_killer"
+  | "seed"
+  | "equipment";
+export type ReleaseType = "slow_release" | "fast_release" | "supplement";
+
+export interface KBProduct {
+  id: string;
+  name: string;
+  product_type: KBProductType;
+  npk_ratio: string | null;
+  release_type: ReleaseType | null;
+  use_case: string;
+  application_season: Season[];
+  product_url: string | null;
+  notes: string | null;
+  is_base_fertilizer: boolean;
+}
+
+export interface SoilTarget {
+  grass_type_id: string;
+  ideal_ph: number;
+  ph_adjustment_product_up: string;
+  ph_adjustment_product_down: string;
+  ideal_npk_ratio: string;
+  testing_notes: string;
+}
+
+export interface ExpertNote {
+  author: string;
+  note: string;
+}
+
+export interface ExternalReference {
+  title: string;
+  url: string;
+}
+
+export interface KnowledgeArticle {
+  id: string;
+  topic_slug: string;
+  title: string;
+  content: string;
+  related_products: string[];
+  related_grass_types: string[];
+  related_seasons: Season[];
+  source_url: string;
+  expert_notes: ExpertNote[];
+  external_references: ExternalReference[];
+}
+
+// ============================================
+// Video References
+// ============================================
+
+export interface VideoReference {
+  id: string;
+  topic: string;
+  youtube_url: string;
+  related_article_ids: string[];
+}
+
+// ============================================
+// Decision Trees (AI Assistant Routing)
+// ============================================
+
+export interface DecisionTreeStep {
+  step: number;
+  instruction: string;
+  condition?: string;
+  products?: string[];
+  next_step?: number | null;
+}
+
+export interface DecisionTree {
+  id: string;
+  trigger_question: string;
+  slug: string;
+  keywords: string[];
+  steps: DecisionTreeStep[];
+}

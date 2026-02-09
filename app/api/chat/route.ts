@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { getContextualPrompt } from "@/lib/lawn-knowledge";
+import { routeQuestion, logRequest, calculateCost } from "@/lib/kb-router";
 import { WeatherData, CalendarActivity, ChatImage } from "@/types";
 import { createClient } from "@/lib/supabase/server";
 import { checkAiChatUsage, incrementAiChatUsage } from "@/lib/usage";
@@ -119,36 +119,36 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    let systemPrompt = getContextualPrompt(profile || {});
+    // Extract last user message for routing
+    const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === "user") as
+      | { role: string; content: string; images?: ChatImage[] }
+      | undefined;
+    const questionText = lastUserMsg?.content || "";
+    const hasImages = (lastUserMsg?.images?.length ?? 0) > 0;
 
-    // Add weather context if provided
-    if (weatherContext) {
-      systemPrompt += formatWeatherContext(weatherContext as WeatherData);
-    }
+    // Format context strings
+    const weatherStr = weatherContext
+      ? formatWeatherContext(weatherContext as WeatherData)
+      : undefined;
+    const activitiesStr =
+      activitiesContext && Array.isArray(activitiesContext) && activitiesContext.length > 0
+        ? formatActivitiesContext(activitiesContext as CalendarActivity[])
+        : undefined;
 
-    // Add activities context if provided
-    if (activitiesContext && Array.isArray(activitiesContext) && activitiesContext.length > 0) {
-      systemPrompt += formatActivitiesContext(activitiesContext as CalendarActivity[]);
-    }
+    // Route question → model + minimal system prompt (async — may call Pl@ntNet)
+    const routeResult = await routeQuestion(questionText, profile || {}, {
+      hasImages,
+      images: lastUserMsg?.images,
+      weatherContext: weatherStr,
+      activitiesContext: activitiesStr,
+    });
 
-    // Add special instructions for "What should I do today?" type questions
-    if (weatherContext || activitiesContext) {
-      systemPrompt += `\n\n## Today's Recommendation Instructions
-When the user asks "What should I do today?" or similar questions:
-1. Review the current weather conditions and forecast
-2. Consider what activities have been done recently (avoid suggesting activities done in the last few days)
-3. Account for upcoming weather (e.g., don't suggest watering if rain is expected)
-4. Provide 2-3 specific, actionable recommendations based on:
-   - Time since last mowing, watering, fertilizing, etc.
-   - Current and upcoming weather conditions
-   - Optimal lawn care schedules for their grass type
-5. Explain WHY each recommendation makes sense given the conditions`;
-    }
-
-    // Convert messages to Anthropic format with vision support
+    // Convert messages to Anthropic format with vision support.
+    // When stripImages is true (Pl@ntNet identified the weed), we do NOT
+    // send photos to Claude — the weed name + treatment are in the system prompt.
     const anthropicMessages = messages.map((msg: { role: string; content: string; images?: ChatImage[] }) => {
-      // If message has images, create a multi-part content array
-      if (msg.images && msg.images.length > 0 && msg.role === "user") {
+      // If message has images AND we're not stripping them, create a multi-part content array
+      if (msg.images && msg.images.length > 0 && msg.role === "user" && !routeResult.stripImages) {
         const contentParts: Anthropic.MessageParam["content"] = [];
 
         // Add images first
@@ -185,9 +185,9 @@ When the user asks "What should I do today?" or similar questions:
     });
 
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: routeResult.model,
       max_tokens: 1024,
-      system: systemPrompt,
+      system: routeResult.systemPrompt,
       messages: anthropicMessages,
     });
 
@@ -204,6 +204,37 @@ When the user asks "What should I do today?" or similar questions:
         // Don't fail the request if usage tracking fails
       }
     }
+
+    // Log request for cost tracking
+    const usage = response.usage as {
+      input_tokens: number;
+      output_tokens: number;
+      cache_read_input_tokens?: number;
+      cache_creation_input_tokens?: number;
+    };
+    const pn = routeResult.plantnet;
+    logRequest({
+      timestamp: new Date().toISOString(),
+      model: routeResult.model,
+      modelTier: routeResult.modelTier,
+      sectionsInjected: routeResult.sections,
+      grassType: (profile as { grassType?: string })?.grassType || null,
+      inputTokens: usage.input_tokens,
+      outputTokens: usage.output_tokens,
+      cacheReadTokens: usage.cache_read_input_tokens ?? 0,
+      cacheCreationTokens: usage.cache_creation_input_tokens ?? 0,
+      estimatedCostUSD: calculateCost(
+        routeResult.modelTier,
+        usage.input_tokens,
+        usage.output_tokens,
+        usage.cache_read_input_tokens ?? 0
+      ),
+      questionPreview: questionText.slice(0, 100),
+      plantnetCalled: pn?.called ?? false,
+      plantnetSpecies: pn?.species ?? null,
+      plantnetConfidence: pn?.confidence ?? null,
+      plantnetFallback: pn?.fallbackReason ?? null,
+    });
 
     return NextResponse.json({ content });
   } catch (error) {

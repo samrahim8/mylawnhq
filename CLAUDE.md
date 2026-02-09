@@ -133,6 +133,12 @@ git config user.name "mylawnhq"
 - **Anthropic API:** Powers the AI chat feature
 - **OpenWeatherMap API:** Powers weather data
 
+## Knowledge Base
+- Cool season lawn care data: `docs/cool-season-lawn-care-kb.md`
+- Lawn Love blog knowledge: `docs/lawnlove-blog-knowledge-base.md`
+- Structured KB data (Section 10 schema): `lib/knowledge-base/` — grass types, seasonal tasks, products, soil targets, knowledge articles
+- Never include affiliate links or third-party monetization URLs
+
 ## Security Notes
 - Never commit `.env.local` or any API keys to the repo
 - Login/signup pages use generic error messages to prevent account enumeration
@@ -175,3 +181,6 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Admin dashboard** — New /admin route with stats (total users, MRR, usage), user list, and individual user management
 - **Admin actions** — Admins can upgrade/downgrade subscriptions and change user roles
 - **Environment variables** — Added STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_YEARLY_PRICE_ID, SUPABASE_SERVICE_ROLE_KEY to .env.example
+
+### 2026-02-08
+- **Lawn Love blog KB integration** — Enriched AI chat system prompt (`lib/lawn-knowledge.ts`) with knowledge from lawnlove.com/blog covering watering guidelines, aeration, overseeding, dethatching, pre-emergent timing, lawn diseases (dollar spot, brown patch, summer patch, leaf spot, iron chlorosis), lawn pests (grubs, armyworms, chinch bugs, sod webworms, voles), and expanded soil pH management. Created reference doc at `docs/lawnlove-blog-knowledge-base.md`.
