@@ -1215,9 +1215,9 @@ function HomePageContent() {
               <p className="text-sm font-medium text-deep-brown mb-2">Larry is trained on:</p>
               <ul className="space-y-2">
                 {[
+                  "Photo analysis of your lawn (weeds, disease, damage)",
                   "Regional grass types & climate zones",
                   "Seasonal fertilizer & weed control schedules",
-                  "Common lawn diseases & pest identification",
                   "Watering, mowing & aeration best practices",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-deep-brown/70">
