@@ -209,3 +209,46 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #a3a3a3;
 }
+
+/* CTA card — gradient top strip */
+.cta-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2D4A2D, #7A9A6E, #C17B4A);
+  z-index: 1;
+}
+
+/* CTA button — hover shine + lift */
+.cta-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.2s ease;
+}
+
+.cta-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  left: -100%;
+  transition: left 0.5s ease;
+  z-index: 1;
+}
+
+.cta-btn:hover::before {
+  left: 100%;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(193, 123, 74, 0.35);
+}

@@ -356,7 +356,7 @@ export default function SandboxHero() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="w-full h-12 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.97] transition-transform duration-100"
+                className="cta-btn w-full h-12 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.97]"
               >
                 GET MY FREE PLAN →
               </button>
@@ -439,7 +439,7 @@ export default function SandboxHero() {
             </div>
 
             <div className="w-full max-w-sm ml-auto">
-              <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-xl p-5">
+              <div className="cta-card bg-white rounded-2xl border border-deep-brown/10 shadow-xl p-5">
                 <h2 className="font-display font-bold text-deep-brown text-lg mb-1">
                   30-Second Setup
                 </h2>
@@ -466,7 +466,7 @@ export default function SandboxHero() {
                   )}
                   <button
                     type="submit"
-                    className="mt-3 w-full bg-terracotta text-white font-bold py-3.5 rounded-xl hover:bg-terracotta/90 transition-colors"
+                    className="cta-btn mt-3 w-full bg-terracotta text-white font-bold py-3.5 rounded-xl"
                   >
                     GET MY FREE PLAN →
                   </button>
