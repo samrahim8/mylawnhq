@@ -18,6 +18,7 @@ import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
+import { getSamplePlan, type PlanMonth } from "@/app/sandbox/plan/samplePlan";
 
 type MobileView = "home" | "plan" | "activity" | "tasks";
 
@@ -88,6 +89,46 @@ function HomePageContent() {
   const chatFileInputRef = useRef<HTMLInputElement>(null);
   const chatCameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Next task from 90-day plan
+  const [nextTask, setNextTask] = useState<{ task: string; week: string; month: string } | null>(null);
+
+  useEffect(() => {
+    // Load plan and find next incomplete task
+    const stored = localStorage.getItem("lawnhq_plan_params");
+    const savedTasks = localStorage.getItem("lawnhq_completed_tasks");
+
+    if (stored) {
+      try {
+        const params = JSON.parse(stored);
+        const plan = getSamplePlan(params.grassType, params.lawnSize, params.lawnGoal, params.path);
+        const completed: Record<string, boolean> = savedTasks ? JSON.parse(savedTasks) : {};
+
+        // Find first incomplete task
+        for (let mIdx = 0; mIdx < plan.length; mIdx++) {
+          const month = plan[mIdx];
+          for (let wIdx = 0; wIdx < month.weeks.length; wIdx++) {
+            const week = month.weeks[wIdx];
+            for (let tIdx = 0; tIdx < week.tasks.length; tIdx++) {
+              const key = `${mIdx}-${wIdx}-${tIdx}`;
+              if (!completed[key]) {
+                setNextTask({
+                  task: week.tasks[tIdx],
+                  week: week.label,
+                  month: month.name,
+                });
+                return;
+              }
+            }
+          }
+        }
+        // All tasks complete
+        setNextTask(null);
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (initialQuery) {
@@ -304,18 +345,22 @@ function HomePageContent() {
               className="block bg-lawn rounded-2xl p-4 active:scale-[0.98] transition-transform duration-100"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
-                  <div>
-                    <p className="text-white/80 text-sm font-medium">Next Up</p>
-                    <p className="text-white font-bold text-lg">View Your 90-Day Plan</p>
+                  <div className="min-w-0">
+                    <p className="text-white/80 text-sm font-medium">
+                      {nextTask ? `${nextTask.month} · ${nextTask.week}` : "Next Up"}
+                    </p>
+                    <p className="text-white font-bold text-base truncate">
+                      {nextTask ? nextTask.task : "View Your 90-Day Plan"}
+                    </p>
                   </div>
                 </div>
-                <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-5 h-5 text-white/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -710,17 +755,21 @@ function HomePageContent() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
-                <div>
-                  <p className="text-white/80 text-sm font-medium">Next Up</p>
-                  <p className="text-white font-bold text-xl">View Your 90-Day Plan</p>
+                <div className="min-w-0">
+                  <p className="text-white/80 text-sm font-medium">
+                    {nextTask ? `${nextTask.month} · ${nextTask.week}` : "Next Up"}
+                  </p>
+                  <p className="text-white font-bold text-lg truncate">
+                    {nextTask ? nextTask.task : "View Your 90-Day Plan"}
+                  </p>
                 </div>
               </div>
-              <svg className="w-6 h-6 text-white/70 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-6 h-6 text-white/70 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
