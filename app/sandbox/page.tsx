@@ -285,6 +285,21 @@ function PreviewCardCarousel() {
   );
 }
 
+/* ── Season Badge ── */
+function SeasonBadge() {
+  return (
+    <div className="inline-flex items-center gap-2 bg-deep-brown rounded-full px-4 py-2 mb-4">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-[#7a8b6e] animate-pulse-dot" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#7a8b6e]" />
+      </span>
+      <span className="font-display text-xs font-semibold tracking-widest uppercase text-[#7a8b6e]">
+        Lawn Season is Live
+      </span>
+    </div>
+  );
+}
+
 export default function SandboxHero() {
   const [zip, setZip] = useState("");
   const [error, setError] = useState("");
@@ -315,6 +330,7 @@ export default function SandboxHero() {
         <div className="flex-1 flex flex-col justify-center px-5 min-h-0">
           <div className="space-y-3">
             <div>
+              <SeasonBadge />
               <h1 className="font-display text-[28px] font-bold text-deep-brown leading-[1.1] tracking-tight">
                 YOUR <span className="text-[#7a8b6e]">LAWN</span> CALLED.<br />IT WANTS A PLAN.
               </h1>
@@ -394,6 +410,7 @@ export default function SandboxHero() {
           {/* Hero */}
           <div className="grid grid-cols-2 gap-8 items-center">
             <div>
+              <SeasonBadge />
               <h1 className="font-display text-3xl xl:text-4xl font-bold text-deep-brown leading-[1.1] tracking-tight">
                 YOUR <span className="text-[#7a8b6e]">LAWN</span> CALLED.<br />IT WANTS A PLAN.
               </h1>
