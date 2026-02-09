@@ -84,6 +84,7 @@ function HomePageContent() {
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isChatFocused, setIsChatFocused] = useState(false);
+  const [showLarryInfo, setShowLarryInfo] = useState(false);
   const [chatImages, setChatImages] = useState<ChatImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatFileInputRef = useRef<HTMLInputElement>(null);
@@ -500,17 +501,24 @@ function HomePageContent() {
               </button>
             </div>
 
-            {/* === AI Chat Card === */}
+            {/* === Ask Larry Chat Card === */}
             <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+                <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center text-lg">
+                  🧑‍🌾
                 </div>
-                <div>
-                  <h3 className="font-semibold text-deep-brown">Ask AI</h3>
-                  <p className="text-xs text-deep-brown/60">Get instant lawn care advice</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-semibold text-deep-brown">Ask Larry</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowLarryInfo(true)}
+                      className="w-4 h-4 bg-deep-brown/10 rounded-full flex items-center justify-center text-[10px] font-bold text-deep-brown/50 hover:bg-deep-brown/20 hover:text-deep-brown/70 transition-colors"
+                    >
+                      ?
+                    </button>
+                  </div>
+                  <p className="text-xs text-deep-brown/60">Your personal lawn expert</p>
                 </div>
               </div>
               <form onSubmit={handleChatSubmit} className="flex gap-2">
@@ -735,17 +743,24 @@ function HomePageContent() {
                 </Link>
               )}
 
-              {/* AI Chat Card */}
+              {/* Ask Larry Chat Card */}
               <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-lawn/10 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                  <div className="w-12 h-12 bg-lawn/10 rounded-xl flex items-center justify-center text-2xl">
+                    🧑‍🌾
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-deep-brown text-lg">Ask AI</h3>
-                    <p className="text-sm text-deep-brown/60">Get instant answers about your lawn</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-deep-brown text-lg">Ask Larry</h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowLarryInfo(true)}
+                        className="w-5 h-5 bg-deep-brown/10 rounded-full flex items-center justify-center text-xs font-bold text-deep-brown/50 hover:bg-deep-brown/20 hover:text-deep-brown/70 transition-colors"
+                      >
+                        ?
+                      </button>
+                    </div>
+                    <p className="text-sm text-deep-brown/60">Your personal lawn expert</p>
                   </div>
                 </div>
                 <form onSubmit={handleChatSubmit} className="flex gap-3">
@@ -1003,7 +1018,7 @@ function HomePageContent() {
               <div className="space-y-3 mb-6">
                 {[
                   { icon: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z", text: "Snap a photo, get instant diagnosis" },
-                  { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Ask AI anything about your lawn" },
+                  { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Ask Larry anything about your lawn" },
                   { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "Weekly reminders so you never miss a task" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
@@ -1077,7 +1092,7 @@ function HomePageContent() {
             <div className="space-y-4 mb-8">
               {[
                 { icon: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z", text: "Snap a photo, get instant diagnosis" },
-                { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Ask AI anything about your lawn" },
+                { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", text: "Ask Larry anything about your lawn" },
                 { icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", text: "Weekly reminders so you never miss a task" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
@@ -1135,6 +1150,77 @@ function HomePageContent() {
         onClose={() => setIsOnboardingOpen(false)}
         initialData={onboardingData || undefined}
       />
+
+      {/* Who's Larry? Popup */}
+      {showLarryInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowLarryInfo(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-fade-in">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setShowLarryInfo(false)}
+              className="absolute top-4 right-4 p-1.5 text-deep-brown/40 hover:text-deep-brown transition-colors rounded-lg hover:bg-deep-brown/5"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Larry avatar */}
+            <div className="w-16 h-16 bg-lawn/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
+              🧑‍🌾
+            </div>
+
+            {/* Content */}
+            <h2 className="font-display text-xl font-bold text-deep-brown text-center mb-2">
+              Who's Larry?
+            </h2>
+            <p className="text-deep-brown/70 text-center mb-4">
+              Larry is your personal lawn care expert, powered by AI.
+            </p>
+
+            {/* What Larry knows */}
+            <div className="bg-cream/50 rounded-xl p-4 mb-4">
+              <p className="text-sm font-medium text-deep-brown mb-2">Larry is trained on:</p>
+              <ul className="space-y-2">
+                {[
+                  "Regional grass types & climate zones",
+                  "Seasonal fertilizer & weed control schedules",
+                  "Common lawn diseases & pest identification",
+                  "Watering, mowing & aeration best practices",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-deep-brown/70">
+                    <svg className="w-4 h-4 text-lawn flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="text-xs text-deep-brown/50 text-center">
+              Ask Larry anything — he's here to help you get the lawn of your dreams.
+            </p>
+
+            {/* CTA */}
+            <button
+              type="button"
+              onClick={() => setShowLarryInfo(false)}
+              className="mt-4 w-full bg-lawn text-white font-semibold py-3 rounded-xl hover:bg-lawn/90 active:scale-[0.98] transition-all"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
