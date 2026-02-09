@@ -46,8 +46,8 @@ const config: Config = {
           "100%": { opacity: "1" },
         },
         "pulse-dot": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.4" },
+          "0%, 100%": { backgroundColor: "#ffffff" },
+          "50%": { backgroundColor: "#7a8b6e" },
         },
       },
       animation: {

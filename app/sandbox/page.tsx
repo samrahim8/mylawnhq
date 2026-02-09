@@ -289,10 +289,7 @@ function PreviewCardCarousel() {
 function SeasonBadge() {
   return (
     <div className="inline-flex items-center gap-2 bg-terracotta rounded-full px-4 py-2 mb-4">
-      <span className="relative flex h-3 w-3">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-[#7a8b6e] opacity-75 animate-ping" />
-        <span className="relative inline-flex h-3 w-3 rounded-full bg-[#7a8b6e]" />
-      </span>
+      <span className="inline-flex h-3 w-3 rounded-full bg-white animate-pulse-dot" />
       <span className="font-display text-xs font-semibold tracking-widest uppercase text-white">
         Lawn Season is Live
       </span>
