@@ -30,30 +30,35 @@ const GRASS_OPTIONS: {
   label: string;
   subtitle: string;
   colors: string;
+  image?: string;
 }[] = [
   {
     key: "bermuda",
     label: "Bermuda",
-    subtitle: "The tough stuff that loves the sun",
+    subtitle: "Fine blades, dense, gray-green hue",
     colors: "from-[#3d7a2e] to-[#5a9e45]",
+    image: "/images/grass/bermuda-grass.jpg",
   },
   {
     key: "zoysia",
     label: "Zoysia",
-    subtitle: "Thick, soft, barefoot-friendly",
+    subtitle: "Thick, carpet-like, stiff dark green blades",
     colors: "from-[#2d6b3a] to-[#4a8f5e]",
+    image: "/images/grass/zoysia-grass.jpg",
   },
   {
     key: "st_augustine",
     label: "St. Augustine",
-    subtitle: "The big-blade Southern classic",
+    subtitle: "Broad, flat blades — coarse and thick",
     colors: "from-[#3b7d4a] to-[#5ba36a]",
+    image: "/images/grass/st-augustine-grass.jpg",
   },
   {
     key: "cool_season",
     label: "Cool Season",
     subtitle: "Fescue, Bluegrass, Rye — the northern mix",
     colors: "from-[#4a7a5e] to-[#6b9e7a]",
+    image: "/images/grass/cool-season-grass.jpg",
   },
   {
     key: "not_sure",
@@ -404,11 +409,18 @@ function OnboardingFlow() {
                             g.key === "not_sure" ? "col-span-2" : ""
                           }`}
                         >
-                          {/* Swatch */}
+                          {/* Swatch / Photo */}
                           <div
-                            className={`h-20 lg:h-24 bg-gradient-to-br ${g.colors} flex items-center justify-center`}
+                            className={`h-24 lg:h-28 bg-gradient-to-br ${g.colors} flex items-center justify-center relative overflow-hidden`}
                           >
-                            {g.key === "not_sure" ? (
+                            {g.image ? (
+                              <img
+                                src={g.image}
+                                alt={`${g.label} grass texture`}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : g.key === "not_sure" ? (
                               <svg
                                 className="w-10 h-10 text-deep-brown/40"
                                 fill="none"
@@ -422,17 +434,7 @@ function OnboardingFlow() {
                                   d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827m0 4h.01"
                                 />
                               </svg>
-                            ) : (
-                              <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <div
-                                    key={i}
-                                    className="w-1 bg-white/30 rounded-full"
-                                    style={{ height: `${20 + Math.random() * 24}px` }}
-                                  />
-                                ))}
-                              </div>
-                            )}
+                            ) : null}
                           </div>
                           {/* Label */}
                           <div className="p-3 lg:p-4">
