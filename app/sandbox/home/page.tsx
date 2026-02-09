@@ -91,10 +91,9 @@ function HomePageContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Next task from 90-day plan
-  const [nextTask, setNextTask] = useState<{ task: string; week: string; month: string } | null>(null);
+  const [nextTask, setNextTask] = useState<{ task: string; week: string; month: string; key: string; totalTasks: number; completedCount: number } | null>(null);
 
-  useEffect(() => {
-    // Load plan and find next incomplete task
+  const findNextTask = useCallback(() => {
     const stored = localStorage.getItem("lawnhq_plan_params");
     const savedTasks = localStorage.getItem("lawnhq_completed_tasks");
 
@@ -103,6 +102,16 @@ function HomePageContent() {
         const params = JSON.parse(stored);
         const plan = getSamplePlan(params.grassType, params.lawnSize, params.lawnGoal, params.path);
         const completed: Record<string, boolean> = savedTasks ? JSON.parse(savedTasks) : {};
+
+        // Count total and completed
+        let totalTasks = 0;
+        let completedCount = 0;
+        for (const month of plan) {
+          for (const week of month.weeks) {
+            totalTasks += week.tasks.length;
+          }
+        }
+        completedCount = Object.values(completed).filter(Boolean).length;
 
         // Find first incomplete task
         for (let mIdx = 0; mIdx < plan.length; mIdx++) {
@@ -116,6 +125,9 @@ function HomePageContent() {
                   task: week.tasks[tIdx],
                   week: week.label,
                   month: month.name,
+                  key,
+                  totalTasks,
+                  completedCount,
                 });
                 return;
               }
@@ -123,12 +135,29 @@ function HomePageContent() {
           }
         }
         // All tasks complete
-        setNextTask(null);
+        setNextTask({ task: "", week: "", month: "", key: "", totalTasks, completedCount });
       } catch {
         // Ignore parse errors
       }
     }
   }, []);
+
+  useEffect(() => {
+    findNextTask();
+  }, [findNextTask]);
+
+  const markTaskDone = () => {
+    if (!nextTask || !nextTask.key) return;
+
+    // Update completed tasks in localStorage
+    const savedTasks = localStorage.getItem("lawnhq_completed_tasks");
+    const completed: Record<string, boolean> = savedTasks ? JSON.parse(savedTasks) : {};
+    completed[nextTask.key] = true;
+    localStorage.setItem("lawnhq_completed_tasks", JSON.stringify(completed));
+
+    // Find the next task
+    findNextTask();
+  };
 
   useEffect(() => {
     if (initialQuery) {
@@ -338,33 +367,62 @@ function HomePageContent() {
               )}
             </div>
 
-            {/* === LEVEL 1: Next Up Card (from 90-day plan) === */}
-            <Link
-              href="#"
-              onClick={(e) => { e.preventDefault(); setMobileView("plan"); }}
-              className="block bg-lawn rounded-2xl p-4 active:scale-[0.98] transition-transform duration-100"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            {/* === LEVEL 1: Next Up Card (actionable) === */}
+            {nextTask && nextTask.task ? (
+              <div className="bg-lawn rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  {/* Checkbox */}
+                  <button
+                    type="button"
+                    onClick={markTaskDone}
+                    className="w-7 h-7 mt-0.5 rounded-lg border-2 border-white/40 flex items-center justify-center flex-shrink-0 active:scale-95 active:bg-white/20 transition-all"
+                  >
+                    <svg className="w-4 h-4 text-white/0 hover:text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white/80 text-sm font-medium">
-                      {nextTask ? `${nextTask.month} · ${nextTask.week}` : "Next Up"}
+                  </button>
+                  {/* Task content */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white/70 text-sm font-medium">
+                      {nextTask.month} · {nextTask.week}
                     </p>
-                    <p className="text-white font-bold text-base truncate">
-                      {nextTask ? nextTask.task : "View Your 90-Day Plan"}
+                    <p className="text-white font-semibold text-base leading-snug mt-0.5">
+                      {nextTask.task}
+                    </p>
+                    <p className="text-white/50 text-xs mt-2">
+                      {nextTask.completedCount} of {nextTask.totalTasks} tasks complete
                     </p>
                   </div>
                 </div>
-                <svg className="w-5 h-5 text-white/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
               </div>
-            </Link>
+            ) : nextTask ? (
+              <div className="bg-lawn/10 rounded-2xl p-4 text-center">
+                <div className="w-12 h-12 bg-lawn/20 rounded-xl flex items-center justify-center mx-auto mb-2">
+                  <svg className="w-6 h-6 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="font-semibold text-deep-brown">All tasks complete!</p>
+                <p className="text-sm text-deep-brown/60 mt-1">{nextTask.completedCount} tasks done</p>
+              </div>
+            ) : (
+              <Link
+                href="/sandbox"
+                className="block bg-lawn rounded-2xl p-4 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white/80 text-sm font-medium">Get Started</p>
+                    <p className="text-white font-bold text-base">Create Your 90-Day Plan</p>
+                  </div>
+                </div>
+              </Link>
+            )}
 
             {/* === LEVEL 2: Compact Chat Input === */}
             <div className="bg-white rounded-2xl border border-deep-brown/10 overflow-hidden">
@@ -404,232 +462,13 @@ function HomePageContent() {
               </form>
             </div>
 
-            {/* === LEVEL 3: Preview Cards === */}
-
-            {/* Recent Activity Preview */}
-            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-deep-brown">Recent Activity</h2>
-                <button
-                  type="button"
-                  onClick={() => setMobileView("activity")}
-                  className="text-sm text-lawn font-medium active:text-lawn/70"
-                >
-                  See all
-                </button>
-              </div>
-              {recentActivities.length > 0 ? (
-                <div className="space-y-2">
-                  {recentActivities.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-center gap-3 p-2 rounded-xl bg-cream/50"
-                    >
-                      <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-deep-brown text-sm truncate">{getActivityName(activity.type)}</p>
-                        <p className="text-xs text-deep-brown/60">{new Date(activity.date).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-deep-brown/50 text-sm py-4 text-center">No recent activity</p>
-              )}
-            </div>
-
-            {/* Upcoming Tasks Preview */}
-            <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-deep-brown">
-                  Tasks
-                  {pendingTodosCount > 0 && (
-                    <span className="ml-2 px-2 py-0.5 bg-terracotta text-white text-xs rounded-full">
-                      {pendingTodosCount}
-                    </span>
-                  )}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setMobileView("tasks")}
-                  className="text-sm text-lawn font-medium active:text-lawn/70"
-                >
-                  See all
-                </button>
-              </div>
-              {pendingTodos.length > 0 ? (
-                <div className="space-y-2">
-                  {pendingTodos.map((todo) => (
-                    <div
-                      key={todo.id}
-                      className="flex items-center gap-3 p-2 rounded-xl bg-cream/50"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => toggleTodo(todo.id)}
-                        className="w-6 h-6 rounded-full border-2 border-deep-brown/30 flex items-center justify-center flex-shrink-0 active:scale-95"
-                      />
-                      <p className="font-medium text-deep-brown text-sm flex-1 truncate">{todo.text}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-deep-brown/50 text-sm py-4 text-center">No pending tasks</p>
-              )}
-            </div>
-
-            {/* Pro Tools - Locked (Mobile) */}
-            <div className="bg-gradient-to-b from-white to-cream/50 rounded-2xl border border-deep-brown/10 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-deep-brown">Pro Tools</h2>
-                <div className="flex items-center gap-1 text-xs text-deep-brown/50">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span>Locked</span>
-                </div>
-              </div>
-
-              {/* Horizontal scroll of locked tools */}
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-                {/* Spreader Calc */}
-                <div className="flex-shrink-0 w-32 p-3 rounded-xl bg-deep-brown/5">
-                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center mb-2 relative">
-                    <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
-                      <svg className="w-2 h-2 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <p className="font-medium text-deep-brown/60 text-sm">Spreader</p>
-                  <p className="text-xs text-deep-brown/40">Exact settings</p>
-                </div>
-
-                {/* My Gear */}
-                <div className="flex-shrink-0 w-32 p-3 rounded-xl bg-deep-brown/5">
-                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center mb-2 relative">
-                    <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
-                      <svg className="w-2 h-2 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <p className="font-medium text-deep-brown/60 text-sm">My Gear</p>
-                  <p className="text-xs text-deep-brown/40">Equipment</p>
-                </div>
-
-                {/* Photo Diagnosis */}
-                <div className="flex-shrink-0 w-32 p-3 rounded-xl bg-deep-brown/5">
-                  <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center mb-2 relative">
-                    <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
-                      <svg className="w-2 h-2 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <p className="font-medium text-deep-brown/60 text-sm">Photo AI</p>
-                  <p className="text-xs text-deep-brown/40">Diagnose issues</p>
-                </div>
-              </div>
-
-              {/* Unlock CTA */}
-              <Link
-                href="/signup"
-                className="mt-3 flex items-center justify-center gap-2 w-full py-3 bg-lawn text-white font-semibold rounded-xl active:scale-[0.98] transition-transform"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                </svg>
-                Sign Up Free to Unlock
-              </Link>
-            </div>
-
-            {/* Bottom padding for FAB + nav */}
-            <div className="h-32" />
+            {/* Bottom padding for nav */}
+            <div className="h-20" />
           </div>
         </div>
 
-        {/* FAB (Floating Action Button) */}
-        <div className="absolute right-4 bottom-24 z-40" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          {/* FAB menu items */}
-          {fabOpen && (
-            <div className="absolute bottom-16 right-0 space-y-2 animate-fade-in">
-              <button
-                type="button"
-                onClick={handleOpenActivityModal}
-                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border border-deep-brown/10 active:scale-95 transition-transform"
-              >
-                <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <span className="font-medium text-deep-brown text-sm whitespace-nowrap">Log Activity</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { fileInputRef.current?.click(); }}
-                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border border-deep-brown/10 active:scale-95 transition-transform"
-              >
-                <div className="w-8 h-8 bg-terracotta/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <span className="font-medium text-deep-brown text-sm whitespace-nowrap">Add Photo</span>
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-              <button
-                type="button"
-                onClick={() => { setIsTodoModalOpen(true); setFabOpen(false); }}
-                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg border border-deep-brown/10 active:scale-95 transition-transform"
-              >
-                <div className="w-8 h-8 bg-ochre/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                </div>
-                <span className="font-medium text-deep-brown text-sm whitespace-nowrap">Add Task</span>
-              </button>
-            </div>
-          )}
-
-          {/* FAB button */}
-          <button
-            type="button"
-            onClick={() => setFabOpen(!fabOpen)}
-            className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 ${
-              fabOpen ? "bg-deep-brown rotate-45" : "bg-lawn"
-            }`}
-          >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-        </div>
-
-        {/* FAB backdrop */}
-        {fabOpen && (
-          <div
-            className="absolute inset-0 z-30"
-            onClick={() => setFabOpen(false)}
-          />
-        )}
+        {/* Hidden file input */}
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
 
         {/* Bottom Nav Bar */}
         <div className="bg-white border-t border-deep-brown/10 pb-[env(safe-area-inset-bottom)]">
@@ -748,46 +587,65 @@ function HomePageContent() {
             </div>
           </div>
 
-          {/* === LEVEL 1: Next Up CTA Card === */}
-          <a
-            href="#desktop-plan"
-            className="block bg-lawn rounded-2xl p-5 hover:bg-lawn/95 transition-colors group"
-          >
-            <div className="flex items-center justify-between">
+          {/* === LEVEL 1: Next Up CTA Card (actionable) === */}
+          {nextTask && nextTask.task ? (
+            <div className="bg-lawn rounded-2xl p-5">
+              <div className="flex items-start gap-4">
+                {/* Checkbox */}
+                <button
+                  type="button"
+                  onClick={markTaskDone}
+                  className="w-8 h-8 mt-0.5 rounded-lg border-2 border-white/40 flex items-center justify-center flex-shrink-0 hover:bg-white/20 active:scale-95 transition-all"
+                >
+                  <svg className="w-5 h-5 text-white/0 hover:text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                {/* Task content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/70 text-sm font-medium">
+                    {nextTask.month} · {nextTask.week}
+                  </p>
+                  <p className="text-white font-semibold text-lg leading-snug mt-1">
+                    {nextTask.task}
+                  </p>
+                  <p className="text-white/50 text-sm mt-2">
+                    {nextTask.completedCount} of {nextTask.totalTasks} tasks complete
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : nextTask ? (
+            <div className="bg-lawn/10 rounded-2xl p-5 text-center">
+              <div className="w-14 h-14 bg-lawn/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <svg className="w-7 h-7 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="font-semibold text-deep-brown text-lg">All tasks complete!</p>
+              <p className="text-deep-brown/60 mt-1">{nextTask.completedCount} tasks done</p>
+            </div>
+          ) : (
+            <Link
+              href="/sandbox"
+              className="block bg-lawn rounded-2xl p-5 hover:bg-lawn/95 transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-white/80 text-sm font-medium">
-                    {nextTask ? `${nextTask.month} · ${nextTask.week}` : "Next Up"}
-                  </p>
-                  <p className="text-white font-bold text-lg truncate">
-                    {nextTask ? nextTask.task : "View Your 90-Day Plan"}
-                  </p>
+                <div>
+                  <p className="text-white/80 text-sm font-medium">Get Started</p>
+                  <p className="text-white font-bold text-lg">Create Your 90-Day Plan</p>
                 </div>
               </div>
-              <svg className="w-6 h-6 text-white/70 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </a>
+            </Link>
+          )}
 
-          {/* === 2-Column Layout === */}
-          <div className="grid grid-cols-3 gap-6">
-
-            {/* Left Column - Plan + Chat (2/3 width) */}
-            <div className="col-span-2 space-y-6">
-
-              {/* 90-Day Plan Hero */}
-              <div id="desktop-plan">
-                <LawnPlan />
-              </div>
-
-              {/* Chat Input */}
-              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+          {/* Chat Input */}
+          <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
                     <svg className="w-5 h-5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -816,224 +674,6 @@ function HomePageContent() {
                   </button>
                 </form>
               </div>
-
-              {/* Activity + Tasks Row */}
-              <div className="grid grid-cols-2 gap-6">
-                {/* Recent Activity */}
-                <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-deep-brown">Recent Activity</h3>
-                    {recentActivitiesCount > 0 && (
-                      <span className="text-sm text-deep-brown/50">{recentActivitiesCount} this week</span>
-                    )}
-                  </div>
-                  {recentActivities.length > 0 ? (
-                    <div className="space-y-2">
-                      {recentActivities.slice(0, 5).map((activity) => (
-                        <div
-                          key={activity.id}
-                          onClick={() => handleEditActivity(activity)}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-cream/50 hover:bg-cream cursor-pointer transition-colors"
-                        >
-                          <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-deep-brown text-sm">{getActivityName(activity.type)}</p>
-                            <p className="text-xs text-deep-brown/60">{new Date(activity.date).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-deep-brown/50 mb-3">No recent activity</p>
-                      <button
-                        type="button"
-                        onClick={handleOpenActivityModal}
-                        className="text-sm text-lawn font-medium hover:text-lawn/80"
-                      >
-                        + Log your first activity
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Tasks */}
-                <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-deep-brown">Tasks</h3>
-                    {pendingTodosCount > 0 && (
-                      <span className="px-2 py-0.5 bg-terracotta text-white text-xs font-medium rounded-full">
-                        {pendingTodosCount} pending
-                      </span>
-                    )}
-                  </div>
-                  {pendingTodos.length > 0 ? (
-                    <div className="space-y-2">
-                      {pendingTodos.slice(0, 5).map((todo) => (
-                        <div
-                          key={todo.id}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-cream/50 hover:bg-cream transition-colors"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => toggleTodo(todo.id)}
-                            className="w-6 h-6 rounded-full border-2 border-deep-brown/30 hover:border-lawn flex items-center justify-center flex-shrink-0 transition-colors"
-                          />
-                          <p className="font-medium text-deep-brown text-sm flex-1">{todo.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-deep-brown/50 mb-3">No pending tasks</p>
-                      <button
-                        type="button"
-                        onClick={() => setIsTodoModalOpen(true)}
-                        className="text-sm text-lawn font-medium hover:text-lawn/80"
-                      >
-                        + Add a task
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Quick Actions + Links (1/3 width) */}
-            <div className="space-y-6">
-
-              {/* Quick Actions */}
-              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
-                <h3 className="font-semibold text-deep-brown mb-4">Quick Actions</h3>
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={handleOpenActivityModal}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-lawn/10 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-lawn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <span className="font-medium text-deep-brown">Log Activity</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <span className="font-medium text-deep-brown">Upload Photo</span>
-                  </button>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                  <button
-                    type="button"
-                    onClick={() => setIsTodoModalOpen(true)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-ochre/10 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-ochre" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                      </svg>
-                    </div>
-                    <span className="font-medium text-deep-brown">Add Task</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Pro Tools - Locked */}
-              <div className="bg-gradient-to-b from-white to-cream/50 rounded-2xl border border-deep-brown/10 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-deep-brown">Pro Tools</h3>
-                  <div className="flex items-center gap-1 text-xs text-deep-brown/50">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <span>Locked</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  {/* Spreader Calculator - Locked */}
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-deep-brown/5 opacity-75">
-                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center relative">
-                      <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
-                        <svg className="w-2.5 h-2.5 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="font-medium text-deep-brown/60 block">Spreader Calculator</span>
-                      <span className="text-xs text-deep-brown/40">Get exact dial settings for your model</span>
-                    </div>
-                  </div>
-
-                  {/* My Gear - Locked */}
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-deep-brown/5 opacity-75">
-                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center relative">
-                      <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
-                        <svg className="w-2.5 h-2.5 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="font-medium text-deep-brown/60 block">My Gear</span>
-                      <span className="text-xs text-deep-brown/40">Track equipment & find manuals</span>
-                    </div>
-                  </div>
-
-                  {/* Photo Diagnosis - Locked */}
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-deep-brown/5 opacity-75">
-                    <div className="w-10 h-10 bg-deep-brown/10 rounded-xl flex items-center justify-center relative">
-                      <svg className="w-5 h-5 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-deep-brown/20 rounded-full flex items-center justify-center">
-                        <svg className="w-2.5 h-2.5 text-deep-brown/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="font-medium text-deep-brown/60 block">Photo Diagnosis</span>
-                      <span className="text-xs text-deep-brown/40">AI identifies lawn problems</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Unlock CTA */}
-                <Link
-                  href="/signup"
-                  className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-lawn text-white font-semibold rounded-xl hover:bg-lawn/90 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                  </svg>
-                  Sign Up Free to Unlock
-                </Link>
-              </div>
-
-            </div>
-          </div>
         </div>
       </div>
 
