@@ -850,12 +850,13 @@ function HomePageContent() {
                   </div>
 
                   {/* View Full Plan Link */}
-                  <Link
-                    href="/sandbox/plan"
-                    className="block mt-4 text-center text-sm text-lawn font-medium hover:text-lawn/80 transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('desktop-full-plan')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="block mt-4 w-full text-center text-sm text-lawn font-medium hover:text-lawn/80 transition-colors"
                   >
                     View Full Plan →
-                  </Link>
+                  </button>
                 </div>
               )}
 
@@ -936,6 +937,19 @@ function HomePageContent() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* === Full 90-Day Plan Section === */}
+          <div id="desktop-full-plan" className="pt-2">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-xl font-bold text-deep-brown">Your Complete 90-Day Plan</h2>
+              {nextTask && nextTask.totalTasks > 0 && (
+                <span className="text-sm text-deep-brown/50">
+                  {nextTask.completedCount} of {nextTask.totalTasks} tasks complete
+                </span>
+              )}
+            </div>
+            <LawnPlan />
           </div>
         </div>
       </div>
