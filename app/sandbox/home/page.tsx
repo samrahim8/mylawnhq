@@ -874,9 +874,14 @@ function HomePageContent() {
                   )}
                 </div>
                 {recentActivities.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {recentActivities.slice(0, 3).map((activity) => (
-                      <div key={activity.id} className="flex items-center gap-3">
+                      <button
+                        key={activity.id}
+                        type="button"
+                        onClick={() => handleEditActivity(activity)}
+                        className="w-full flex items-center gap-3 p-2 -mx-2 rounded-xl hover:bg-cream/50 transition-colors text-left group"
+                      >
                         <div className="w-8 h-8 bg-lawn/10 rounded-lg flex items-center justify-center flex-shrink-0">
                           <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -886,7 +891,10 @@ function HomePageContent() {
                           <p className="text-sm font-medium text-deep-brown truncate">{getActivityName(activity.type)}</p>
                           <p className="text-xs text-deep-brown/50">{new Date(activity.date).toLocaleDateString()}</p>
                         </div>
-                      </div>
+                        <svg className="w-4 h-4 text-deep-brown/30 group-hover:text-deep-brown/50 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
                     ))}
                   </div>
                 ) : (
