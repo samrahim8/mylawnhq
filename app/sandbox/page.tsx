@@ -316,7 +316,7 @@ export default function SandboxHero() {
           <div className="space-y-3">
             <div>
               <h1 className="font-display text-[28px] font-bold text-deep-brown leading-[1.1] tracking-tight">
-                YOUR LAWN CALLED.<br />IT WANTS A PLAN.
+                YOUR <span className="text-[#7a8b6e]">LAWN</span> CALLED.<br />IT WANTS A PLAN.
               </h1>
               <p className="mt-2 text-sm text-deep-brown/70 leading-relaxed max-w-[320px]">
                 A week-by-week playbook built for your zip code — what to buy, when to apply, and when to just kick back.
@@ -395,7 +395,7 @@ export default function SandboxHero() {
           <div className="grid grid-cols-2 gap-8 items-center">
             <div>
               <h1 className="font-display text-3xl xl:text-4xl font-bold text-deep-brown leading-[1.1] tracking-tight">
-                YOUR LAWN CALLED.<br />IT WANTS A PLAN.
+                YOUR <span className="text-[#7a8b6e]">LAWN</span> CALLED.<br />IT WANTS A PLAN.
               </h1>
               <p className="mt-3 text-base text-deep-brown/70 leading-relaxed">
                 A week-by-week playbook built for your zip code — what to buy, when to apply, and when to just kick back.
