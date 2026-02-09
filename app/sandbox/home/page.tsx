@@ -162,7 +162,7 @@ function HomePageContent() {
 
   useEffect(() => {
     if (initialQuery) {
-      router.push(`/chat?q=${encodeURIComponent(initialQuery)}`);
+      router.push(`/sandbox/chat?q=${encodeURIComponent(initialQuery)}`);
     }
   }, [initialQuery, router]);
 
@@ -274,7 +274,7 @@ function HomePageContent() {
         sessionStorage.setItem("pendingChatImages", JSON.stringify(chatImages));
       }
       const query = chatInput.trim() || (chatImages.length > 0 ? "What can you tell me about this?" : "");
-      window.location.href = `/chat?q=${encodeURIComponent(query)}${chatImages.length > 0 ? "&hasImages=true" : ""}`;
+      window.location.href = `/sandbox/chat?q=${encodeURIComponent(query)}${chatImages.length > 0 ? "&hasImages=true" : ""}`;
     }
   };
 
@@ -787,7 +787,7 @@ function HomePageContent() {
                   <span className="text-sm font-medium text-deep-brown">Log Activity</span>
                 </button>
                 <Link
-                  href="/chat"
+                  href="/sandbox/chat"
                   className="bg-white rounded-2xl border border-deep-brown/10 p-5 flex flex-col items-center gap-3 hover:border-deep-brown/20 hover:shadow-md transition-all group"
                 >
                   <div className="w-12 h-12 bg-deep-brown/5 rounded-xl flex items-center justify-center group-hover:bg-deep-brown/10 transition-colors">
