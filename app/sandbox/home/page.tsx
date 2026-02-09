@@ -90,6 +90,8 @@ function HomePageContent() {
   const chatFileInputRef = useRef<HTMLInputElement>(null);
   const chatCameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollArrow, setShowScrollArrow] = useState(true);
 
   // Next task from 90-day plan
   const [nextTask, setNextTask] = useState<{ task: string; week: string; month: string; key: string; totalTasks: number; completedCount: number } | null>(null);
@@ -177,6 +179,21 @@ function HomePageContent() {
       setShowSignupSheet(true);
     }, 8000); // Show after 8 seconds
     return () => clearTimeout(timer);
+  }, []);
+
+  // Track scroll position to show/hide the down arrow
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      setShowScrollArrow(!nearBottom);
+    };
+
+    handleScroll();
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleDismissSignup = (permanent: boolean) => {
@@ -331,7 +348,7 @@ function HomePageContent() {
         <div className="bg-cream pt-[env(safe-area-inset-top)]" />
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto relative">
           <div className="px-4 py-4 space-y-4">
             {/* === LEVEL 1: Hero Status Card === */}
             <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
@@ -535,6 +552,23 @@ function HomePageContent() {
             {/* Bottom padding for nav */}
             <div className="h-20" />
           </div>
+
+          {/* Scroll Down Indicator */}
+          {showScrollArrow && (
+            <div className="sticky bottom-0 left-0 right-0 pointer-events-none flex flex-col items-center z-30 -mt-16">
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#f8f6f3] to-transparent" />
+              <button
+                type="button"
+                onClick={() => scrollContainerRef.current?.scrollBy({ top: 300, behavior: "smooth" })}
+                className="pointer-events-auto relative mb-4 flex items-center justify-center w-10 h-10 rounded-full bg-[#7a8b6e] text-white shadow-lg animate-bounce cursor-pointer"
+                aria-label="Scroll down for more"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Hidden file input */}
