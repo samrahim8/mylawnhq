@@ -1180,7 +1180,7 @@ function HomePageContent() {
 
             {/* Content */}
             <h2 className="font-display text-xl font-bold text-deep-brown text-center mb-2">
-              Who's Larry?
+              Who&apos;s Larry?
             </h2>
             <p className="text-deep-brown/70 text-center mb-4">
               Larry is your personal lawn care expert, powered by AI.
@@ -1207,7 +1207,7 @@ function HomePageContent() {
             </div>
 
             <p className="text-xs text-deep-brown/50 text-center">
-              Ask Larry anything — he's here to help you get the lawn of your dreams.
+              Ask Larry anything — he&apos;s here to help you get the lawn of your dreams.
             </p>
 
             {/* CTA */}
