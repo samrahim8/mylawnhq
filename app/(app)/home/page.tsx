@@ -21,7 +21,7 @@ import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
-import { Clock, Calendar as CalendarIcon, CheckSquare, Cloud, Thermometer, LucideIcon } from "lucide-react";
+import { Clock, Calendar as CalendarIcon, CheckSquare, Cloud, Thermometer, ChevronDown, LucideIcon } from "lucide-react";
 
 type TabId = "activities" | "calendar" | "todos" | "weather" | "soil";
 
@@ -133,6 +133,24 @@ function HomePageContent() {
   const chatFileInputRef = useRef<HTMLInputElement>(null);
   const chatCameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollArrow, setShowScrollArrow] = useState(true);
+
+  // Track scroll position to show/hide the down arrow
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      setShowScrollArrow(!nearBottom);
+    };
+
+    // Check on mount in case content doesn't overflow
+    handleScroll();
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // If there's an initial query from the landing page, auto-redirect to chat
   useEffect(() => {
@@ -298,7 +316,7 @@ function HomePageContent() {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-3 sm:p-4 lg:p-6">
+    <div ref={scrollContainerRef} className="h-full overflow-y-auto p-3 sm:p-4 lg:p-6 relative">
       {/* 90-Day Plan Hero Section */}
       <div className="flex-shrink-0 max-w-2xl mx-auto w-full pt-4 sm:pt-6 mb-6 sm:mb-8">
         <LawnPlan />
@@ -593,6 +611,21 @@ function HomePageContent() {
         onClose={() => setIsOnboardingOpen(false)}
         initialData={onboardingData || undefined}
       />
+
+      {/* Scroll Down Indicator */}
+      {showScrollArrow && (
+        <div className="sticky bottom-0 left-0 right-0 pointer-events-none flex flex-col items-center z-30 -mt-16">
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#f8f6f3] to-transparent" />
+          <button
+            type="button"
+            onClick={() => scrollContainerRef.current?.scrollBy({ top: 300, behavior: "smooth" })}
+            className="pointer-events-auto relative mb-4 flex items-center justify-center w-10 h-10 rounded-full bg-[#7a8b6e] text-white shadow-lg animate-bounce cursor-pointer"
+            aria-label="Scroll down for more"
+          >
+            <ChevronDown size={22} strokeWidth={2.5} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
