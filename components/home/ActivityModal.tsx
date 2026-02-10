@@ -265,7 +265,7 @@ export default function ActivityModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-hidden">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -273,7 +273,7 @@ export default function ActivityModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden mx-2">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[92vh] sm:max-h-[85vh] flex flex-col overflow-hidden sm:mx-2">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 sm:p-6 border-b border-stone-200 flex-shrink-0">
           <h2 className="text-base sm:text-xl font-bold text-stone-800">
