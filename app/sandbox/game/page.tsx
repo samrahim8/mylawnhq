@@ -1179,12 +1179,27 @@ export default function MowTownGame() {
           })}
         </div>
 
-        <button
-          onClick={() => setGameState("start")}
-          className="mt-8 text-white/60 hover:text-white/80 text-sm"
-        >
-          ← Back
-        </button>
+        <div className="mt-8 flex gap-4 items-center">
+          <button
+            onClick={() => setGameState("start")}
+            className="text-white/60 hover:text-white/80 text-sm"
+          >
+            ← Back
+          </button>
+          {unlockedYards.size > 1 && (
+            <button
+              onClick={() => {
+                localStorage.removeItem(UNLOCKED_KEY);
+                localStorage.removeItem(EMAIL_KEY);
+                setUnlockedYards(new Set(["starter"]));
+                setEmail("");
+              }}
+              className="text-white/40 hover:text-white/60 text-xs"
+            >
+              Reset progress
+            </button>
+          )}
+        </div>
       </div>
     );
   }
