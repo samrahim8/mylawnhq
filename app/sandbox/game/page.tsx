@@ -75,6 +75,7 @@ class SoundManager {
   private mowerOscillator: OscillatorNode | null = null;
   private mowerGain: GainNode | null = null;
   private initialized = false;
+  private muted = false;
 
   init() {
     if (this.initialized) return;
@@ -84,6 +85,20 @@ class SoundManager {
     } catch (e) {
       console.log("Web Audio not supported");
     }
+  }
+
+  setMuted(muted: boolean) {
+    this.muted = muted;
+    // If muting while mower is running, stop it
+    if (muted && this.mowerGain) {
+      this.mowerGain.gain.setValueAtTime(0, this.audioContext?.currentTime || 0);
+    } else if (!muted && this.mowerGain && this.audioContext) {
+      this.mowerGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+    }
+  }
+
+  isMuted() {
+    return this.muted;
   }
 
   startMower() {
@@ -96,7 +111,7 @@ class SoundManager {
 
     this.mowerOscillator.type = "sawtooth";
     this.mowerOscillator.frequency.setValueAtTime(55, this.audioContext.currentTime);
-    this.mowerGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+    this.mowerGain.gain.setValueAtTime(this.muted ? 0 : 0.08, this.audioContext.currentTime);
 
     this.mowerOscillator.connect(this.mowerGain);
     this.mowerGain.connect(this.audioContext.destination);
@@ -118,7 +133,7 @@ class SoundManager {
   }
 
   playGrassCut() {
-    if (!this.audioContext) return;
+    if (!this.audioContext || this.muted) return;
 
     const osc = this.audioContext.createOscillator();
     const gain = this.audioContext.createGain();
@@ -141,7 +156,7 @@ class SoundManager {
   }
 
   playCollision() {
-    if (!this.audioContext) return;
+    if (!this.audioContext || this.muted) return;
 
     const osc = this.audioContext.createOscillator();
     const gain = this.audioContext.createGain();
@@ -160,7 +175,7 @@ class SoundManager {
   }
 
   playPowerUp() {
-    if (!this.audioContext) return;
+    if (!this.audioContext || this.muted) return;
 
     const osc = this.audioContext.createOscillator();
     const gain = this.audioContext.createGain();
@@ -179,7 +194,7 @@ class SoundManager {
   }
 
   playCombo(level: number) {
-    if (!this.audioContext) return;
+    if (!this.audioContext || this.muted) return;
 
     const baseFreq = 300 + level * 50;
 
@@ -202,7 +217,7 @@ class SoundManager {
   }
 
   playGameOver(win: boolean) {
-    if (!this.audioContext) return;
+    if (!this.audioContext || this.muted) return;
 
     const notes = win ? [523, 659, 784, 1047] : [400, 350, 300, 250];
 
@@ -356,6 +371,7 @@ const UNLOCKED_KEY = "mowtown_unlocked";
 const EMAIL_KEY = "mowtown_email";
 const LEADERBOARD_KEY = "mowtown_leaderboard";
 const PLAYER_NAME_KEY = "mowtown_player_name";
+const SOUND_ENABLED_KEY = "mowtown_sound_enabled";
 
 // Game Component
 export default function MowTownGame() {
@@ -427,6 +443,7 @@ export default function MowTownGame() {
   const [leaderboardEmail, setLeaderboardEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Cell size based on canvas
   const CELL_SIZE = 24;
@@ -439,6 +456,16 @@ export default function MowTownGame() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Load sound preference from localStorage
+  useEffect(() => {
+    const savedSound = localStorage.getItem(SOUND_ENABLED_KEY);
+    if (savedSound !== null) {
+      const enabled = savedSound === "true";
+      setSoundEnabled(enabled);
+      soundManager.current.setMuted(!enabled);
+    }
   }, []);
 
   // Keep joystick ref in sync
@@ -532,6 +559,14 @@ export default function MowTownGame() {
       return false;
     }
   }, [selectedYard, percentMowed, maxCombo, hitCount]);
+
+  // Toggle sound
+  const toggleSound = useCallback(() => {
+    const newEnabled = !soundEnabled;
+    setSoundEnabled(newEnabled);
+    soundManager.current.setMuted(!newEnabled);
+    localStorage.setItem(SOUND_ENABLED_KEY, String(newEnabled));
+  }, [soundEnabled]);
 
   // Trigger screen shake
   const triggerShake = useCallback((intensity: number = 8) => {
@@ -1398,7 +1433,6 @@ export default function MowTownGame() {
   // Results screen - Overlay on top of final mow pattern
   if (gameState === "results") {
     const tier = getScoreTier(percentMowed);
-    const shareText = `I mowed ${percentMowed}% of the yard in Mow Town 🌱 ${maxCombo > 10 ? `(${maxCombo}x combo!)` : ""}`;
     const needsEmail = !email && showNameInput;
     const canUnlockYards = unlockedYards.size === 1;
 
@@ -1506,26 +1540,6 @@ export default function MowTownGame() {
                 🏆 View Leaderboard
               </button>
             )}
-
-            {/* Share buttons */}
-            <div className="flex gap-2 mb-4">
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent("https://mylawnhq-theta.vercel.app/sandbox/game")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-[#1da1f2] hover:bg-[#1a8cd8] text-white font-medium py-2 rounded-lg text-sm text-center"
-              >
-                Share on X
-              </a>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(`${shareText} https://mylawnhq-theta.vercel.app/sandbox/game`);
-                }}
-                className="flex-1 bg-white/20 hover:bg-white/30 text-white font-medium py-2 rounded-lg text-sm"
-              >
-                Copy Link
-              </button>
-            </div>
 
             {/* Action buttons */}
             <div className="flex gap-2">
@@ -1653,6 +1667,15 @@ export default function MowTownGame() {
           <span className="text-white/60 text-xs">Hits</span>
           <span className="text-white font-bold text-lg ml-2">💥 {hitCount}</span>
         </div>
+
+        {/* Sound toggle */}
+        <button
+          onClick={toggleSound}
+          className="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 transition-colors"
+          title={soundEnabled ? "Mute" : "Unmute"}
+        >
+          <span className="text-xl">{soundEnabled ? "🔊" : "🔇"}</span>
+        </button>
       </div>
 
       {/* Game canvas */}

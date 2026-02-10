@@ -4,6 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 // GET - Fetch leaderboard
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
+
+  if (!supabase) {
+    console.error("Supabase client not initialized");
+    return NextResponse.json({ error: "Database not available" }, { status: 503 });
+  }
+
   const { searchParams } = new URL(request.url);
   const yard = searchParams.get("yard");
   const limit = parseInt(searchParams.get("limit") || "50");
@@ -33,6 +39,11 @@ export async function GET(request: NextRequest) {
 // POST - Submit score
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
+
+  if (!supabase) {
+    console.error("Supabase client not initialized");
+    return NextResponse.json({ error: "Database not available" }, { status: 503 });
+  }
 
   try {
     const body = await request.json();
