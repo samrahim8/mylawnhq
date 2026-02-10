@@ -69,19 +69,164 @@ interface YardConfig {
   locked?: boolean;
 }
 
-// Sound Manager - disabled for now (mobile compatibility issues)
+// Sound Manager using Web Audio API (desktop only)
 class SoundManager {
-  init() {}
-  setMuted(_muted: boolean) {}
-  isMuted() { return true; }
-  startMower() {}
-  stopMower() {}
-  adjustMowerPitch(_moving: boolean) {}
-  playGrassCut() {}
-  playCollision() {}
-  playPowerUp() {}
-  playCombo(_level: number) {}
-  playGameOver(_win: boolean) {}
+  private audioContext: AudioContext | null = null;
+  private mowerOscillator: OscillatorNode | null = null;
+  private mowerGain: GainNode | null = null;
+  private initialized = false;
+  private isMobile = false;
+
+  init() {
+    if (this.initialized) return;
+    // Detect mobile - disable sound on mobile due to autoplay restrictions
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (typeof window !== 'undefined' && window.matchMedia("(max-width: 1024px)").matches && 'ontouchstart' in window);
+    if (this.isMobile) return;
+
+    try {
+      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      this.initialized = true;
+    } catch (e) {
+      console.log("Web Audio not supported");
+    }
+  }
+
+  startMower() {
+    if (!this.audioContext || this.isMobile) return;
+    if (this.mowerOscillator) return;
+
+    this.mowerOscillator = this.audioContext.createOscillator();
+    this.mowerGain = this.audioContext.createGain();
+
+    this.mowerOscillator.type = "sawtooth";
+    this.mowerOscillator.frequency.setValueAtTime(55, this.audioContext.currentTime);
+    this.mowerGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+
+    this.mowerOscillator.connect(this.mowerGain);
+    this.mowerGain.connect(this.audioContext.destination);
+    this.mowerOscillator.start();
+  }
+
+  stopMower() {
+    if (this.mowerOscillator) {
+      this.mowerOscillator.stop();
+      this.mowerOscillator = null;
+      this.mowerGain = null;
+    }
+  }
+
+  adjustMowerPitch(moving: boolean) {
+    if (!this.audioContext || !this.mowerOscillator || this.isMobile) return;
+    const targetFreq = moving ? 75 : 55;
+    this.mowerOscillator.frequency.setTargetAtTime(targetFreq, this.audioContext.currentTime, 0.1);
+  }
+
+  playGrassCut() {
+    if (!this.audioContext || this.isMobile) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    const filter = this.audioContext.createBiquadFilter();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(800 + Math.random() * 400, this.audioContext.currentTime);
+
+    filter.type = "highpass";
+    filter.frequency.setValueAtTime(600, this.audioContext.currentTime);
+
+    gain.gain.setValueAtTime(0.02, this.audioContext.currentTime);
+    gain.gain.setTargetAtTime(0.001, this.audioContext.currentTime, 0.02);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.audioContext.destination);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + 0.05);
+  }
+
+  playCollision() {
+    if (!this.audioContext || this.isMobile) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(150, this.audioContext.currentTime);
+    osc.frequency.setTargetAtTime(80, this.audioContext.currentTime, 0.1);
+
+    gain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+    gain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.15);
+
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + 0.2);
+  }
+
+  playPowerUp() {
+    if (!this.audioContext || this.isMobile) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(400, this.audioContext.currentTime);
+    osc.frequency.setTargetAtTime(800, this.audioContext.currentTime, 0.1);
+
+    gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+    gain.gain.setTargetAtTime(0, this.audioContext.currentTime + 0.15, 0.1);
+
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + 0.25);
+  }
+
+  playCombo(level: number) {
+    if (!this.audioContext || this.isMobile) return;
+
+    const baseFreq = 300 + level * 50;
+
+    for (let i = 0; i < 3; i++) {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(baseFreq * (1 + i * 0.25), this.audioContext.currentTime + i * 0.05);
+
+      gain.gain.setValueAtTime(0, this.audioContext.currentTime + i * 0.05);
+      gain.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + i * 0.05 + 0.02);
+      gain.gain.setTargetAtTime(0, this.audioContext.currentTime + i * 0.05 + 0.05, 0.05);
+
+      osc.connect(gain);
+      gain.connect(this.audioContext.destination);
+      osc.start(this.audioContext.currentTime + i * 0.05);
+      osc.stop(this.audioContext.currentTime + i * 0.05 + 0.15);
+    }
+  }
+
+  playGameOver(win: boolean) {
+    if (!this.audioContext || this.isMobile) return;
+
+    const notes = win ? [523, 659, 784, 1047] : [400, 350, 300, 250];
+
+    notes.forEach((freq, i) => {
+      const osc = this.audioContext!.createOscillator();
+      const gain = this.audioContext!.createGain();
+
+      osc.type = win ? "sine" : "triangle";
+      osc.frequency.setValueAtTime(freq, this.audioContext!.currentTime + i * 0.15);
+
+      gain.gain.setValueAtTime(0.1, this.audioContext!.currentTime + i * 0.15);
+      gain.gain.setTargetAtTime(0, this.audioContext!.currentTime + i * 0.15 + 0.1, 0.05);
+
+      osc.connect(gain);
+      gain.connect(this.audioContext!.destination);
+      osc.start(this.audioContext!.currentTime + i * 0.15);
+      osc.stop(this.audioContext!.currentTime + i * 0.15 + 0.2);
+    });
+  }
 }
 
 // Yard configurations
