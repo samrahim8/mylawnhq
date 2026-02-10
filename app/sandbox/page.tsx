@@ -312,7 +312,7 @@ export default function SandboxHero() {
   };
 
   return (
-    <div className="bg-cream flex flex-col min-h-dvh relative">
+    <div className="bg-cream flex flex-col relative">
       {/* Decorative background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-lawn/5 via-transparent to-transparent rounded-full blur-3xl" />
@@ -329,8 +329,8 @@ export default function SandboxHero() {
           </a>
         </nav>
 
-        {/* Hero content — fills viewport */}
-        <div className="min-h-[calc(100dvh-60px)] flex flex-col justify-start pt-[12vh] px-5">
+        {/* Hero content */}
+        <div className="flex flex-col justify-start pt-[12vh] px-5">
           <div className="space-y-4">
             <div>
               <SeasonBadge />
@@ -405,8 +405,8 @@ export default function SandboxHero() {
           </div>
         </div>
 
-        {/* Mobile Before/After — below the fold, scrollable */}
-        <div className="px-5 pb-8 -mt-[12vh]">
+        {/* Mobile Before/After */}
+        <div className="px-5 pb-8 pt-6">
           <div className="border-t border-deep-brown/10 pt-5">
             <div className="mb-3">
               <div className="w-8 h-0.5 bg-[#c17f59] mb-2"></div>
@@ -447,8 +447,8 @@ export default function SandboxHero() {
           </div>
         </nav>
 
-        {/* Hero — fills viewport, centered vertically */}
-        <div className="min-h-[calc(100dvh-60px)] flex flex-col justify-center max-w-6xl mx-auto w-full px-8">
+        {/* Hero */}
+        <div className="flex flex-col justify-center max-w-6xl mx-auto w-full px-8 pt-16 pb-12">
           {/* Hero */}
           <div className="grid grid-cols-2 gap-12 items-center">
             <div>
