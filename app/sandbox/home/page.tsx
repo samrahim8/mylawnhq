@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CalendarActivity, ChatImage } from "@/types";
+import { CalendarActivity, ChatImage, ChatMessage } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
 import { useTodos } from "@/hooks/useTodos";
 import { useCalendar } from "@/hooks/useCalendar";
@@ -92,6 +92,16 @@ function HomePageContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollArrow, setShowScrollArrow] = useState(true);
+
+  // Inline chat state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInputInline, setChatInputInline] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatPendingImages, setChatPendingImages] = useState<ChatImage[]>([]);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  const chatTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const chatInlineFileRef = useRef<HTMLInputElement>(null);
+  const chatInlineCameraRef = useRef<HTMLInputElement>(null);
 
   // Next task from 90-day plan
   const [nextTask, setNextTask] = useState<{ task: string; week: string; month: string; key: string; totalTasks: number; completedCount: number } | null>(null);
@@ -311,6 +321,108 @@ function HomePageContent() {
     }
   };
 
+  // Inline chat handlers
+  const handleInlineChatSend = async (messageText?: string) => {
+    const text = messageText || chatInputInline.trim();
+    if ((!text && chatPendingImages.length === 0) || isChatLoading) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: text || "What can you tell me about this?",
+      timestamp: new Date().toISOString(),
+      images: chatPendingImages.length > 0 ? [...chatPendingImages] : undefined,
+    };
+
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInputInline("");
+    const imagesToSend = [...chatPendingImages];
+    setChatPendingImages([]);
+    setIsChatLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...chatMessages, userMessage].map((m) => ({
+            role: m.role,
+            content: m.content,
+            images: m.images?.map((img) => ({
+              data: img.data,
+              mimeType: img.mimeType,
+            })),
+          })),
+          profile: {
+            zipCode: profile?.zipCode,
+            grassType: profile?.grassType,
+            lawnSize: profile?.lawnSize,
+            sunExposure: profile?.sunExposure,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data.content,
+        timestamp: new Date().toISOString(),
+      };
+      setChatMessages((prev) => [...prev, assistantMessage]);
+    } catch {
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I had trouble processing that. Please try again.",
+        timestamp: new Date().toISOString(),
+      };
+      setChatMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const handleInlineChatKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleInlineChatSend();
+    }
+  };
+
+  const handleInlineChatImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    try {
+      const newImages = await Promise.all(Array.from(files).map(processChatImage));
+      setChatPendingImages((prev) => [...prev, ...newImages].slice(0, 4));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to upload image");
+    }
+    e.target.value = "";
+  };
+
+  const removeInlineChatImage = (imageId: string) => {
+    setChatPendingImages((prev) => prev.filter((img) => img.id !== imageId));
+  };
+
+  // Scroll to bottom of chat on new messages
+  useEffect(() => {
+    if (mobileView === "chat") {
+      chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, mobileView]);
+
+  // Auto-resize inline chat textarea
+  useEffect(() => {
+    if (chatTextareaRef.current) {
+      chatTextareaRef.current.style.height = "auto";
+      chatTextareaRef.current.style.height = `${Math.min(chatTextareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [chatInputInline]);
+
   // Check if profile is incomplete (has zip/grass but missing optional fields)
   const isProfileIncomplete = (() => {
     if (!profile || !profile.zipCode) return false; // No profile at all — different CTA
@@ -390,8 +502,8 @@ function HomePageContent() {
         {/* Safe area top */}
         <div className="bg-cream pt-[env(safe-area-inset-top)]" />
 
-        {/* Scrollable content */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto relative">
+        {/* HOME: Scrollable content */}
+        {mobileView === "home" && <div ref={scrollContainerRef} className="flex-1 overflow-y-auto relative">
           <div className="px-4 py-4 space-y-4">
             {/* === LEVEL 1: Hero Status Card === */}
             <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
@@ -651,7 +763,173 @@ function HomePageContent() {
               </button>
             </div>
           )}
-        </div>
+        </div>}
+
+        {/* PLAN/ACTIVITY: Sub-view with header */}
+        {(mobileView === "plan" || mobileView === "activity") && (
+          <>
+            <div className="bg-white border-b border-deep-brown/10">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => setMobileView("home")}
+                  className="p-2 -ml-2 rounded-xl active:bg-deep-brown/5"
+                >
+                  <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <h1 className="font-display text-lg font-bold text-deep-brown">
+                  {mobileView === "plan" && "Your 90-Day Plan"}
+                  {mobileView === "activity" && "Activity Log"}
+                </h1>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {mobileView === "plan" && <LawnPlan onTaskToggle={findNextTask} />}
+              {mobileView === "activity" && (
+                <RecentActivities
+                  activities={activities}
+                  onDeleteActivity={deleteActivity}
+                  onOpenActivityModal={handleOpenActivityModal}
+                  onEditActivity={handleEditActivity}
+                  compact
+                />
+              )}
+            </div>
+          </>
+        )}
+
+        {/* CHAT: Inline chat view */}
+        {mobileView === "chat" && (
+          <>
+            <div className="bg-white border-b border-deep-brown/10">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => setMobileView("home")}
+                  className="p-2 -ml-2 rounded-xl active:bg-deep-brown/5"
+                >
+                  <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <div className="w-9 h-9 bg-lawn/10 rounded-xl flex items-center justify-center text-lg">🧑‍🌾</div>
+                <div className="flex-1">
+                  <h1 className="font-semibold text-deep-brown">Larry</h1>
+                  <p className="text-xs text-deep-brown/50">Your lawn expert</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Chat messages */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
+                {chatMessages.length === 0 && !isChatLoading && (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-lawn/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl">🧑‍🌾</div>
+                    <h2 className="font-display text-xl font-bold text-deep-brown mb-2">Hey, I&apos;m Larry!</h2>
+                    <p className="text-deep-brown/60 max-w-xs mx-auto">Your personal lawn expert. Ask me anything or snap a photo of your lawn for diagnosis.</p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-6">
+                      {["Why is my grass turning brown?", "When should I fertilize?", "How often should I water?"].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => handleInlineChatSend(suggestion)}
+                          className="px-4 py-2 bg-white border border-deep-brown/10 rounded-full text-sm text-deep-brown/70 hover:border-lawn/30 hover:text-lawn active:scale-95 transition-all"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {chatMessages.map((message) => (
+                  <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}>
+                    {message.role === "assistant" && (
+                      <div className="w-8 h-8 bg-lawn/10 rounded-xl flex items-center justify-center text-sm flex-shrink-0">🧑‍🌾</div>
+                    )}
+                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.role === "user" ? "bg-lawn text-white rounded-br-md" : "bg-white border border-deep-brown/10 text-deep-brown rounded-bl-md"}`}>
+                      {message.images && message.images.length > 0 && (
+                        <div className="flex gap-2 mb-2">
+                          {message.images.map((img) => (
+                            <img key={img.id} src={img.preview} alt="Uploaded" className="w-20 h-20 object-cover rounded-lg" />
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {isChatLoading && (
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-lawn/10 rounded-xl flex items-center justify-center text-sm flex-shrink-0">🧑‍🌾</div>
+                    <div className="bg-white border border-deep-brown/10 rounded-2xl rounded-bl-md px-4 py-3">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-deep-brown/30 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-2 h-2 bg-deep-brown/30 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-2 h-2 bg-deep-brown/30 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={chatMessagesEndRef} />
+              </div>
+            </div>
+
+            {/* Chat input */}
+            <div className="bg-white border-t border-deep-brown/10">
+              <div className="max-w-2xl mx-auto px-4 py-3">
+                {chatPendingImages.length > 0 && (
+                  <div className="flex gap-2 mb-3 pb-3 border-b border-deep-brown/10">
+                    {chatPendingImages.map((img) => (
+                      <div key={img.id} className="relative">
+                        <img src={img.preview} alt="To upload" className="w-16 h-16 object-cover rounded-lg border border-deep-brown/10" />
+                        <button type="button" onClick={() => removeInlineChatImage(img.id)} className="absolute -top-2 -right-2 w-5 h-5 bg-deep-brown text-white rounded-full flex items-center justify-center">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2 items-end">
+                  <input ref={chatInlineFileRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleInlineChatImageUpload} className="hidden" />
+                  <input ref={chatInlineCameraRef} type="file" accept="image/jpeg,image/png" capture="environment" onChange={handleInlineChatImageUpload} className="hidden" />
+                  <div className="flex-1 flex items-end gap-2 px-3 py-2 bg-cream/50 border border-deep-brown/10 rounded-2xl focus-within:border-lawn">
+                    <button type="button" onClick={() => chatInlineCameraRef.current?.click()} className="p-1.5 text-deep-brown/40 hover:text-lawn active:scale-95 transition-all rounded-lg hover:bg-lawn/10 flex-shrink-0">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                    <textarea
+                      ref={chatTextareaRef}
+                      value={chatInputInline}
+                      onChange={(e) => setChatInputInline(e.target.value)}
+                      onKeyDown={handleInlineChatKeyDown}
+                      placeholder="Ask Larry anything..."
+                      rows={1}
+                      className="flex-1 bg-transparent text-base resize-none focus:outline-none min-h-[24px] max-h-[120px]"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleInlineChatSend()}
+                    disabled={(!chatInputInline.trim() && chatPendingImages.length === 0) || isChatLoading}
+                    className="p-3 bg-lawn text-white rounded-xl disabled:bg-deep-brown/10 disabled:text-deep-brown/30 active:scale-95 transition-all flex-shrink-0"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Hidden file input */}
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
@@ -670,7 +948,7 @@ function HomePageContent() {
                 <button
                   key={nav.id}
                   type="button"
-                  onClick={() => nav.id === "chat" ? router.push("/sandbox/chat") : setMobileView(nav.id)}
+                  onClick={() => setMobileView(nav.id)}
                   className={`flex-1 flex flex-col items-center justify-center py-3 min-h-[56px] active:bg-deep-brown/5 transition-colors ${
                     isActive ? "text-lawn" : "text-deep-brown/50"
                   }`}
@@ -685,47 +963,6 @@ function HomePageContent() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Full-Screen Views (Plan, Activity, Tasks) */}
-      {mobileView !== "home" && (
-        <div className="fixed inset-0 bg-cream z-50 flex flex-col lg:hidden">
-          {/* Safe area + header */}
-          <div className="bg-white border-b border-deep-brown/10 pt-[env(safe-area-inset-top)]">
-            <div className="flex items-center gap-3 px-4 py-3">
-              <button
-                type="button"
-                onClick={() => setMobileView("home")}
-                className="p-2 -ml-2 rounded-xl active:bg-deep-brown/5"
-              >
-                <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <h1 className="font-display text-lg font-bold text-deep-brown">
-                {mobileView === "plan" && "Your 90-Day Plan"}
-                {mobileView === "activity" && "Activity Log"}
-              </h1>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {mobileView === "plan" && <LawnPlan onTaskToggle={findNextTask} />}
-            {mobileView === "activity" && (
-              <RecentActivities
-                activities={activities}
-                onDeleteActivity={deleteActivity}
-                onOpenActivityModal={handleOpenActivityModal}
-                onEditActivity={handleEditActivity}
-                compact
-              />
-            )}
-          </div>
-
-          {/* Bottom safe area */}
-          <div className="pb-[env(safe-area-inset-bottom)]" />
-        </div>
-      )}
 
       {/* Desktop Layout - Dashboard with 2-column grid */}
       <div className="hidden lg:block h-full overflow-y-auto p-6">
