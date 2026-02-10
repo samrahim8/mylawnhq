@@ -1350,29 +1350,32 @@ export default function MowTownGame() {
   if (gameState === "start") {
     return (
       <div className="min-h-dvh bg-[#2d5a27] flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md">
+        <div className="max-w-md flex flex-col items-center">
           <div className="text-6xl mb-4">🚜</div>
           <h1 className="font-display text-5xl font-bold text-white mb-3 tracking-tight">MOW TOWN</h1>
           <p className="text-xl text-white/80 mb-8">Mow the yard. Dodge the junk. Beat the clock.</p>
-          <button
-            onClick={() => {
-              soundManager.current.init();
-              setGameState("select");
-            }}
-            className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg"
-          >
-            Start Mowing
-          </button>
 
-          {leaderboard.length > 0 && (
+          <div className="flex flex-col gap-4 items-center">
             <button
-              onClick={() => setGameState("leaderboard")}
-              className="mt-6 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium px-6 py-3 rounded-xl transition-colors flex items-center gap-2 mx-auto"
+              onClick={() => {
+                soundManager.current.init();
+                setGameState("select");
+              }}
+              className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg"
             >
-              <span className="text-lg">🏆</span>
-              <span>View Leaderboard</span>
+              Start Mowing
             </button>
-          )}
+
+            {leaderboard.length > 0 && (
+              <button
+                onClick={() => setGameState("leaderboard")}
+                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium px-6 py-3 rounded-xl transition-colors flex items-center gap-2"
+              >
+                <span>🏆</span>
+                <span>View Leaderboard</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mt-12 text-white/60 text-sm">
