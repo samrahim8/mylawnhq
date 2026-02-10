@@ -3,8 +3,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // Types
-type GameState = "start" | "select" | "playing" | "results" | "email";
+type GameState = "start" | "select" | "playing" | "results" | "email" | "leaderboard";
 type Difficulty = "starter" | "suburban" | "hoa" | "abandoned";
+
+interface LeaderboardEntry {
+  name: string;
+  yard: Difficulty;
+  percent: number;
+  combo: number;
+  hits: number;
+  date: string;
+}
 
 interface Position {
   x: number;
@@ -331,9 +340,11 @@ function getScoreTier(percent: number): { title: string; message: string } {
   return { title: "Did You Even Start?", message: "The neighbors are talking. And not in a good way." };
 }
 
-// Local storage key for unlocked yards
+// Local storage keys
 const UNLOCKED_KEY = "mowtown_unlocked";
 const EMAIL_KEY = "mowtown_email";
+const LEADERBOARD_KEY = "mowtown_leaderboard";
+const PLAYER_NAME_KEY = "mowtown_player_name";
 
 // Game Component
 export default function MowTownGame() {
@@ -351,6 +362,11 @@ export default function MowTownGame() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [pendingYard, setPendingYard] = useState<Difficulty | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [playerName, setPlayerName] = useState("");
+  const [showUnlockPrompt, setShowUnlockPrompt] = useState(false);
+  const [showNameInput, setShowNameInput] = useState(true);
+  const [nameInput, setNameInput] = useState("");
 
   // Screen shake state
   const [shake, setShake] = useState({ x: 0, y: 0 });
@@ -388,7 +404,7 @@ export default function MowTownGame() {
   // Cell size based on canvas
   const CELL_SIZE = 24;
 
-  // Load unlocked yards from localStorage
+  // Load unlocked yards, leaderboard, and player name from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(UNLOCKED_KEY);
     if (saved) {
@@ -404,7 +420,49 @@ export default function MowTownGame() {
     if (savedEmail) {
       setEmail(savedEmail);
     }
+
+    const savedLeaderboard = localStorage.getItem(LEADERBOARD_KEY);
+    if (savedLeaderboard) {
+      try {
+        setLeaderboard(JSON.parse(savedLeaderboard));
+      } catch {
+        setLeaderboard([]);
+      }
+    }
+
+    const savedName = localStorage.getItem(PLAYER_NAME_KEY);
+    if (savedName) {
+      setPlayerName(savedName);
+      setNameInput(savedName);
+      setShowNameInput(false);
+    }
   }, []);
+
+  // Save score to leaderboard
+  const saveToLeaderboard = useCallback((name: string) => {
+    const entry: LeaderboardEntry = {
+      name,
+      yard: selectedYard,
+      percent: percentMowed,
+      combo: maxCombo,
+      hits: hitCount,
+      date: new Date().toISOString(),
+    };
+
+    const newLeaderboard = [...leaderboard, entry]
+      .sort((a, b) => {
+        // Sort by percent desc, then by combo desc, then by hits asc
+        if (b.percent !== a.percent) return b.percent - a.percent;
+        if (b.combo !== a.combo) return b.combo - a.combo;
+        return a.hits - b.hits;
+      })
+      .slice(0, 50); // Keep top 50
+
+    setLeaderboard(newLeaderboard);
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(newLeaderboard));
+    localStorage.setItem(PLAYER_NAME_KEY, name);
+    setPlayerName(name);
+  }, [selectedYard, percentMowed, maxCombo, hitCount, leaderboard]);
 
   // Trigger screen shake
   const triggerShake = useCallback((intensity: number = 8) => {
@@ -1129,6 +1187,15 @@ export default function MowTownGame() {
           >
             Start Mowing
           </button>
+
+          {leaderboard.length > 0 && (
+            <button
+              onClick={() => setGameState("leaderboard")}
+              className="mt-4 text-white/60 hover:text-white/80 text-sm underline"
+            >
+              🏆 View Leaderboard
+            </button>
+          )}
         </div>
 
         <div className="mt-12 text-white/60 text-sm">
@@ -1207,6 +1274,7 @@ export default function MowTownGame() {
   if (gameState === "results") {
     const tier = getScoreTier(percentMowed);
     const shareText = `I mowed ${percentMowed}% of the yard in Mow Town 🌱 ${maxCombo > 10 ? `(${maxCombo}x combo!)` : ""}`;
+    const shouldShowUnlockPrompt = selectedYard === "starter" && unlockedYards.size === 1 && !showUnlockPrompt;
 
     return (
       <div className="min-h-dvh bg-[#2d5a27] flex flex-col items-center justify-center p-6 text-center">
@@ -1232,6 +1300,58 @@ export default function MowTownGame() {
           {finalPattern && (
             <div className="mb-6">
               <img src={finalPattern} alt="Your mow pattern" className="w-full rounded-xl border-2 border-white/20" />
+            </div>
+          )}
+
+          {/* Save to Leaderboard */}
+          {showNameInput ? (
+            <div className="mb-6 bg-white/10 rounded-xl p-4">
+              <p className="text-white/80 text-sm mb-3">Save your score to the leaderboard!</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  placeholder="Your name"
+                  maxLength={20}
+                  className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm"
+                />
+                <button
+                  onClick={() => {
+                    if (nameInput.trim()) {
+                      saveToLeaderboard(nameInput.trim());
+                      setShowNameInput(false);
+                    }
+                  }}
+                  className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-medium px-4 py-2 rounded-lg text-sm"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setGameState("leaderboard")}
+              className="mb-6 text-white/60 hover:text-white/80 text-sm underline"
+            >
+              🏆 View Leaderboard
+            </button>
+          )}
+
+          {/* Unlock Prompt - shows after completing starter yard */}
+          {shouldShowUnlockPrompt && (
+            <div className="mb-6 bg-gradient-to-r from-[#c17f59]/20 to-[#c17f59]/10 border border-[#c17f59]/30 rounded-xl p-5">
+              <p className="text-white font-bold mb-2">🔓 Ready for a bigger challenge?</p>
+              <p className="text-white/70 text-sm mb-4">Unlock 3 more yards with harder obstacles and tighter time limits!</p>
+              <button
+                onClick={() => {
+                  setShowUnlockPrompt(true);
+                  setGameState("email");
+                }}
+                className="w-full bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold px-6 py-3 rounded-xl"
+              >
+                Unlock All Yards
+              </button>
             </div>
           )}
 
@@ -1272,6 +1392,72 @@ export default function MowTownGame() {
               className="bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-xl"
             >
               New Yard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Leaderboard screen
+  if (gameState === "leaderboard") {
+    return (
+      <div className="min-h-dvh bg-[#2d5a27] flex flex-col items-center justify-center p-6">
+        <div className="max-w-lg w-full">
+          <h2 className="font-display text-3xl font-bold text-white mb-2 text-center">🏆 Leaderboard</h2>
+          <p className="text-white/60 text-center mb-6">Top mowers in the neighborhood</p>
+
+          {leaderboard.length === 0 ? (
+            <div className="bg-white/10 rounded-xl p-8 text-center">
+              <p className="text-white/60">No scores yet. Be the first!</p>
+            </div>
+          ) : (
+            <div className="bg-white/10 rounded-xl overflow-hidden">
+              <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-white/10 text-white/60 text-xs font-medium">
+                <div className="col-span-1">#</div>
+                <div className="col-span-4">Name</div>
+                <div className="col-span-3">Yard</div>
+                <div className="col-span-2 text-right">Score</div>
+                <div className="col-span-2 text-right">Combo</div>
+              </div>
+              <div className="divide-y divide-white/10">
+                {leaderboard.slice(0, 20).map((entry, index) => (
+                  <div
+                    key={`${entry.name}-${entry.date}`}
+                    className={`grid grid-cols-12 gap-2 px-4 py-3 text-sm ${
+                      index === 0 ? "bg-yellow-500/10 text-yellow-300" :
+                      index === 1 ? "bg-gray-300/10 text-gray-300" :
+                      index === 2 ? "bg-orange-500/10 text-orange-300" :
+                      "text-white/80"
+                    }`}
+                  >
+                    <div className="col-span-1 font-bold">
+                      {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
+                    </div>
+                    <div className="col-span-4 truncate">{entry.name}</div>
+                    <div className="col-span-3 text-white/60 text-xs truncate">
+                      {YARDS[entry.yard].name.replace("The ", "")}
+                    </div>
+                    <div className="col-span-2 text-right font-bold">{entry.percent}%</div>
+                    <div className="col-span-2 text-right text-orange-400">{entry.combo}x</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-center mt-6">
+            <button
+              onClick={() => setGameState("select")}
+              className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold px-6 py-3 rounded-xl"
+            >
+              Play Again
+            </button>
+            <button
+              onClick={() => setGameState("start")}
+              className="bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-xl"
+            >
+              Home
             </button>
           </div>
         </div>
