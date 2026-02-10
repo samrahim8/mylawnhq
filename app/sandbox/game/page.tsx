@@ -1367,9 +1367,10 @@ export default function MowTownGame() {
           {leaderboard.length > 0 && (
             <button
               onClick={() => setGameState("leaderboard")}
-              className="mt-4 text-white/60 hover:text-white/80 text-sm underline"
+              className="mt-6 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium px-6 py-3 rounded-xl transition-colors flex items-center gap-2 mx-auto"
             >
-              🏆 View Leaderboard
+              <span className="text-lg">🏆</span>
+              <span>View Leaderboard</span>
             </button>
           )}
         </div>
@@ -1551,9 +1552,10 @@ export default function MowTownGame() {
             ) : (
               <button
                 onClick={() => setGameState("leaderboard")}
-                className="w-full mb-4 py-2 text-white/70 hover:text-white text-sm flex items-center justify-center gap-2"
+                className="w-full mb-4 bg-[#f1c40f]/20 hover:bg-[#f1c40f]/30 border border-[#f1c40f]/40 text-[#f1c40f] font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
               >
-                🏆 View Leaderboard
+                <span className="text-lg">🏆</span>
+                <span>View Leaderboard</span>
               </button>
             )}
 
