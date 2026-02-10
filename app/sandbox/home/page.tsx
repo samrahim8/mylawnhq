@@ -761,7 +761,7 @@ function HomePageContent() {
           {/* === Two Column Layout === */}
           <div className="grid grid-cols-3 gap-6">
             {/* Left Column - Main Content (2/3 width) */}
-            <div className="col-span-2 space-y-6">
+            <div className="col-span-2 flex flex-col gap-6">
               {/* Next Task Card */}
               {nextTask && nextTask.task ? (
                 <div className="bg-lawn rounded-2xl p-6 shadow-lg shadow-lawn/10">
@@ -907,7 +907,7 @@ function HomePageContent() {
               </div>
 
               {/* Quick Actions Row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mt-auto">
                 <button
                   type="button"
                   onClick={handleOpenActivityModal}
@@ -935,7 +935,7 @@ function HomePageContent() {
             </div>
 
             {/* Right Column - Plan Progress & Stats (1/3 width) */}
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {/* Progress Card */}
               {nextTask && nextTask.totalTasks > 0 && (
                 <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
@@ -995,7 +995,7 @@ function HomePageContent() {
               )}
 
               {/* Recent Activity Preview */}
-              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+              <div className="bg-white rounded-2xl border border-deep-brown/10 p-5 mt-auto">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-display font-bold text-deep-brown">Recent Activity</h3>
                   {recentActivitiesCount > 0 && (
