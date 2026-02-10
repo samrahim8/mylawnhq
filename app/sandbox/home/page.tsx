@@ -692,7 +692,7 @@ function HomePageContent() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4">
-            {mobileView === "plan" && <LawnPlan />}
+            {mobileView === "plan" && <LawnPlan onTaskToggle={findNextTask} />}
             {mobileView === "activity" && (
               <RecentActivities
                 activities={activities}
@@ -1055,7 +1055,7 @@ function HomePageContent() {
                 </span>
               )}
             </div>
-            <LawnPlan />
+            <LawnPlan onTaskToggle={findNextTask} />
           </div>
         </div>
       </div>

@@ -27,7 +27,11 @@ const goalLabels: Record<string, string> = {
   not_sure: "General Care",
 };
 
-export function LawnPlan() {
+interface LawnPlanProps {
+  onTaskToggle?: () => void;
+}
+
+export function LawnPlan({ onTaskToggle }: LawnPlanProps = {}) {
   const [plan, setPlan] = useState<PlanMonth[]>([]);
   const [params, setParams] = useState<PlanParams | null>(null);
   const [expandedMonths, setExpandedMonths] = useState<Record<number, boolean>>({ 0: true });
@@ -80,6 +84,7 @@ export function LawnPlan() {
       localStorage.setItem("lawnhq_completed_tasks", JSON.stringify(updated));
       return updated;
     });
+    onTaskToggle?.();
   };
 
   const totalTasks = plan.reduce((sum, month) =>
