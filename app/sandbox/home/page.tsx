@@ -558,6 +558,7 @@ function HomePageContent() {
                     <button
                       type="button"
                       onClick={() => setShowLarryInfo(true)}
+                      onMouseEnter={() => setShowLarryInfo(true)}
                       className="w-4 h-4 bg-deep-brown/10 rounded-full flex items-center justify-center text-[10px] font-bold text-deep-brown/50 hover:bg-deep-brown/20 hover:text-deep-brown/70 transition-colors"
                     >
                       ?
@@ -872,6 +873,7 @@ function HomePageContent() {
                       <button
                         type="button"
                         onClick={() => setShowLarryInfo(true)}
+                        onMouseEnter={() => setShowLarryInfo(true)}
                         className="w-5 h-5 bg-deep-brown/10 rounded-full flex items-center justify-center text-xs font-bold text-deep-brown/50 hover:bg-deep-brown/20 hover:text-deep-brown/70 transition-colors"
                       >
                         ?
