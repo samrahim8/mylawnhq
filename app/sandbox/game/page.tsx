@@ -111,8 +111,7 @@ class SoundManager {
     filter.frequency.setValueAtTime(600, this.audioContext.currentTime);
 
     gain.gain.setValueAtTime(0.02, this.audioContext.currentTime);
-    gain.gain.exponentialDecayTo?.(0.001, this.audioContext.currentTime + 0.05) ||
-      gain.gain.setTargetAtTime(0.001, this.audioContext.currentTime, 0.02);
+    gain.gain.setTargetAtTime(0.001, this.audioContext.currentTime, 0.02);
 
     osc.connect(filter);
     filter.connect(gain);
@@ -348,7 +347,7 @@ export default function MowTownGame() {
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [finalPattern, setFinalPattern] = useState<string | null>(null);
-  const [unlockedYards, setUnlockedYards] = useState<Set<Difficulty>>(new Set(["starter"]));
+  const [unlockedYards, setUnlockedYards] = useState<Set<Difficulty>>(new Set<Difficulty>(["starter"]));
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [pendingYard, setPendingYard] = useState<Difficulty | null>(null);
@@ -397,7 +396,7 @@ export default function MowTownGame() {
         const parsed = JSON.parse(saved);
         setUnlockedYards(new Set(parsed));
       } catch {
-        setUnlockedYards(new Set(["starter"]));
+        setUnlockedYards(new Set<Difficulty>(["starter"]));
       }
     }
 
@@ -1191,7 +1190,7 @@ export default function MowTownGame() {
               onClick={() => {
                 localStorage.removeItem(UNLOCKED_KEY);
                 localStorage.removeItem(EMAIL_KEY);
-                setUnlockedYards(new Set(["starter"]));
+                setUnlockedYards(new Set<Difficulty>(["starter"]));
                 setEmail("");
               }}
               className="text-white/40 hover:text-white/60 text-xs"
