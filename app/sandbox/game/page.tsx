@@ -7,12 +7,23 @@ type GameState = "start" | "select" | "playing" | "results" | "email" | "leaderb
 type Difficulty = "starter" | "suburban" | "hoa" | "abandoned";
 
 interface LeaderboardEntry {
+  id?: string;
   name: string;
   yard: Difficulty;
   percent: number;
   combo: number;
   hits: number;
-  date: string;
+  created_at?: string;
+}
+
+interface JoystickState {
+  active: boolean;
+  startX: number;
+  startY: number;
+  currentX: number;
+  currentY: number;
+  dx: number;
+  dy: number;
 }
 
 interface Position {
@@ -401,10 +412,41 @@ export default function MowTownGame() {
   const animationFrame = useRef<number>();
   const lastTime = useRef<number>(0);
 
+  // Virtual joystick state
+  const [joystick, setJoystick] = useState<JoystickState>({
+    active: false,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    dx: 0,
+    dy: 0,
+  });
+  const joystickRef = useRef<JoystickState>(joystick);
+  const [isMobile, setIsMobile] = useState(false);
+  const [leaderboardEmail, setLeaderboardEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   // Cell size based on canvas
   const CELL_SIZE = 24;
 
-  // Load unlocked yards, leaderboard, and player name from localStorage
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia("(max-width: 1024px)").matches || "ontouchstart" in window);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Keep joystick ref in sync
+  useEffect(() => {
+    joystickRef.current = joystick;
+  }, [joystick]);
+
+  // Load unlocked yards and player name from localStorage, fetch global leaderboard
   useEffect(() => {
     const saved = localStorage.getItem(UNLOCKED_KEY);
     if (saved) {
@@ -419,15 +461,7 @@ export default function MowTownGame() {
     const savedEmail = localStorage.getItem(EMAIL_KEY);
     if (savedEmail) {
       setEmail(savedEmail);
-    }
-
-    const savedLeaderboard = localStorage.getItem(LEADERBOARD_KEY);
-    if (savedLeaderboard) {
-      try {
-        setLeaderboard(JSON.parse(savedLeaderboard));
-      } catch {
-        setLeaderboard([]);
-      }
+      setLeaderboardEmail(savedEmail);
     }
 
     const savedName = localStorage.getItem(PLAYER_NAME_KEY);
@@ -436,33 +470,68 @@ export default function MowTownGame() {
       setNameInput(savedName);
       setShowNameInput(false);
     }
+
+    // Fetch global leaderboard
+    fetch("/api/game/leaderboard?limit=50")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.leaderboard) {
+          setLeaderboard(data.leaderboard);
+        }
+      })
+      .catch(console.error);
   }, []);
 
-  // Save score to leaderboard
-  const saveToLeaderboard = useCallback((name: string) => {
-    const entry: LeaderboardEntry = {
-      name,
-      yard: selectedYard,
-      percent: percentMowed,
-      combo: maxCombo,
-      hits: hitCount,
-      date: new Date().toISOString(),
-    };
+  // Save score to global leaderboard
+  const saveToLeaderboard = useCallback(async (name: string, email: string) => {
+    setIsSubmitting(true);
+    setSubmitError("");
 
-    const newLeaderboard = [...leaderboard, entry]
-      .sort((a, b) => {
-        // Sort by percent desc, then by combo desc, then by hits asc
-        if (b.percent !== a.percent) return b.percent - a.percent;
-        if (b.combo !== a.combo) return b.combo - a.combo;
-        return a.hits - b.hits;
-      })
-      .slice(0, 50); // Keep top 50
+    try {
+      const res = await fetch("/api/game/leaderboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          yard: selectedYard,
+          percent: percentMowed,
+          combo: maxCombo,
+          hits: hitCount,
+        }),
+      });
 
-    setLeaderboard(newLeaderboard);
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(newLeaderboard));
-    localStorage.setItem(PLAYER_NAME_KEY, name);
-    setPlayerName(name);
-  }, [selectedYard, percentMowed, maxCombo, hitCount, leaderboard]);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(data.error || "Failed to save score");
+        setIsSubmitting(false);
+        return false;
+      }
+
+      // Save name and email locally
+      localStorage.setItem(PLAYER_NAME_KEY, name);
+      localStorage.setItem(EMAIL_KEY, email);
+      setPlayerName(name);
+      setEmail(email);
+
+      // Refresh leaderboard
+      const lbRes = await fetch("/api/game/leaderboard?limit=50");
+      const lbData = await lbRes.json();
+      if (lbData.leaderboard) {
+        setLeaderboard(lbData.leaderboard);
+      }
+
+      setIsSubmitting(false);
+      setShowNameInput(false);
+      return true;
+    } catch (error) {
+      console.error("Leaderboard submit error:", error);
+      setSubmitError("Network error. Please try again.");
+      setIsSubmitting(false);
+      return false;
+    }
+  }, [selectedYard, percentMowed, maxCombo, hitCount]);
 
   // Trigger screen shake
   const triggerShake = useCallback((intensity: number = 8) => {
@@ -569,9 +638,9 @@ export default function MowTownGame() {
     };
   }, []);
 
-  // Handle touch input
-  const handleTouch = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (gameState !== "playing") return;
+  // Handle touch input for canvas (desktop mouse)
+  const handleCanvasTouch = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (gameState !== "playing" || isMobile) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -584,10 +653,60 @@ export default function MowTownGame() {
       x: (clientX - rect.left) / rect.width,
       y: (clientY - rect.top) / rect.height,
     };
+  }, [gameState, isMobile]);
+
+  const handleCanvasTouchEnd = useCallback(() => {
+    if (!isMobile) {
+      touchTarget.current = null;
+    }
+  }, [isMobile]);
+
+  // Virtual joystick handlers
+  const handleJoystickStart = useCallback((e: React.TouchEvent) => {
+    if (gameState !== "playing") return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    setJoystick({
+      active: true,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      currentX: touch.clientX,
+      currentY: touch.clientY,
+      dx: 0,
+      dy: 0,
+    });
   }, [gameState]);
 
-  const handleTouchEnd = useCallback(() => {
-    touchTarget.current = null;
+  const handleJoystickMove = useCallback((e: React.TouchEvent) => {
+    if (!joystickRef.current.active) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const maxDistance = 50;
+    let dx = touch.clientX - joystickRef.current.startX;
+    let dy = touch.clientY - joystickRef.current.startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > maxDistance) {
+      dx = (dx / distance) * maxDistance;
+      dy = (dy / distance) * maxDistance;
+    }
+
+    setJoystick((prev) => ({
+      ...prev,
+      currentX: prev.startX + dx,
+      currentY: prev.startY + dy,
+      dx: dx / maxDistance,
+      dy: dy / maxDistance,
+    }));
+  }, []);
+
+  const handleJoystickEnd = useCallback(() => {
+    setJoystick((prev) => ({
+      ...prev,
+      active: false,
+      dx: 0,
+      dy: 0,
+    }));
   }, []);
 
   // Spawn grass particles
@@ -690,7 +809,13 @@ export default function MowTownGame() {
       if (keysPressed.current.has("arrowleft") || keysPressed.current.has("a")) dx -= 1;
       if (keysPressed.current.has("arrowright") || keysPressed.current.has("d")) dx += 1;
 
-      // Touch input
+      // Virtual joystick input (mobile)
+      if (joystickRef.current.active) {
+        dx = joystickRef.current.dx;
+        dy = joystickRef.current.dy;
+      }
+
+      // Mouse/touch input on canvas (desktop)
       if (touchTarget.current) {
         const targetX = touchTarget.current.x * yard.gridWidth;
         const targetY = touchTarget.current.y * yard.gridHeight;
@@ -1200,7 +1325,7 @@ export default function MowTownGame() {
 
         <div className="mt-12 text-white/60 text-sm">
           <p>Desktop: Arrow keys or WASD to steer</p>
-          <p>Mobile: Tap and hold to steer toward your finger</p>
+          <p>Mobile: Virtual joystick in bottom-left corner</p>
         </div>
       </div>
     );
@@ -1303,31 +1428,42 @@ export default function MowTownGame() {
             </div>
           )}
 
-          {/* Save to Leaderboard */}
+          {/* Save to Global Leaderboard */}
           {showNameInput ? (
             <div className="mb-6 bg-white/10 rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-3">Save your score to the leaderboard!</p>
-              <div className="flex gap-2">
+              <p className="text-white/80 text-sm mb-3">🏆 Save your score to the global leaderboard!</p>
+              <div className="space-y-2">
                 <input
                   type="text"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
                   placeholder="Your name"
                   maxLength={20}
-                  className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm"
+                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm"
                 />
+                <input
+                  type="email"
+                  value={leaderboardEmail}
+                  onChange={(e) => setLeaderboardEmail(e.target.value)}
+                  placeholder="Your email"
+                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm"
+                />
+                {submitError && (
+                  <p className="text-red-400 text-xs">{submitError}</p>
+                )}
                 <button
-                  onClick={() => {
-                    if (nameInput.trim()) {
-                      saveToLeaderboard(nameInput.trim());
-                      setShowNameInput(false);
+                  onClick={async () => {
+                    if (nameInput.trim() && leaderboardEmail.trim()) {
+                      await saveToLeaderboard(nameInput.trim(), leaderboardEmail.trim());
                     }
                   }}
-                  className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-medium px-4 py-2 rounded-lg text-sm"
+                  disabled={isSubmitting || !nameInput.trim() || !leaderboardEmail.trim()}
+                  className="w-full bg-[#c17f59] hover:bg-[#a66b48] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-4 py-2 rounded-lg text-sm"
                 >
-                  Save
+                  {isSubmitting ? "Saving..." : "Save to Leaderboard"}
                 </button>
               </div>
+              <p className="text-white/40 text-xs mt-2">We&apos;ll send you lawn tips. Unsubscribe anytime.</p>
             </div>
           ) : (
             <button
@@ -1423,7 +1559,7 @@ export default function MowTownGame() {
               <div className="divide-y divide-white/10">
                 {leaderboard.slice(0, 20).map((entry, index) => (
                   <div
-                    key={`${entry.name}-${entry.date}`}
+                    key={entry.id || `${entry.name}-${index}`}
                     className={`grid grid-cols-12 gap-2 px-4 py-3 text-sm ${
                       index === 0 ? "bg-yellow-500/10 text-yellow-300" :
                       index === 1 ? "bg-gray-300/10 text-gray-300" :
@@ -1468,7 +1604,7 @@ export default function MowTownGame() {
   // Playing
   return (
     <div
-      className="min-h-dvh bg-[#1a3d15] flex flex-col items-center justify-center p-2 sm:p-4"
+      className="min-h-dvh bg-[#1a3d15] flex flex-col items-center justify-center p-2 sm:p-4 select-none"
       style={{
         transform: `translate(${shake.x}px, ${shake.y}px)`,
       }}
@@ -1501,15 +1637,12 @@ export default function MowTownGame() {
       {/* Game canvas */}
       <div
         className="relative bg-[#4a7c3f] rounded-xl overflow-hidden shadow-2xl border-4 border-[#2d5a27] touch-none"
-        onMouseDown={handleTouch}
-        onMouseMove={(e) => e.buttons === 1 && handleTouch(e)}
-        onMouseUp={handleTouchEnd}
-        onMouseLeave={handleTouchEnd}
-        onTouchStart={handleTouch}
-        onTouchMove={handleTouch}
-        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleCanvasTouch}
+        onMouseMove={(e) => e.buttons === 1 && handleCanvasTouch(e)}
+        onMouseUp={handleCanvasTouchEnd}
+        onMouseLeave={handleCanvasTouchEnd}
       >
-        <canvas ref={canvasRef} className="block" />
+        <canvas ref={canvasRef} className="block" style={{ maxWidth: "100%", height: "auto" }} />
 
         {/* Power-up indicators */}
         <div className="absolute top-2 left-2 flex gap-2">
@@ -1522,9 +1655,49 @@ export default function MowTownGame() {
         </div>
       </div>
 
-      {/* Mobile controls hint */}
-      <p className="text-white/40 text-xs mt-3 lg:hidden">Tap and drag to steer the mower</p>
-      <p className="text-white/40 text-xs mt-3 hidden lg:block">Use arrow keys or WASD to steer</p>
+      {/* Virtual Joystick (Mobile) */}
+      {isMobile && (
+        <div
+          className="fixed bottom-8 left-8 w-32 h-32 touch-none"
+          onTouchStart={handleJoystickStart}
+          onTouchMove={handleJoystickMove}
+          onTouchEnd={handleJoystickEnd}
+        >
+          {/* Joystick base */}
+          <div className="absolute inset-0 rounded-full bg-white/10 border-2 border-white/20" />
+
+          {/* Joystick knob */}
+          <div
+            className="absolute w-14 h-14 rounded-full bg-white/30 border-2 border-white/40 transition-transform duration-75"
+            style={{
+              left: "50%",
+              top: "50%",
+              transform: joystick.active
+                ? `translate(calc(-50% + ${joystick.dx * 40}px), calc(-50% + ${joystick.dy * 40}px))`
+                : "translate(-50%, -50%)",
+            }}
+          />
+
+          {/* Direction indicator */}
+          {joystick.active && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div
+                className="w-4 h-4 border-t-4 border-r-4 border-white/60"
+                style={{
+                  transform: `rotate(${Math.atan2(joystick.dy, joystick.dx) * (180 / Math.PI) + 45}deg)`,
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Controls hint */}
+      {isMobile ? (
+        <p className="text-white/40 text-xs mt-3">Use the joystick to steer</p>
+      ) : (
+        <p className="text-white/40 text-xs mt-3">Use arrow keys or WASD to steer</p>
+      )}
     </div>
   );
 }
