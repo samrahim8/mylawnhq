@@ -69,174 +69,19 @@ interface YardConfig {
   locked?: boolean;
 }
 
-// Sound Manager using Web Audio API
+// Sound Manager - disabled for now (mobile compatibility issues)
 class SoundManager {
-  private audioContext: AudioContext | null = null;
-  private mowerOscillator: OscillatorNode | null = null;
-  private mowerGain: GainNode | null = null;
-  private initialized = false;
-  private muted = false;
-
-  init() {
-    if (this.initialized) return;
-    try {
-      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      this.initialized = true;
-    } catch (e) {
-      console.log("Web Audio not supported");
-    }
-  }
-
-  setMuted(muted: boolean) {
-    this.muted = muted;
-    // If muting while mower is running, stop it
-    if (muted && this.mowerGain) {
-      this.mowerGain.gain.setValueAtTime(0, this.audioContext?.currentTime || 0);
-    } else if (!muted && this.mowerGain && this.audioContext) {
-      this.mowerGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
-    }
-  }
-
-  isMuted() {
-    return this.muted;
-  }
-
-  startMower() {
-    if (!this.audioContext) return;
-    if (this.mowerOscillator) return;
-
-    // Create oscillator for mower hum
-    this.mowerOscillator = this.audioContext.createOscillator();
-    this.mowerGain = this.audioContext.createGain();
-
-    this.mowerOscillator.type = "sawtooth";
-    this.mowerOscillator.frequency.setValueAtTime(55, this.audioContext.currentTime);
-    this.mowerGain.gain.setValueAtTime(this.muted ? 0 : 0.08, this.audioContext.currentTime);
-
-    this.mowerOscillator.connect(this.mowerGain);
-    this.mowerGain.connect(this.audioContext.destination);
-    this.mowerOscillator.start();
-  }
-
-  stopMower() {
-    if (this.mowerOscillator) {
-      this.mowerOscillator.stop();
-      this.mowerOscillator = null;
-      this.mowerGain = null;
-    }
-  }
-
-  adjustMowerPitch(moving: boolean) {
-    if (!this.audioContext || !this.mowerOscillator) return;
-    const targetFreq = moving ? 75 : 55;
-    this.mowerOscillator.frequency.setTargetAtTime(targetFreq, this.audioContext.currentTime, 0.1);
-  }
-
-  playGrassCut() {
-    if (!this.audioContext || this.muted) return;
-
-    const osc = this.audioContext.createOscillator();
-    const gain = this.audioContext.createGain();
-    const filter = this.audioContext.createBiquadFilter();
-
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(800 + Math.random() * 400, this.audioContext.currentTime);
-
-    filter.type = "highpass";
-    filter.frequency.setValueAtTime(600, this.audioContext.currentTime);
-
-    gain.gain.setValueAtTime(0.02, this.audioContext.currentTime);
-    gain.gain.setTargetAtTime(0.001, this.audioContext.currentTime, 0.02);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.audioContext.destination);
-    osc.start();
-    osc.stop(this.audioContext.currentTime + 0.05);
-  }
-
-  playCollision() {
-    if (!this.audioContext || this.muted) return;
-
-    const osc = this.audioContext.createOscillator();
-    const gain = this.audioContext.createGain();
-
-    osc.type = "square";
-    osc.frequency.setValueAtTime(150, this.audioContext.currentTime);
-    osc.frequency.setTargetAtTime(80, this.audioContext.currentTime, 0.1);
-
-    gain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
-    gain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.15);
-
-    osc.connect(gain);
-    gain.connect(this.audioContext.destination);
-    osc.start();
-    osc.stop(this.audioContext.currentTime + 0.2);
-  }
-
-  playPowerUp() {
-    if (!this.audioContext || this.muted) return;
-
-    const osc = this.audioContext.createOscillator();
-    const gain = this.audioContext.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(400, this.audioContext.currentTime);
-    osc.frequency.setTargetAtTime(800, this.audioContext.currentTime, 0.1);
-
-    gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-    gain.gain.setTargetAtTime(0, this.audioContext.currentTime + 0.15, 0.1);
-
-    osc.connect(gain);
-    gain.connect(this.audioContext.destination);
-    osc.start();
-    osc.stop(this.audioContext.currentTime + 0.25);
-  }
-
-  playCombo(level: number) {
-    if (!this.audioContext || this.muted) return;
-
-    const baseFreq = 300 + level * 50;
-
-    for (let i = 0; i < 3; i++) {
-      const osc = this.audioContext.createOscillator();
-      const gain = this.audioContext.createGain();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(baseFreq * (1 + i * 0.25), this.audioContext.currentTime + i * 0.05);
-
-      gain.gain.setValueAtTime(0, this.audioContext.currentTime + i * 0.05);
-      gain.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + i * 0.05 + 0.02);
-      gain.gain.setTargetAtTime(0, this.audioContext.currentTime + i * 0.05 + 0.05, 0.05);
-
-      osc.connect(gain);
-      gain.connect(this.audioContext.destination);
-      osc.start(this.audioContext.currentTime + i * 0.05);
-      osc.stop(this.audioContext.currentTime + i * 0.05 + 0.15);
-    }
-  }
-
-  playGameOver(win: boolean) {
-    if (!this.audioContext || this.muted) return;
-
-    const notes = win ? [523, 659, 784, 1047] : [400, 350, 300, 250];
-
-    notes.forEach((freq, i) => {
-      const osc = this.audioContext!.createOscillator();
-      const gain = this.audioContext!.createGain();
-
-      osc.type = win ? "sine" : "triangle";
-      osc.frequency.setValueAtTime(freq, this.audioContext!.currentTime + i * 0.15);
-
-      gain.gain.setValueAtTime(0.1, this.audioContext!.currentTime + i * 0.15);
-      gain.gain.setTargetAtTime(0, this.audioContext!.currentTime + i * 0.15 + 0.1, 0.05);
-
-      osc.connect(gain);
-      gain.connect(this.audioContext!.destination);
-      osc.start(this.audioContext!.currentTime + i * 0.15);
-      osc.stop(this.audioContext!.currentTime + i * 0.15 + 0.2);
-    });
-  }
+  init() {}
+  setMuted(_muted: boolean) {}
+  isMuted() { return true; }
+  startMower() {}
+  stopMower() {}
+  adjustMowerPitch(_moving: boolean) {}
+  playGrassCut() {}
+  playCollision() {}
+  playPowerUp() {}
+  playCombo(_level: number) {}
+  playGameOver(_win: boolean) {}
 }
 
 // Yard configurations
@@ -371,7 +216,6 @@ const UNLOCKED_KEY = "mowtown_unlocked";
 const EMAIL_KEY = "mowtown_email";
 const LEADERBOARD_KEY = "mowtown_leaderboard";
 const PLAYER_NAME_KEY = "mowtown_player_name";
-const SOUND_ENABLED_KEY = "mowtown_sound_enabled";
 
 // Game Component
 export default function MowTownGame() {
@@ -443,7 +287,6 @@ export default function MowTownGame() {
   const [leaderboardEmail, setLeaderboardEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Cell size based on canvas
   const CELL_SIZE = 24;
@@ -456,16 +299,6 @@ export default function MowTownGame() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Load sound preference from localStorage
-  useEffect(() => {
-    const savedSound = localStorage.getItem(SOUND_ENABLED_KEY);
-    if (savedSound !== null) {
-      const enabled = savedSound === "true";
-      setSoundEnabled(enabled);
-      soundManager.current.setMuted(!enabled);
-    }
   }, []);
 
   // Keep joystick ref in sync
@@ -559,14 +392,6 @@ export default function MowTownGame() {
       return false;
     }
   }, [selectedYard, percentMowed, maxCombo, hitCount]);
-
-  // Toggle sound
-  const toggleSound = useCallback(() => {
-    const newEnabled = !soundEnabled;
-    setSoundEnabled(newEnabled);
-    soundManager.current.setMuted(!newEnabled);
-    localStorage.setItem(SOUND_ENABLED_KEY, String(newEnabled));
-  }, [soundEnabled]);
 
   // Trigger screen shake
   const triggerShake = useCallback((intensity: number = 8) => {
@@ -1688,15 +1513,6 @@ export default function MowTownGame() {
           <span className="text-white/60 text-xs">Hits</span>
           <span className="text-white font-bold text-lg ml-2">💥 {hitCount}</span>
         </div>
-
-        {/* Sound toggle */}
-        <button
-          onClick={toggleSound}
-          className="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 transition-colors"
-          title={soundEnabled ? "Mute" : "Unmute"}
-        >
-          <span className="text-xl">{soundEnabled ? "🔊" : "🔇"}</span>
-        </button>
       </div>
 
       {/* Game canvas */}
