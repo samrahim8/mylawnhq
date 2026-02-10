@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // Types
-type GameState = "start" | "select" | "playing" | "results";
+type GameState = "start" | "select" | "playing" | "results" | "email";
 type Difficulty = "starter" | "suburban" | "hoa" | "abandoned";
 
 interface Position {
@@ -26,6 +26,17 @@ interface PowerUp {
   collected: boolean;
 }
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  color: string;
+  size: number;
+}
+
 interface YardConfig {
   name: string;
   description: string;
@@ -35,6 +46,163 @@ interface YardConfig {
   timeLimit: number;
   obstacles: Obstacle[];
   randomize?: boolean;
+  locked?: boolean;
+}
+
+// Sound Manager using Web Audio API
+class SoundManager {
+  private audioContext: AudioContext | null = null;
+  private mowerOscillator: OscillatorNode | null = null;
+  private mowerGain: GainNode | null = null;
+  private initialized = false;
+
+  init() {
+    if (this.initialized) return;
+    try {
+      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      this.initialized = true;
+    } catch (e) {
+      console.log("Web Audio not supported");
+    }
+  }
+
+  startMower() {
+    if (!this.audioContext) return;
+    if (this.mowerOscillator) return;
+
+    // Create oscillator for mower hum
+    this.mowerOscillator = this.audioContext.createOscillator();
+    this.mowerGain = this.audioContext.createGain();
+
+    this.mowerOscillator.type = "sawtooth";
+    this.mowerOscillator.frequency.setValueAtTime(55, this.audioContext.currentTime);
+    this.mowerGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+
+    this.mowerOscillator.connect(this.mowerGain);
+    this.mowerGain.connect(this.audioContext.destination);
+    this.mowerOscillator.start();
+  }
+
+  stopMower() {
+    if (this.mowerOscillator) {
+      this.mowerOscillator.stop();
+      this.mowerOscillator = null;
+      this.mowerGain = null;
+    }
+  }
+
+  adjustMowerPitch(moving: boolean) {
+    if (!this.audioContext || !this.mowerOscillator) return;
+    const targetFreq = moving ? 75 : 55;
+    this.mowerOscillator.frequency.setTargetAtTime(targetFreq, this.audioContext.currentTime, 0.1);
+  }
+
+  playGrassCut() {
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    const filter = this.audioContext.createBiquadFilter();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(800 + Math.random() * 400, this.audioContext.currentTime);
+
+    filter.type = "highpass";
+    filter.frequency.setValueAtTime(600, this.audioContext.currentTime);
+
+    gain.gain.setValueAtTime(0.02, this.audioContext.currentTime);
+    gain.gain.exponentialDecayTo?.(0.001, this.audioContext.currentTime + 0.05) ||
+      gain.gain.setTargetAtTime(0.001, this.audioContext.currentTime, 0.02);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.audioContext.destination);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + 0.05);
+  }
+
+  playCollision() {
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(150, this.audioContext.currentTime);
+    osc.frequency.setTargetAtTime(80, this.audioContext.currentTime, 0.1);
+
+    gain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+    gain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.15);
+
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + 0.2);
+  }
+
+  playPowerUp() {
+    if (!this.audioContext) return;
+
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(400, this.audioContext.currentTime);
+    osc.frequency.setTargetAtTime(800, this.audioContext.currentTime, 0.1);
+
+    gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+    gain.gain.setTargetAtTime(0, this.audioContext.currentTime + 0.15, 0.1);
+
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + 0.25);
+  }
+
+  playCombo(level: number) {
+    if (!this.audioContext) return;
+
+    const baseFreq = 300 + level * 50;
+
+    for (let i = 0; i < 3; i++) {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(baseFreq * (1 + i * 0.25), this.audioContext.currentTime + i * 0.05);
+
+      gain.gain.setValueAtTime(0, this.audioContext.currentTime + i * 0.05);
+      gain.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + i * 0.05 + 0.02);
+      gain.gain.setTargetAtTime(0, this.audioContext.currentTime + i * 0.05 + 0.05, 0.05);
+
+      osc.connect(gain);
+      gain.connect(this.audioContext.destination);
+      osc.start(this.audioContext.currentTime + i * 0.05);
+      osc.stop(this.audioContext.currentTime + i * 0.05 + 0.15);
+    }
+  }
+
+  playGameOver(win: boolean) {
+    if (!this.audioContext) return;
+
+    const notes = win ? [523, 659, 784, 1047] : [400, 350, 300, 250];
+
+    notes.forEach((freq, i) => {
+      const osc = this.audioContext!.createOscillator();
+      const gain = this.audioContext!.createGain();
+
+      osc.type = win ? "sine" : "triangle";
+      osc.frequency.setValueAtTime(freq, this.audioContext!.currentTime + i * 0.15);
+
+      gain.gain.setValueAtTime(0.1, this.audioContext!.currentTime + i * 0.15);
+      gain.gain.setTargetAtTime(0, this.audioContext!.currentTime + i * 0.15 + 0.1, 0.05);
+
+      osc.connect(gain);
+      gain.connect(this.audioContext!.destination);
+      osc.start(this.audioContext!.currentTime + i * 0.15);
+      osc.stop(this.audioContext!.currentTime + i * 0.15 + 0.2);
+    });
+  }
 }
 
 // Yard configurations
@@ -51,6 +219,7 @@ const YARDS: Record<Difficulty, YardConfig> = {
       { x: 14, y: 10, width: 1, height: 1, type: "gnome" },
       { x: 10, y: 7, width: 1, height: 1, type: "sprinkler" },
     ],
+    locked: false,
   },
   suburban: {
     name: "The Suburban Spread",
@@ -69,6 +238,7 @@ const YARDS: Record<Difficulty, YardConfig> = {
       { x: 6, y: 14, width: 1, height: 1, type: "poop" },
       { x: 12, y: 8, width: 3, height: 1, type: "hose" },
     ],
+    locked: true,
   },
   hoa: {
     name: "The HOA Nightmare",
@@ -96,6 +266,7 @@ const YARDS: Record<Difficulty, YardConfig> = {
       { x: 10, y: 15, width: 4, height: 1, type: "hose" },
       { x: 5, y: 6, width: 3, height: 1, type: "hose" },
     ],
+    locked: true,
   },
   abandoned: {
     name: "The Abandoned Lot",
@@ -106,13 +277,13 @@ const YARDS: Record<Difficulty, YardConfig> = {
     timeLimit: 70,
     obstacles: [],
     randomize: true,
+    locked: true,
   },
 };
 
 // Utility functions
 function generateRandomObstacles(width: number, height: number): Obstacle[] {
   const obstacles: Obstacle[] = [];
-  const types: Obstacle["type"][] = ["tree", "flowerbed", "bicycle", "gnome", "sprinkler", "poop", "hose"];
 
   // Add 2-3 trees
   for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) {
@@ -161,15 +332,29 @@ function getScoreTier(percent: number): { title: string; message: string } {
   return { title: "Did You Even Start?", message: "The neighbors are talking. And not in a good way." };
 }
 
+// Local storage key for unlocked yards
+const UNLOCKED_KEY = "mowtown_unlocked";
+const EMAIL_KEY = "mowtown_email";
+
 // Game Component
 export default function MowTownGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const soundManager = useRef<SoundManager>(new SoundManager());
   const [gameState, setGameState] = useState<GameState>("start");
   const [selectedYard, setSelectedYard] = useState<Difficulty>("starter");
   const [timeLeft, setTimeLeft] = useState(60);
   const [percentMowed, setPercentMowed] = useState(0);
   const [hitCount, setHitCount] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
   const [finalPattern, setFinalPattern] = useState<string | null>(null);
+  const [unlockedYards, setUnlockedYards] = useState<Set<Difficulty>>(new Set(["starter"]));
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [pendingYard, setPendingYard] = useState<Difficulty | null>(null);
+
+  // Screen shake state
+  const [shake, setShake] = useState({ x: 0, y: 0 });
 
   // Game state refs (for animation loop)
   const gameStateRef = useRef({
@@ -178,6 +363,7 @@ export default function MowTownGame() {
     grass: [] as boolean[][],
     obstacles: [] as Obstacle[],
     powerUps: [] as PowerUp[],
+    particles: [] as Particle[],
     timeLeft: 60,
     speedBoost: false,
     speedBoostTimer: 0,
@@ -189,6 +375,10 @@ export default function MowTownGame() {
     totalGrass: 0,
     cutGrass: 0,
     hits: 0,
+    combo: 0,
+    maxCombo: 0,
+    lastCutTime: 0,
+    isMoving: false,
   });
 
   const keysPressed = useRef<Set<string>>(new Set());
@@ -198,6 +388,41 @@ export default function MowTownGame() {
 
   // Cell size based on canvas
   const CELL_SIZE = 24;
+
+  // Load unlocked yards from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(UNLOCKED_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUnlockedYards(new Set(parsed));
+      } catch {
+        setUnlockedYards(new Set(["starter"]));
+      }
+    }
+
+    const savedEmail = localStorage.getItem(EMAIL_KEY);
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  // Trigger screen shake
+  const triggerShake = useCallback((intensity: number = 8) => {
+    let shakeCount = 0;
+    const shakeInterval = setInterval(() => {
+      if (shakeCount >= 6) {
+        setShake({ x: 0, y: 0 });
+        clearInterval(shakeInterval);
+        return;
+      }
+      setShake({
+        x: (Math.random() - 0.5) * intensity,
+        y: (Math.random() - 0.5) * intensity,
+      });
+      shakeCount++;
+    }, 50);
+  }, []);
 
   // Initialize game
   const initGame = useCallback((difficulty: Difficulty) => {
@@ -244,6 +469,7 @@ export default function MowTownGame() {
       grass,
       obstacles,
       powerUps,
+      particles: [],
       timeLeft: yard.timeLimit,
       speedBoost: false,
       speedBoostTimer: 0,
@@ -255,11 +481,17 @@ export default function MowTownGame() {
       totalGrass,
       cutGrass: 0,
       hits: 0,
+      combo: 0,
+      maxCombo: 0,
+      lastCutTime: 0,
+      isMoving: false,
     };
 
     setTimeLeft(yard.timeLimit);
     setPercentMowed(0);
     setHitCount(0);
+    setCombo(0);
+    setMaxCombo(0);
   }, []);
 
   // Handle keyboard input
@@ -301,9 +533,78 @@ export default function MowTownGame() {
     touchTarget.current = null;
   }, []);
 
+  // Spawn grass particles
+  const spawnParticles = useCallback((x: number, y: number, count: number = 3) => {
+    const particles = gameStateRef.current.particles;
+    const colors = ["#4a7c3f", "#3d6b34", "#5a8c4f", "#6b9d5f"];
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: x * CELL_SIZE + CELL_SIZE / 2,
+        y: y * CELL_SIZE + CELL_SIZE / 2,
+        vx: (Math.random() - 0.5) * 4,
+        vy: -Math.random() * 3 - 1,
+        life: 1,
+        maxLife: 0.5 + Math.random() * 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 2 + Math.random() * 3,
+      });
+    }
+  }, []);
+
+  // Handle yard selection
+  const handleYardSelect = useCallback((yard: Difficulty) => {
+    const isLocked = YARDS[yard].locked && !unlockedYards.has(yard);
+
+    if (isLocked) {
+      setPendingYard(yard);
+      setGameState("email");
+    } else {
+      setSelectedYard(yard);
+      initGame(yard);
+      soundManager.current.init();
+      soundManager.current.startMower();
+      setGameState("playing");
+    }
+  }, [unlockedYards, initGame]);
+
+  // Handle email submit
+  const handleEmailSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+
+    // Save email and unlock all yards
+    localStorage.setItem(EMAIL_KEY, email);
+    const allYards: Difficulty[] = ["starter", "suburban", "hoa", "abandoned"];
+    localStorage.setItem(UNLOCKED_KEY, JSON.stringify(allYards));
+    setUnlockedYards(new Set(allYards));
+    setEmailError("");
+
+    // Start the pending yard
+    if (pendingYard) {
+      setSelectedYard(pendingYard);
+      initGame(pendingYard);
+      soundManager.current.init();
+      soundManager.current.startMower();
+      setGameState("playing");
+      setPendingYard(null);
+    } else {
+      setGameState("select");
+    }
+  }, [email, pendingYard, initGame]);
+
   // Game loop
   useEffect(() => {
-    if (gameState !== "playing") return;
+    if (gameState !== "playing") {
+      soundManager.current.stopMower();
+      return;
+    }
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -316,6 +617,7 @@ export default function MowTownGame() {
     canvas.height = yard.gridHeight * CELL_SIZE;
 
     let timerInterval: NodeJS.Timeout;
+    let grassCutSoundCooldown = 0;
 
     const gameLoop = (timestamp: number) => {
       const delta = timestamp - lastTime.current;
@@ -347,6 +649,13 @@ export default function MowTownGame() {
         }
       }
 
+      const wasMoving = state.isMoving;
+      state.isMoving = dx !== 0 || dy !== 0;
+
+      if (state.isMoving !== wasMoving) {
+        soundManager.current.adjustMowerPitch(state.isMoving);
+      }
+
       // Update mower
       if (!state.stunned && (dx !== 0 || dy !== 0)) {
         state.targetAngle = Math.atan2(dy, dx);
@@ -368,6 +677,8 @@ export default function MowTownGame() {
 
         // Cut grass
         const mowWidth = state.widecut ? 1.5 : 0.7;
+        let cutThisFrame = false;
+
         for (let oy = -Math.ceil(mowWidth); oy <= Math.ceil(mowWidth); oy++) {
           for (let ox = -Math.ceil(mowWidth); ox <= Math.ceil(mowWidth); ox++) {
             const gx = Math.floor(state.mower.x + ox * 0.5);
@@ -381,9 +692,40 @@ export default function MowTownGame() {
                 if (!hitFlowerbed) {
                   state.grass[gy][gx] = false;
                   state.cutGrass++;
+                  cutThisFrame = true;
+
+                  // Spawn particles
+                  spawnParticles(gx, gy, 2);
+
+                  // Update combo
+                  const now = Date.now();
+                  if (now - state.lastCutTime < 500) {
+                    state.combo++;
+                    if (state.combo > state.maxCombo) {
+                      state.maxCombo = state.combo;
+                      setMaxCombo(state.maxCombo);
+                    }
+                    // Play combo sound at milestones
+                    if (state.combo % 10 === 0) {
+                      soundManager.current.playCombo(Math.floor(state.combo / 10));
+                    }
+                  } else {
+                    state.combo = 1;
+                  }
+                  state.lastCutTime = now;
+                  setCombo(state.combo);
                 }
               }
             }
+          }
+        }
+
+        // Play grass cut sound (with cooldown to avoid spam)
+        if (cutThisFrame) {
+          grassCutSoundCooldown -= delta;
+          if (grassCutSoundCooldown <= 0) {
+            soundManager.current.playGrassCut();
+            grassCutSoundCooldown = 100; // 100ms cooldown
           }
         }
 
@@ -399,7 +741,13 @@ export default function MowTownGame() {
             ) {
               state.lastHitTime = now;
               state.hits++;
+              state.combo = 0; // Reset combo on hit
+              setCombo(0);
               setHitCount(state.hits);
+
+              // Play collision sound and shake
+              soundManager.current.playCollision();
+              triggerShake(10);
 
               if (obs.type === "poop") {
                 // Slow down instead of stun
@@ -426,6 +774,8 @@ export default function MowTownGame() {
         for (const pu of state.powerUps) {
           if (!pu.collected && Math.abs(state.mower.x - pu.x - 0.5) < 0.8 && Math.abs(state.mower.y - pu.y - 0.5) < 0.8) {
             pu.collected = true;
+            soundManager.current.playPowerUp();
+
             if (pu.type === "time") {
               state.timeLeft += 5;
               setTimeLeft(state.timeLeft);
@@ -438,7 +788,23 @@ export default function MowTownGame() {
             }
           }
         }
+      } else if (!state.stunned) {
+        // Not moving, reset combo after a delay
+        const now = Date.now();
+        if (now - state.lastCutTime > 1000 && state.combo > 0) {
+          state.combo = 0;
+          setCombo(0);
+        }
       }
+
+      // Update particles
+      state.particles = state.particles.filter((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15; // Gravity
+        p.life -= delta / 1000 / p.maxLife;
+        return p.life > 0;
+      });
 
       // Update timers
       if (state.stunned) {
@@ -606,10 +972,18 @@ export default function MowTownGame() {
         ctx.font = "16px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        if (pu.type === "time") ctx.fillText("⏱", px, py);
-        else if (pu.type === "speed") ctx.fillText("⚡", px, py);
-        else if (pu.type === "wide") ctx.fillText("📏", px, py);
+        if (pu.type === "time") ctx.fillText("\u23F1", px, py);
+        else if (pu.type === "speed") ctx.fillText("\u26A1", px, py);
+        else if (pu.type === "wide") ctx.fillText("\uD83D\uDCCF", px, py);
       }
+
+      // Draw particles
+      for (const p of state.particles) {
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      }
+      ctx.globalAlpha = 1;
 
       // Draw mower
       ctx.save();
@@ -664,6 +1038,10 @@ export default function MowTownGame() {
         // Game over
         clearInterval(timerInterval);
         if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+        soundManager.current.stopMower();
+
+        const percent = Math.round((gameStateRef.current.cutGrass / gameStateRef.current.totalGrass) * 100);
+        soundManager.current.playGameOver(percent >= 76);
 
         // Capture final pattern
         const canvas = canvasRef.current;
@@ -680,8 +1058,60 @@ export default function MowTownGame() {
     return () => {
       clearInterval(timerInterval);
       if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+      soundManager.current.stopMower();
     };
-  }, [gameState, selectedYard]);
+  }, [gameState, selectedYard, spawnParticles, triggerShake]);
+
+  // Email capture screen
+  if (gameState === "email") {
+    return (
+      <div className="min-h-dvh bg-[#2d5a27] flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="font-display text-3xl font-bold text-white mb-2">Unlock All Yards</h2>
+          <p className="text-white/70 mb-6">
+            Enter your email to unlock <strong className="text-white">{pendingYard ? YARDS[pendingYard].name : "all premium yards"}</strong> and get weekly lawn care tips.
+          </p>
+
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
+            <div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError("");
+                }}
+                placeholder="your@email.com"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50"
+              />
+              {emailError && (
+                <p className="text-red-400 text-sm mt-2">{emailError}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg"
+            >
+              Unlock Yards
+            </button>
+          </form>
+
+          <p className="text-white/40 text-xs mt-6">
+            We&apos;ll send you 1 email per week with lawn tips. Unsubscribe anytime.
+          </p>
+
+          <button
+            onClick={() => setGameState("select")}
+            className="mt-6 text-white/60 hover:text-white/80 text-sm"
+          >
+            ← Back to yard selection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Start screen
   if (gameState === "start") {
@@ -692,7 +1122,10 @@ export default function MowTownGame() {
           <h1 className="font-display text-5xl font-bold text-white mb-3 tracking-tight">MOW TOWN</h1>
           <p className="text-xl text-white/80 mb-8">Mow the yard. Dodge the junk. Beat the clock.</p>
           <button
-            onClick={() => setGameState("select")}
+            onClick={() => {
+              soundManager.current.init();
+              setGameState("select");
+            }}
             className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg"
           >
             Start Mowing
@@ -714,30 +1147,36 @@ export default function MowTownGame() {
         <h2 className="font-display text-3xl font-bold text-white mb-8">Pick Your Yard</h2>
 
         <div className="grid gap-4 max-w-lg w-full">
-          {(Object.entries(YARDS) as [Difficulty, YardConfig][]).map(([key, yard]) => (
-            <button
-              key={key}
-              onClick={() => {
-                setSelectedYard(key);
-                initGame(key);
-                setGameState("playing");
-              }}
-              className="bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 rounded-xl p-4 text-left transition-all"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold text-white text-lg">{yard.name}</span>
-                <span className={`text-xs font-medium px-2 py-1 rounded ${
-                  yard.difficulty === "Easy" ? "bg-green-500/20 text-green-300" :
-                  yard.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-300" :
-                  "bg-red-500/20 text-red-300"
-                }`}>
-                  {yard.difficulty}
-                </span>
-              </div>
-              <p className="text-white/70 text-sm">{yard.description}</p>
-              <p className="text-white/50 text-xs mt-2">{yard.timeLimit} seconds</p>
-            </button>
-          ))}
+          {(Object.entries(YARDS) as [Difficulty, YardConfig][]).map(([key, yard]) => {
+            const isLocked = yard.locked && !unlockedYards.has(key);
+
+            return (
+              <button
+                key={key}
+                onClick={() => handleYardSelect(key)}
+                className={`bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/40 rounded-xl p-4 text-left transition-all relative ${isLocked ? "opacity-80" : ""}`}
+              >
+                {isLocked && (
+                  <div className="absolute top-4 right-4 text-2xl">🔒</div>
+                )}
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-white text-lg">{yard.name}</span>
+                  <span className={`text-xs font-medium px-2 py-1 rounded ${
+                    yard.difficulty === "Easy" ? "bg-green-500/20 text-green-300" :
+                    yard.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-300" :
+                    "bg-red-500/20 text-red-300"
+                  }`}>
+                    {yard.difficulty}
+                  </span>
+                </div>
+                <p className="text-white/70 text-sm">{yard.description}</p>
+                <p className="text-white/50 text-xs mt-2">
+                  {yard.timeLimit} seconds
+                  {isLocked && <span className="ml-2 text-[#c17f59]">• Enter email to unlock</span>}
+                </p>
+              </button>
+            );
+          })}
         </div>
 
         <button
@@ -753,7 +1192,7 @@ export default function MowTownGame() {
   // Results screen
   if (gameState === "results") {
     const tier = getScoreTier(percentMowed);
-    const shareText = `I mowed ${percentMowed}% of the yard in Mow Town 🌱`;
+    const shareText = `I mowed ${percentMowed}% of the yard in Mow Town 🌱 ${maxCombo > 10 ? `(${maxCombo}x combo!)` : ""}`;
 
     return (
       <div className="min-h-dvh bg-[#2d5a27] flex flex-col items-center justify-center p-6 text-center">
@@ -771,6 +1210,7 @@ export default function MowTownGame() {
           {/* Stats */}
           <div className="flex justify-center gap-6 mb-6 text-white/70 text-sm">
             <div>💥 {hitCount} hits</div>
+            <div>🔥 {maxCombo}x max combo</div>
             <div>⏱ {YARDS[selectedYard].timeLimit}s</div>
           </div>
 
@@ -806,6 +1246,7 @@ export default function MowTownGame() {
             <button
               onClick={() => {
                 initGame(selectedYard);
+                soundManager.current.startMower();
                 setGameState("playing");
               }}
               className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold px-6 py-3 rounded-xl"
@@ -826,13 +1267,25 @@ export default function MowTownGame() {
 
   // Playing
   return (
-    <div className="min-h-dvh bg-[#1a3d15] flex flex-col items-center justify-center p-2 sm:p-4">
+    <div
+      className="min-h-dvh bg-[#1a3d15] flex flex-col items-center justify-center p-2 sm:p-4"
+      style={{
+        transform: `translate(${shake.x}px, ${shake.y}px)`,
+      }}
+    >
       {/* HUD */}
       <div className="w-full max-w-3xl flex items-center justify-between mb-2 px-2">
         <div className="bg-white/10 rounded-lg px-3 py-1.5">
           <span className="text-white/60 text-xs">Mowed</span>
           <span className="text-white font-bold text-lg ml-2">{percentMowed}%</span>
         </div>
+
+        {/* Combo display */}
+        {combo > 1 && (
+          <div className={`bg-orange-500/30 rounded-lg px-3 py-1.5 ${combo >= 10 ? "animate-pulse" : ""}`}>
+            <span className="text-orange-400 font-bold text-lg">🔥 {combo}x</span>
+          </div>
+        )}
 
         <div className={`bg-white/10 rounded-lg px-3 py-1.5 ${timeLeft <= 10 ? "animate-pulse bg-red-500/30" : ""}`}>
           <span className="text-white/60 text-xs">Time</span>
