@@ -562,7 +562,7 @@ function OnboardingFlow() {
                           key={g.key}
                           onClick={() => selectGrass(g.key)}
                           className={`rounded-xl border border-deep-brown/10 bg-white text-left transition-all duration-150 active:scale-[0.97] hover:border-terracotta hover:shadow-md overflow-hidden ${
-                            g.key === "not_sure" ? "col-span-2" : ""
+                            g.key === "not_sure" && (filteredGrassOptions.length - 1) % 2 === 0 ? "col-span-2" : ""
                           }`}
                         >
                           {/* Swatch / Photo */}
