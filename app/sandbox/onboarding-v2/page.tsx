@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, Suspense } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { LogoIcon, LogoWordmark } from "@/components/Logo";
 import { getRegionInfo } from "@/lib/zip-climate";
 import type { RegionInfo } from "@/lib/zip-climate";
+import zipGrassZones from "@/lib/zip-grass-zones.json";
 
 /* ═══════════════════════════════════════════
    Types
@@ -99,6 +100,18 @@ function track(event: string, data?: Record<string, unknown>) {
     console.log(`[LawnHQ Analytics] ${event}`, data ?? {});
     // Future: send to analytics endpoint
   }
+}
+
+/* ── Zip-to-zone grass filtering ── */
+const zipPrefixToZone = zipGrassZones.zip_prefix_to_zone as Record<string, string>;
+const zoneGrasses = zipGrassZones.zone_grasses as Record<string, string[]>;
+
+function getEligibleGrasses(zip: string): GrassKey[] | null {
+  if (!zip || zip.length < 3) return null;
+  const prefix = zip.substring(0, 3);
+  const zone = zipPrefixToZone[prefix];
+  if (!zone) return null;
+  return (zoneGrasses[zone] || null) as GrassKey[] | null;
 }
 
 /* ═══════════════════════════════════════════
@@ -239,6 +252,15 @@ function OnboardingFlow() {
   const [optInSaved, setOptInSaved] = useState(false);
 
   const upsellTriggerRef = useRef<HTMLDivElement>(null);
+
+  /* ── Filter grass options by zip zone ── */
+  const filteredGrassOptions = useMemo(() => {
+    const eligible = getEligibleGrasses(state.zip);
+    if (!eligible) return GRASS_OPTIONS; // show all if zip not found
+    return GRASS_OPTIONS.filter(
+      (g) => g.key === "not_sure" || eligible.includes(g.key)
+    );
+  }, [state.zip]);
 
   /* ── Init from URL ── */
   useEffect(() => {
@@ -452,7 +474,7 @@ function OnboardingFlow() {
 
                     {/* Grass cards grid */}
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      {GRASS_OPTIONS.map((g) => (
+                      {filteredGrassOptions.map((g) => (
                         <button
                           key={g.key}
                           onClick={() => selectGrass(g.key)}
