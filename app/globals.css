@@ -227,25 +227,27 @@ body {
   z-index: 1;
 }
 
-/* CTA button — hover shine + lift */
+/* CTA button — auto shine + hover lift */
 .cta-btn {
   position: relative;
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.2s ease;
 }
 
+@keyframes cta-shine {
+  0% { left: -100%; }
+  20% { left: 100%; }
+  100% { left: 100%; }
+}
+
 .cta-btn::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   left: -100%;
-  transition: left 0.5s ease;
   z-index: 1;
-}
-
-.cta-btn:hover::before {
-  left: 100%;
+  animation: cta-shine 3s ease-in-out infinite;
 }
 
 .cta-btn:hover {
