@@ -118,40 +118,6 @@ export function LawnPlan() {
 
   return (
     <div className="space-y-3">
-      {/* Header card */}
-      <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 sm:p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h2 className="font-display text-lg sm:text-xl font-bold text-deep-brown">Your 90-Day Plan</h2>
-            <p className="text-deep-brown/50 text-xs sm:text-sm mt-0.5">
-              {grassLabels[params.grassType] || params.grassType} · {params.zip}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-xl sm:text-2xl font-bold text-deep-brown">{progressPercent}%</div>
-            <div className="text-xs text-deep-brown/50">{completedCount}/{totalTasks}</div>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-2.5 bg-deep-brown/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-lawn rounded-full transition-all duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-
-        {/* Pills */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          <span className="inline-flex items-center bg-deep-brown/5 text-deep-brown/70 text-xs font-medium px-2.5 py-1 rounded-full">
-            {goalLabels[params.lawnGoal] || params.lawnGoal}
-          </span>
-          <span className="inline-flex items-center bg-deep-brown/5 text-deep-brown/70 text-xs font-medium px-2.5 py-1 rounded-full">
-            {params.path === "expert" ? "Expert" : "Guided"}
-          </span>
-        </div>
-      </div>
-
       {/* Plan months */}
       <div className="space-y-2">
         {plan.map((month, idx) => {

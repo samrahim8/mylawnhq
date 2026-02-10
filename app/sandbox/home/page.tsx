@@ -939,7 +939,13 @@ function HomePageContent() {
               {/* Progress Card */}
               {nextTask && nextTask.totalTasks > 0 && (
                 <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
-                  <h3 className="font-display font-bold text-deep-brown mb-4">90-Day Progress</h3>
+                  <h3 className="font-display font-bold text-deep-brown">90-Day Progress</h3>
+                  {(profile?.grassType || profile?.zipCode) && (
+                    <p className="text-xs text-deep-brown/50 mt-0.5 mb-4">
+                      {[formatGrassType(profile?.grassType), profile?.zipCode].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  {!(profile?.grassType || profile?.zipCode) && <div className="mb-4" />}
 
                   {/* Large Progress Ring */}
                   <div className="flex justify-center mb-4">
