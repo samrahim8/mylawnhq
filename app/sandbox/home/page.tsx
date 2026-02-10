@@ -106,15 +106,19 @@ function HomePageContent() {
         const plan = getSamplePlan(params.grassType, params.lawnSize, params.lawnGoal, params.path);
         const completed: Record<string, boolean> = savedTasks ? JSON.parse(savedTasks) : {};
 
-        // Count total and completed
+        // Count total and completed (only count keys that match actual plan tasks)
         let totalTasks = 0;
         let completedCount = 0;
-        for (const month of plan) {
-          for (const week of month.weeks) {
-            totalTasks += week.tasks.length;
+        for (let mIdx = 0; mIdx < plan.length; mIdx++) {
+          for (let wIdx = 0; wIdx < plan[mIdx].weeks.length; wIdx++) {
+            for (let tIdx = 0; tIdx < plan[mIdx].weeks[wIdx].tasks.length; tIdx++) {
+              totalTasks++;
+              if (completed[`${mIdx}-${wIdx}-${tIdx}`]) {
+                completedCount++;
+              }
+            }
           }
         }
-        completedCount = Object.values(completed).filter(Boolean).length;
 
         // Find first incomplete task
         for (let mIdx = 0; mIdx < plan.length; mIdx++) {

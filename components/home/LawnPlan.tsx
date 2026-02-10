@@ -79,11 +79,9 @@ export function LawnPlan({ onTaskToggle }: LawnPlanProps = {}) {
 
   const toggleTask = (monthIdx: number, weekIdx: number, taskIdx: number) => {
     const key = `${monthIdx}-${weekIdx}-${taskIdx}`;
-    setCompletedTasks((prev) => {
-      const updated = { ...prev, [key]: !prev[key] };
-      localStorage.setItem("lawnhq_completed_tasks", JSON.stringify(updated));
-      return updated;
-    });
+    const updated = { ...completedTasks, [key]: !completedTasks[key] };
+    localStorage.setItem("lawnhq_completed_tasks", JSON.stringify(updated));
+    setCompletedTasks(updated);
     onTaskToggle?.();
   };
 
