@@ -20,7 +20,7 @@ import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
 import { getSamplePlan, type PlanMonth } from "@/app/sandbox/plan/samplePlan";
 
-type MobileView = "home" | "plan" | "activity";
+type MobileView = "home" | "plan" | "activity" | "chat";
 
 function HomePageContent() {
   const { profile, isSetUp } = useProfile();
@@ -191,13 +191,25 @@ function HomePageContent() {
     if (!el) return;
 
     const handleScroll = () => {
+      const hasOverflow = el.scrollHeight > el.clientHeight + 10;
       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-      setShowScrollArrow(!nearBottom);
+      setShowScrollArrow(hasOverflow && !nearBottom);
     };
 
-    handleScroll();
+    // Delay initial check so content has time to render
+    const timer = setTimeout(handleScroll, 300);
+
     el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
+
+    // Re-check when content size changes (images load, dynamic content)
+    const ro = new ResizeObserver(handleScroll);
+    ro.observe(el);
+
+    return () => {
+      clearTimeout(timer);
+      el.removeEventListener("scroll", handleScroll);
+      ro.disconnect();
+    };
   }, []);
 
   const handleDismissSignup = (permanent: boolean) => {
@@ -651,13 +663,14 @@ function HomePageContent() {
               { id: "home" as MobileView, label: "Home", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
               { id: "plan" as MobileView, label: "Plan", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
               { id: "activity" as MobileView, label: "Activity", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { id: "chat" as MobileView, label: "Chat", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
             ].map((nav) => {
               const isActive = mobileView === nav.id;
               return (
                 <button
                   key={nav.id}
                   type="button"
-                  onClick={() => setMobileView(nav.id)}
+                  onClick={() => nav.id === "chat" ? router.push("/sandbox/chat") : setMobileView(nav.id)}
                   className={`flex-1 flex flex-col items-center justify-center py-3 min-h-[56px] active:bg-deep-brown/5 transition-colors ${
                     isActive ? "text-lawn" : "text-deep-brown/50"
                   }`}
