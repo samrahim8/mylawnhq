@@ -288,9 +288,9 @@ function PreviewCardCarousel() {
 /* ── Season Badge ── */
 function SeasonBadge() {
   return (
-    <div className="inline-flex items-center gap-2 bg-terracotta rounded-full px-4 py-2 mb-4">
-      <span className="inline-flex h-3 w-3 rounded-full bg-white animate-pulse-dot" />
-      <span className="font-display text-xs font-semibold tracking-widest uppercase text-white">
+    <div className="inline-flex items-center gap-1.5 bg-terracotta rounded-full px-3 py-1.5 mb-4">
+      <span className="inline-flex h-2 w-2 rounded-full bg-white animate-pulse-dot" />
+      <span className="font-display text-[10px] font-semibold tracking-widest uppercase text-white">
         Lawn Season is Live
       </span>
     </div>
@@ -312,7 +312,7 @@ export default function SandboxHero() {
   };
 
   return (
-    <div className="bg-cream flex flex-col h-dvh overflow-hidden relative">
+    <div className="bg-cream flex flex-col min-h-dvh relative">
       {/* Decorative background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-lawn/5 via-transparent to-transparent rounded-full blur-3xl" />
@@ -320,7 +320,7 @@ export default function SandboxHero() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="flex-1 flex flex-col lg:hidden overflow-hidden relative z-10">
+      <div className="flex flex-col lg:hidden relative z-10">
         {/* Nav */}
         <nav className="flex items-center justify-between px-5 pt-[max(12px,env(safe-area-inset-top))] pb-2">
           <Logo />
@@ -329,20 +329,20 @@ export default function SandboxHero() {
           </a>
         </nav>
 
-        {/* Hero content */}
-        <div className="flex-1 overflow-y-auto px-5 pt-8">
-          <div className="space-y-3">
+        {/* Hero content — fills viewport */}
+        <div className="min-h-[calc(100dvh-60px)] flex flex-col justify-start pt-[12vh] px-5">
+          <div className="space-y-4">
             <div>
               <SeasonBadge />
-              <h1 className="font-display text-[28px] font-bold text-deep-brown leading-[1.1] tracking-tight">
+              <h1 className="font-display text-[32px] font-bold text-deep-brown leading-[1.1] tracking-tight">
                 YOUR <span className="text-[#7a8b6e]">LAWN</span> CALLED.<br />IT WANTS A PLAN.
               </h1>
-              <p className="mt-2 text-sm text-deep-brown/70 leading-relaxed max-w-[320px]">
+              <p className="mt-3 text-[15px] text-deep-brown/70 leading-relaxed max-w-[340px]">
                 A week-by-week playbook built for your zip code — what to buy, when to apply, and when to just kick back.
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="relative">
                 <input
                   type="text"
@@ -354,7 +354,7 @@ export default function SandboxHero() {
                     setZip(e.target.value.replace(/\D/g, ""));
                     setError("");
                   }}
-                  className="w-full h-12 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn focus:ring-0 transition-colors shadow-sm"
+                  className="w-full h-14 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn focus:ring-0 transition-colors shadow-sm"
                 />
                 {zip.length === 5 && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -373,7 +373,7 @@ export default function SandboxHero() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="cta-btn w-full h-12 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.97] transition-all shadow-lg shadow-terracotta/20 hover:shadow-xl hover:shadow-terracotta/25"
+                className="cta-btn w-full h-14 bg-terracotta text-white font-bold rounded-2xl text-[17px] active:scale-[0.97] transition-all shadow-lg shadow-terracotta/20 hover:shadow-xl hover:shadow-terracotta/25"
               >
                 GET MY FREE PLAN →
               </button>
@@ -402,30 +402,32 @@ export default function SandboxHero() {
                 Neighbor jealousy guaranteed
               </span>
             </div>
+          </div>
+        </div>
 
-            {/* Mobile Before/After */}
-            <div className="pt-4 pb-4">
-              <div className="mb-2">
-                <div className="w-8 h-0.5 bg-[#c17f59] mb-2"></div>
-                <p className="font-display text-sm font-semibold text-[#1a1a1a]">Real <span className="text-[#7a8b6e]">yards</span>. Real <span className="text-[#7a8b6e]">results</span>.</p>
+        {/* Mobile Before/After — below the fold, scrollable */}
+        <div className="px-5 pb-8 -mt-[12vh]">
+          <div className="border-t border-deep-brown/10 pt-5">
+            <div className="mb-3">
+              <div className="w-8 h-0.5 bg-[#c17f59] mb-2"></div>
+              <p className="font-display text-base font-semibold text-[#1a1a1a]">Real <span className="text-[#7a8b6e]">yards</span>. Real <span className="text-[#7a8b6e]">results</span>.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="relative">
+                <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                  <img src="/lawn-before.jpg" alt="Lawn before using LawnHQ" className="w-full h-full object-cover" />
+                </div>
+                <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[#525252] text-[8px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded">
+                  Before
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <div className="aspect-[4/3] overflow-hidden rounded-lg">
-                    <img src="/lawn-before.jpg" alt="Lawn before using LawnHQ" className="w-full h-full object-cover" />
-                  </div>
-                  <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[#525252] text-[8px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded">
-                    Before
-                  </span>
+              <div className="relative">
+                <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                  <img src="/lawn-after.jpg" alt="Lawn after using LawnHQ" className="w-full h-full object-cover" />
                 </div>
-                <div className="relative">
-                  <div className="aspect-[4/3] overflow-hidden rounded-lg">
-                    <img src="/lawn-after.jpg" alt="Lawn after using LawnHQ" className="w-full h-full object-cover" />
-                  </div>
-                  <span className="absolute top-2 left-2 bg-[#c17f59]/90 backdrop-blur-sm text-white text-[8px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded">
-                    After
-                  </span>
-                </div>
+                <span className="absolute top-2 left-2 bg-[#c17f59]/90 backdrop-blur-sm text-white text-[8px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded">
+                  After
+                </span>
               </div>
             </div>
           </div>
@@ -435,7 +437,7 @@ export default function SandboxHero() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden lg:flex lg:flex-col lg:h-dvh lg:overflow-hidden relative z-10">
+      <div className="hidden lg:flex lg:flex-col relative z-10">
         {/* Nav - pinned to top */}
         <nav className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center justify-between flex-shrink-0">
           <Logo />
@@ -445,28 +447,28 @@ export default function SandboxHero() {
           </div>
         </nav>
 
-        {/* All content centered vertically */}
-        <div className="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full px-8 min-h-0">
+        {/* Hero — fills viewport, centered vertically */}
+        <div className="min-h-[calc(100dvh-60px)] flex flex-col justify-center max-w-6xl mx-auto w-full px-8">
           {/* Hero */}
-          <div className="grid grid-cols-2 gap-8 items-center">
+          <div className="grid grid-cols-2 gap-12 items-center">
             <div>
               <SeasonBadge />
-              <h1 className="font-display text-3xl xl:text-4xl font-bold text-deep-brown leading-[1.1] tracking-tight">
+              <h1 className="font-display text-[3.15rem] font-bold text-deep-brown leading-[1.1] tracking-tight">
                 YOUR <span className="text-[#7a8b6e]">LAWN</span> CALLED.<br />IT WANTS A PLAN.
               </h1>
-              <p className="mt-3 text-base text-deep-brown/70 leading-relaxed">
+              <p className="mt-4 text-lg text-deep-brown/70 leading-relaxed">
                 A week-by-week playbook built for your zip code — what to buy, when to apply, and when to just kick back.
               </p>
 
-              <ul className="mt-3 space-y-1.5">
+              <ul className="mt-5 space-y-2">
                 {[
                   "Know exactly what to do and when \u2014 personalized to your lawn.",
                   "Get instant answers \u2014 snap a photo or ask anything.",
                   "Track everything \u2014 no more guessing what you put down last month.",
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-deep-brown/80">
-                    <span className="w-4 h-4 rounded-full bg-lawn/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-2.5 h-2.5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <li key={item} className="flex items-center gap-2.5 text-[15px] text-deep-brown/80">
+                    <span className="w-5 h-5 rounded-full bg-lawn/10 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </span>
@@ -475,7 +477,7 @@ export default function SandboxHero() {
                 ))}
               </ul>
 
-              <div className="flex items-center gap-2 mt-6">
+              <div className="flex items-center gap-2 mt-8">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap" style={{ background: 'rgba(107, 125, 58, 0.08)', color: '#6B7D3A' }}>
                   <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -498,12 +500,12 @@ export default function SandboxHero() {
               </div>
             </div>
 
-            <div className="w-full max-w-sm ml-auto">
-              <div className="cta-card bg-white rounded-2xl border border-deep-brown/10 shadow-xl p-5">
-                <h2 className="font-display font-bold text-deep-brown text-lg mb-1">
+            <div className="w-full max-w-md ml-auto">
+              <div className="cta-card bg-white rounded-2xl border border-deep-brown/10 shadow-xl p-8">
+                <h2 className="font-display font-bold text-deep-brown text-xl mb-1.5">
                   30-Second Setup
                 </h2>
-                <p className="text-sm text-deep-brown/50 mb-3">
+                <p className="text-[15px] text-deep-brown/50 mb-4">
                   Punch in your zip. We&apos;ll handle the rest.
                 </p>
 
@@ -520,7 +522,7 @@ export default function SandboxHero() {
                         setZip(e.target.value.replace(/\D/g, ""));
                         setError("");
                       }}
-                      className="w-full px-4 py-3.5 rounded-xl border-2 border-deep-brown/10 bg-cream/50 text-deep-brown text-lg placeholder:text-deep-brown/30 focus:outline-none focus:border-lawn transition-colors"
+                      className="w-full px-5 py-4 rounded-xl border-2 border-deep-brown/10 bg-cream/50 text-deep-brown text-lg placeholder:text-deep-brown/30 focus:outline-none focus:border-lawn transition-colors"
                     />
                     {zip.length === 5 && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -537,18 +539,24 @@ export default function SandboxHero() {
                   )}
                   <button
                     type="submit"
-                    className="cta-btn mt-3 w-full bg-terracotta text-white font-bold py-3.5 rounded-xl hover:bg-terracotta/90 active:scale-[0.99] transition-all shadow-lg shadow-terracotta/20 hover:shadow-xl hover:shadow-terracotta/25"
+                    className="cta-btn mt-4 w-full bg-terracotta text-white font-bold py-4 rounded-xl text-[17px] hover:bg-terracotta/90 active:scale-[0.99] transition-all shadow-lg shadow-terracotta/20 hover:shadow-xl hover:shadow-terracotta/25"
                   >
                     GET MY FREE PLAN →
                   </button>
-                  <p className="mt-2 text-xs text-deep-brown/40 text-center flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" /></svg>No credit card required.</p>
+                  <p className="mt-3 text-sm text-deep-brown/40 text-center flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" /></svg>No credit card required.</p>
                 </form>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Before/After Section - same width as hero */}
-          <div className="mt-5 pt-8 border-t border-deep-brown/10">
+        {/* Full-width divider below hero */}
+        <div className="max-w-6xl mx-auto w-full px-8">
+          <div className="border-t border-deep-brown/10"></div>
+        </div>
+
+        {/* Before/After Section */}
+        <div className="max-w-6xl mx-auto w-full px-8 pt-8 pb-12">
             <div className="mb-2">
               <div className="w-10 h-0.5 bg-[#c17f59] mb-3"></div>
               <h2 className="font-display text-xl font-semibold text-[#1a1a1a]">
@@ -599,7 +607,6 @@ export default function SandboxHero() {
                 <p className="mt-1.5 text-xs text-[#737373] italic">September &mdash; &ldquo;My neighbor asked what my secret is.&rdquo;</p>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
