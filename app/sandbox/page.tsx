@@ -312,13 +312,19 @@ export default function SandboxHero() {
   };
 
   return (
-    <div className="bg-cream flex flex-col h-dvh overflow-hidden">
+    <div className="bg-cream flex flex-col h-dvh overflow-hidden relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-lawn/5 via-transparent to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-terracotta/5 via-transparent to-transparent rounded-full blur-3xl" />
+      </div>
+
       {/* Mobile Layout */}
-      <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
+      <div className="flex-1 flex flex-col lg:hidden overflow-hidden relative z-10">
         {/* Nav */}
         <nav className="flex items-center justify-between px-5 pt-[max(12px,env(safe-area-inset-top))] pb-2">
           <Logo />
-          <a href="/login" className="text-sm text-deep-brown/70 min-h-[44px] min-w-[44px] flex items-center justify-end">
+          <a href="/login" className="text-sm text-deep-brown/70 min-h-[44px] min-w-[44px] flex items-center justify-end font-medium hover:text-deep-brown transition-colors">
             Log In
           </a>
         </nav>
@@ -337,18 +343,29 @@ export default function SandboxHero() {
             </div>
 
             <div className="space-y-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={5}
-                placeholder="Enter zip code"
-                value={zip}
-                onChange={(e) => {
-                  setZip(e.target.value.replace(/\D/g, ""));
-                  setError("");
-                }}
-                className="w-full h-12 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn focus:ring-0 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={5}
+                  placeholder="Enter zip code"
+                  value={zip}
+                  onChange={(e) => {
+                    setZip(e.target.value.replace(/\D/g, ""));
+                    setError("");
+                  }}
+                  className="w-full h-12 px-4 rounded-2xl border-2 border-deep-brown/15 bg-white text-deep-brown text-lg text-center placeholder:text-deep-brown/40 focus:outline-none focus:border-lawn focus:ring-0 transition-colors shadow-sm"
+                />
+                {zip.length === 5 && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-6 h-6 bg-lawn/10 rounded-full flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
               {error && (
                 <p className="text-sm text-red-600 text-center">{error}</p>
               )}
@@ -356,7 +373,7 @@ export default function SandboxHero() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="cta-btn w-full h-12 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.97]"
+                className="cta-btn w-full h-12 bg-terracotta text-white font-bold rounded-2xl text-base active:scale-[0.97] transition-all shadow-lg shadow-terracotta/20 hover:shadow-xl hover:shadow-terracotta/25"
               >
                 GET MY FREE PLAN →
               </button>
@@ -418,11 +435,14 @@ export default function SandboxHero() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden lg:flex lg:flex-col lg:h-dvh lg:overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col lg:h-dvh lg:overflow-hidden relative z-10">
         {/* Nav - pinned to top */}
         <nav className="max-w-6xl mx-auto w-full px-8 py-3 flex items-center justify-between flex-shrink-0">
           <Logo />
-          <a href="/login" className="text-sm text-deep-brown/70 hover:text-deep-brown transition-colors">Log In</a>
+          <div className="flex items-center gap-6">
+            <a href="/login" className="text-sm text-deep-brown/70 hover:text-deep-brown transition-colors font-medium">Log In</a>
+            <a href="/signup" className="text-sm bg-deep-brown/5 hover:bg-deep-brown/10 text-deep-brown font-medium px-4 py-2 rounded-lg transition-colors">Sign Up</a>
+          </div>
         </nav>
 
         {/* All content centered vertically */}
@@ -488,25 +508,36 @@ export default function SandboxHero() {
                 </p>
 
                 <form onSubmit={handleSubmit}>
-                  <input
-                    id="zip-desktop"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={5}
-                    placeholder="e.g. 78701"
-                    value={zip}
-                    onChange={(e) => {
-                      setZip(e.target.value.replace(/\D/g, ""));
-                      setError("");
-                    }}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-deep-brown/10 bg-cream/50 text-deep-brown placeholder:text-deep-brown/30 focus:outline-none focus:border-lawn transition-colors"
-                  />
+                  <div className="relative">
+                    <input
+                      id="zip-desktop"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={5}
+                      placeholder="e.g. 78701"
+                      value={zip}
+                      onChange={(e) => {
+                        setZip(e.target.value.replace(/\D/g, ""));
+                        setError("");
+                      }}
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-deep-brown/10 bg-cream/50 text-deep-brown text-lg placeholder:text-deep-brown/30 focus:outline-none focus:border-lawn transition-colors"
+                    />
+                    {zip.length === 5 && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="w-6 h-6 bg-lawn/10 rounded-full flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   {error && (
                     <p className="mt-2 text-sm text-red-600">{error}</p>
                   )}
                   <button
                     type="submit"
-                    className="cta-btn mt-3 w-full bg-terracotta text-white font-bold py-3.5 rounded-xl"
+                    className="cta-btn mt-3 w-full bg-terracotta text-white font-bold py-3.5 rounded-xl hover:bg-terracotta/90 active:scale-[0.99] transition-all shadow-lg shadow-terracotta/20 hover:shadow-xl hover:shadow-terracotta/25"
                   >
                     GET MY FREE PLAN →
                   </button>
