@@ -821,6 +821,41 @@ function HomePageContent() {
                 </Link>
               )}
 
+              {/* Profile Completion CTA - Desktop inline banner */}
+              {isProfileIncomplete && !profileCtaDismissed && (
+                <Link
+                  href="/sandbox/profile"
+                  className="flex items-center gap-3 bg-gradient-to-r from-terracotta/8 to-ochre/8 rounded-2xl border border-terracotta/15 px-5 py-3.5 hover:border-terracotta/30 transition-all group relative"
+                >
+                  <div className="w-9 h-9 bg-terracotta/12 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-terracotta/18 transition-colors">
+                    <svg className="w-4.5 h-4.5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-deep-brown text-sm">Finish your profile for better recommendations</p>
+                    <p className="text-xs text-deep-brown/50 mt-0.5">A few more details and Larry can dial in his advice.</p>
+                  </div>
+                  <span className="flex-shrink-0 px-3.5 py-1.5 bg-terracotta hover:bg-terracotta/90 text-white text-xs font-semibold rounded-lg transition-colors">
+                    Finish
+                  </span>
+                  {/* Dismiss */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDismissProfileCta();
+                    }}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-deep-brown/10 rounded-full flex items-center justify-center text-deep-brown/40 hover:text-deep-brown/70 hover:border-deep-brown/30 shadow-sm transition-all"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </Link>
+              )}
+
               {/* Ask Larry Chat Card */}
               <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
                 <div className="flex items-center gap-3 mb-4">
@@ -901,49 +936,6 @@ function HomePageContent() {
 
             {/* Right Column - Plan Progress & Stats (1/3 width) */}
             <div className="space-y-4">
-              {/* Profile Completion CTA - Desktop */}
-              {isProfileIncomplete && !profileCtaDismissed && (
-                <div className="bg-white rounded-2xl border border-terracotta/20 overflow-hidden relative">
-                  {/* Accent top bar */}
-                  <div className="h-1 bg-gradient-to-r from-terracotta to-ochre" />
-                  <div className="p-5">
-                    {/* Dismiss */}
-                    <button
-                      type="button"
-                      onClick={handleDismissProfileCta}
-                      className="absolute top-3.5 right-3.5 p-1 rounded-full text-deep-brown/30 hover:text-deep-brown/60 hover:bg-deep-brown/5 transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-terracotta/10 rounded-xl flex items-center justify-center">
-                        <svg className="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-display font-bold text-deep-brown text-sm">Almost there!</h3>
-                        <p className="text-xs text-deep-brown/50">Your profile&apos;s not done yet.</p>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-deep-brown/60 mb-4">
-                      A few more details and Larry can give you spot-on recommendations for your yard.
-                    </p>
-
-                    <Link
-                      href="/sandbox/profile"
-                      className="block w-full text-center py-2.5 bg-terracotta hover:bg-terracotta/90 text-white text-sm font-semibold rounded-xl transition-colors"
-                    >
-                      Finish Profile
-                    </Link>
-                  </div>
-                </div>
-              )}
-
               {/* Progress Card */}
               {nextTask && nextTask.totalTasks > 0 && (
                 <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
