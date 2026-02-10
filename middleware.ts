@@ -50,6 +50,7 @@ export async function middleware(request: NextRequest) {
   const publicPaths = ["/", "/login", "/signup", "/home", "/chat", "/spreader", "/profile", "/gear"];
   const isPublicPath = publicPaths.includes(request.nextUrl.pathname) ||
     request.nextUrl.pathname.startsWith("/sandbox") ||
+    request.nextUrl.pathname.startsWith("/api/game") || // Game leaderboard API is public
     request.nextUrl.pathname.startsWith("/admin"); // Admin routes are protected by admin layout
 
   if (!user && !isPublicPath) {
