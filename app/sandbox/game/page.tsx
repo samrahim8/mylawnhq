@@ -1395,140 +1395,161 @@ export default function MowTownGame() {
     );
   }
 
-  // Results screen
+  // Results screen - Overlay on top of final mow pattern
   if (gameState === "results") {
     const tier = getScoreTier(percentMowed);
     const shareText = `I mowed ${percentMowed}% of the yard in Mow Town 🌱 ${maxCombo > 10 ? `(${maxCombo}x combo!)` : ""}`;
-    const shouldShowUnlockPrompt = selectedYard === "starter" && unlockedYards.size === 1 && !showUnlockPrompt;
+    const needsEmail = !email && showNameInput;
+    const canUnlockYards = unlockedYards.size === 1;
 
     return (
-      <div className="min-h-dvh bg-[#2d5a27] flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md w-full">
-          {/* Score */}
-          <div className="text-7xl font-bold text-white mb-2">{percentMowed}%</div>
-          <p className="text-white/60 mb-6">of the yard mowed</p>
+      <div className="min-h-dvh bg-[#1a3d15] flex items-center justify-center p-2 sm:p-4 relative">
+        {/* Mow pattern background */}
+        {finalPattern && (
+          <img
+            src={finalPattern}
+            alt="Your mow pattern"
+            className="absolute inset-0 w-full h-full object-contain opacity-40"
+          />
+        )}
 
-          {/* Tier */}
-          <div className="bg-white/10 rounded-xl p-6 mb-6">
-            <h3 className="font-display text-2xl font-bold text-[#f1c40f] mb-2">{tier.title}</h3>
-            <p className="text-white/80">{tier.message}</p>
-          </div>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/50" />
 
-          {/* Stats */}
-          <div className="flex justify-center gap-6 mb-6 text-white/70 text-sm">
-            <div>💥 {hitCount} hits</div>
-            <div>🔥 {maxCombo}x max combo</div>
-            <div>⏱ {YARDS[selectedYard].timeLimit}s</div>
-          </div>
-
-          {/* Pattern preview */}
-          {finalPattern && (
-            <div className="mb-6">
-              <img src={finalPattern} alt="Your mow pattern" className="w-full rounded-xl border-2 border-white/20" />
+        {/* Results overlay card */}
+        <div className="relative z-10 w-full max-w-sm mx-auto">
+          <div className="bg-[#2d3b2d]/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/10">
+            {/* Score header */}
+            <div className="text-center mb-4">
+              <div className="text-5xl sm:text-6xl font-bold text-white mb-1">{percentMowed}%</div>
+              <p className="text-white/60 text-sm">of the yard mowed</p>
             </div>
-          )}
 
-          {/* Save to Global Leaderboard */}
-          {showNameInput ? (
-            <div className="mb-6 bg-white/10 rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-3">🏆 Save your score to the global leaderboard!</p>
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={nameInput}
-                  onChange={(e) => setNameInput(e.target.value)}
-                  placeholder="Your name"
-                  maxLength={20}
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm"
-                />
-                <input
-                  type="email"
-                  value={leaderboardEmail}
-                  onChange={(e) => setLeaderboardEmail(e.target.value)}
-                  placeholder="Your email"
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm"
-                />
-                {submitError && (
-                  <p className="text-red-400 text-xs">{submitError}</p>
-                )}
-                <button
-                  onClick={async () => {
-                    if (nameInput.trim() && leaderboardEmail.trim()) {
-                      await saveToLeaderboard(nameInput.trim(), leaderboardEmail.trim());
-                    }
-                  }}
-                  disabled={isSubmitting || !nameInput.trim() || !leaderboardEmail.trim()}
-                  className="w-full bg-[#c17f59] hover:bg-[#a66b48] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-4 py-2 rounded-lg text-sm"
-                >
-                  {isSubmitting ? "Saving..." : "Save to Leaderboard"}
-                </button>
+            {/* Tier badge */}
+            <div className="bg-white/10 rounded-xl p-4 mb-4 text-center">
+              <h3 className="font-display text-xl font-bold text-[#f1c40f] mb-1">{tier.title}</h3>
+              <p className="text-white/70 text-sm">{tier.message}</p>
+            </div>
+
+            {/* Stats row */}
+            <div className="flex justify-center gap-4 mb-5 text-white/70 text-xs">
+              <div className="text-center">
+                <div className="text-lg font-bold text-white">💥 {hitCount}</div>
+                <div>hits</div>
               </div>
-              <p className="text-white/40 text-xs mt-2">We&apos;ll send you lawn tips. Unsubscribe anytime.</p>
+              <div className="text-center">
+                <div className="text-lg font-bold text-orange-400">🔥 {maxCombo}x</div>
+                <div>combo</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-white">⏱ {YARDS[selectedYard].timeLimit}s</div>
+                <div>time</div>
+              </div>
             </div>
-          ) : (
-            <button
-              onClick={() => setGameState("leaderboard")}
-              className="mb-6 text-white/60 hover:text-white/80 text-sm underline"
-            >
-              🏆 View Leaderboard
-            </button>
-          )}
 
-          {/* Unlock Prompt - shows after completing starter yard */}
-          {shouldShowUnlockPrompt && (
-            <div className="mb-6 bg-gradient-to-r from-[#c17f59]/20 to-[#c17f59]/10 border border-[#c17f59]/30 rounded-xl p-5">
-              <p className="text-white font-bold mb-2">🔓 Ready for a bigger challenge?</p>
-              <p className="text-white/70 text-sm mb-4">Unlock 3 more yards with harder obstacles and tighter time limits!</p>
+            {/* Email capture for leaderboard + yard unlock */}
+            {needsEmail ? (
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">🏆</span>
+                  <div>
+                    <p className="text-white font-medium text-sm">Join the Global Leaderboard</p>
+                    {canUnlockYards && (
+                      <p className="text-[#c17f59] text-xs">+ Unlock 3 more yards!</p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    placeholder="Your name"
+                    maxLength={20}
+                    className="w-full px-3 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-[#c17f59] text-sm"
+                  />
+                  <input
+                    type="email"
+                    value={leaderboardEmail}
+                    onChange={(e) => setLeaderboardEmail(e.target.value)}
+                    placeholder="Your email"
+                    className="w-full px-3 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-[#c17f59] text-sm"
+                  />
+                  {submitError && (
+                    <p className="text-red-400 text-xs">{submitError}</p>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (nameInput.trim() && leaderboardEmail.trim()) {
+                        const success = await saveToLeaderboard(nameInput.trim(), leaderboardEmail.trim());
+                        if (success && canUnlockYards) {
+                          // Also unlock yards when saving to leaderboard
+                          const allYards: Difficulty[] = ["starter", "suburban", "hoa", "abandoned"];
+                          localStorage.setItem(UNLOCKED_KEY, JSON.stringify(allYards));
+                          setUnlockedYards(new Set(allYards));
+                        }
+                      }
+                    }}
+                    disabled={isSubmitting || !nameInput.trim() || !leaderboardEmail.trim()}
+                    className="w-full bg-[#c17f59] hover:bg-[#a66b48] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition-colors"
+                  >
+                    {isSubmitting ? "Saving..." : canUnlockYards ? "Save Score & Unlock Yards" : "Save to Leaderboard"}
+                  </button>
+                </div>
+                <p className="text-white/40 text-xs mt-2 text-center">Weekly lawn tips. Unsubscribe anytime.</p>
+              </div>
+            ) : (
+              <button
+                onClick={() => setGameState("leaderboard")}
+                className="w-full mb-4 py-2 text-white/70 hover:text-white text-sm flex items-center justify-center gap-2"
+              >
+                🏆 View Leaderboard
+              </button>
+            )}
+
+            {/* Share buttons */}
+            <div className="flex gap-2 mb-4">
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent("https://mylawnhq-theta.vercel.app/sandbox/game")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-[#1da1f2] hover:bg-[#1a8cd8] text-white font-medium py-2 rounded-lg text-sm text-center"
+              >
+                Share on X
+              </a>
               <button
                 onClick={() => {
-                  setShowUnlockPrompt(true);
-                  setGameState("email");
+                  navigator.clipboard.writeText(`${shareText} https://mylawnhq-theta.vercel.app/sandbox/game`);
                 }}
-                className="w-full bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold px-6 py-3 rounded-xl"
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white font-medium py-2 rounded-lg text-sm"
               >
-                Unlock All Yards
+                Copy Link
               </button>
             </div>
-          )}
 
-          {/* Share */}
-          <div className="flex gap-3 justify-center mb-6">
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent("https://mylawnhq-theta.vercel.app/sandbox/game")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-[#1da1f2] hover:bg-[#1a8cd8] text-white font-medium px-4 py-2 rounded-lg text-sm"
-            >
-              Share on X
-            </a>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(`${shareText} https://mylawnhq-theta.vercel.app/sandbox/game`);
-              }}
-              className="bg-white/20 hover:bg-white/30 text-white font-medium px-4 py-2 rounded-lg text-sm"
-            >
-              Copy Link
-            </button>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => {
-                initGame(selectedYard);
-                soundManager.current.startMower();
-                setGameState("playing");
-              }}
-              className="bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold px-6 py-3 rounded-xl"
-            >
-              Mow Again
-            </button>
-            <button
-              onClick={() => setGameState("select")}
-              className="bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-xl"
-            >
-              New Yard
-            </button>
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowNameInput(true);
+                  initGame(selectedYard);
+                  soundManager.current.startMower();
+                  setGameState("playing");
+                }}
+                className="flex-1 bg-[#c17f59] hover:bg-[#a66b48] text-white font-bold py-3 rounded-xl text-sm"
+              >
+                Mow Again
+              </button>
+              <button
+                onClick={() => {
+                  setShowNameInput(true);
+                  setGameState("select");
+                }}
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white font-bold py-3 rounded-xl text-sm"
+              >
+                New Yard
+              </button>
+            </div>
           </div>
         </div>
       </div>
