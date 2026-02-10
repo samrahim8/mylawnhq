@@ -1041,6 +1041,22 @@ export default function MowTownGame() {
       const percent = Math.round((state.cutGrass / state.totalGrass) * 100);
       setPercentMowed(percent);
 
+      // Check for 100% completion - end game immediately
+      if (state.cutGrass >= state.totalGrass) {
+        // Perfect score! End the game
+        soundManager.current.stopMower();
+        soundManager.current.playGameOver(true);
+
+        // Capture final pattern
+        const canvasEl = canvasRef.current;
+        if (canvasEl) {
+          setFinalPattern(canvasEl.toDataURL());
+        }
+
+        setGameState("results");
+        return; // Exit the game loop
+      }
+
       // Draw
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
