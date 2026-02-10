@@ -448,7 +448,7 @@ export default function SandboxHero() {
         </nav>
 
         {/* Hero */}
-        <div className="flex flex-col justify-center max-w-6xl mx-auto w-full px-8 pt-16 pb-12">
+        <div className="flex flex-col justify-center max-w-6xl mx-auto w-full px-8 pt-16 pb-36">
           {/* Hero */}
           <div className="grid grid-cols-2 gap-12 items-center">
             <div>
@@ -556,7 +556,7 @@ export default function SandboxHero() {
         </div>
 
         {/* Before/After Section */}
-        <div className="max-w-6xl mx-auto w-full px-8 pt-8 pb-12">
+        <div className="max-w-6xl mx-auto w-full px-8 pt-24 pb-12">
             <div className="mb-2">
               <div className="w-10 h-0.5 bg-[#c17f59] mb-3"></div>
               <h2 className="font-display text-xl font-semibold text-[#1a1a1a]">
