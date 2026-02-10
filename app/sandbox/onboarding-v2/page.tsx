@@ -12,7 +12,7 @@ import zipGrassZones from "@/lib/zip-grass-zones.json";
    ═══════════════════════════════════════════ */
 
 type GrassKey = "bermuda" | "zoysia" | "st_augustine" | "fescue" | "kentucky_bluegrass" | "bentgrass" | "not_sure";
-type FlowStep = 1 | 2 | 3;
+type FlowStep = 0 | 1 | 2 | 3;
 
 interface OnboardingState {
   zip: string;
@@ -235,7 +235,8 @@ function getWeeklyTasks(grass: string, region: string) {
 function OnboardingFlow() {
   const searchParams = useSearchParams();
 
-  const [step, setStep] = useState<FlowStep>(1);
+  const [step, setStep] = useState<FlowStep>(0);
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
   const [state, setState] = useState<OnboardingState>({
     zip: "",
     grassType: null,
@@ -270,6 +271,12 @@ function OnboardingFlow() {
     const region = getRegionInfo(zip);
     setState((prev) => ({ ...prev, zip, region }));
     track("onboarding_zip_submitted", { zip, region: region.region, zone: region.zone });
+    track("onboarding_welcome_viewed", { zip, region: region.region, zone: region.zone });
+
+    // Trigger entrance animation for welcome screen
+    requestAnimationFrame(() => {
+      setWelcomeVisible(true);
+    });
   }, [searchParams]);
 
   /* ── Save to localStorage ── */
@@ -422,7 +429,7 @@ function OnboardingFlow() {
   );
 
   /* ── Progress bar width ── */
-  const progressPct = step === 1 ? 25 : step === 2 ? 55 : 100;
+  const progressPct = step === 0 ? 10 : step === 1 ? 35 : step === 2 ? 65 : 100;
 
   /* ── Task data for dashboard ── */
   const weeklyData = getWeeklyTasks(
@@ -450,6 +457,82 @@ function OnboardingFlow() {
       <div
         className={`transition-opacity duration-250 ${animating ? "opacity-0" : "opacity-100"}`}
       >
+        {/* ════════════════════════════════
+           STEP 0: Welcome / Congratulations
+           ════════════════════════════════ */}
+        {step === 0 && (
+          <div className="fixed inset-0 bg-cream flex flex-col overflow-hidden">
+            {/* Spacer for progress bar */}
+            <div className="h-1 flex-shrink-0" />
+
+            <div className="flex-1 flex flex-col justify-center px-4 py-8">
+              <div
+                className={`transition-all duration-400 ease-out ${
+                  welcomeVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+              >
+                <div className="bg-white rounded-2xl shadow-sm border border-deep-brown/10 p-8 max-w-md mx-auto">
+                  {/* MapPin icon */}
+                  <div className="flex justify-center mb-4">
+                    <svg
+                      className="w-8 h-8 text-terracotta"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Heading */}
+                  <h1 className="font-display text-2xl font-bold text-deep-brown text-center">
+                    Nice — we know this area well.
+                  </h1>
+
+                  {/* Region line */}
+                  <p className="text-deep-brown/60 text-sm text-center mt-2">
+                    📍 {state.region?.region} ·{" "}
+                    {state.region?.zone
+                      ? state.region.zone.charAt(0).toUpperCase() +
+                        state.region.zone.slice(1)
+                      : ""}{" "}
+                    Season
+                  </p>
+
+                  {/* Subtext */}
+                  <p className="text-deep-brown/70 text-center mt-2">
+                    We&apos;ve helped a lot of lawns in your neck of the woods.
+                    Let&apos;s build yours.
+                  </p>
+
+                  {/* CTA */}
+                  <button
+                    onClick={() => {
+                      track("onboarding_welcome_continued", { zip: state.zip });
+                      goToStep(1);
+                    }}
+                    className="w-full h-14 bg-terracotta text-white font-bold rounded-xl active:scale-[0.97] hover:bg-terracotta/90 transition-all duration-100 text-base tracking-wide mt-6"
+                  >
+                    LET&apos;S GO →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ════════════════════════════════
            STEP 1: Grass Type Picker
            ════════════════════════════════ */}
