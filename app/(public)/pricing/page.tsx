@@ -17,7 +17,27 @@ export default function PricingPage() {
   const handleCheckout = async (interval: "month" | "year") => {
     setCheckoutLoading(interval);
     try {
-      await startCheckout(interval);
+      const response = await fetch("/api/subscription/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval }),
+      });
+
+      if (response.status === 401) {
+        // Not authenticated — redirect to login, then back here
+        router.push(`/login?redirect=/pricing`);
+        setCheckoutLoading(null);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to start checkout");
+      }
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      }
     } catch {
       setCheckoutLoading(null);
     }
