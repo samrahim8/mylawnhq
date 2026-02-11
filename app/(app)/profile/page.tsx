@@ -27,13 +27,22 @@ export default function ProfilePage() {
     knownIssues: [] as string[],
   });
 
-  // Get user email
+  // Get user email and sync auth state
   useEffect(() => {
     const getUser = async () => {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabase.auth.getUser();
       if (user?.email) {
         setUserEmail(user.email);
+        // Sync sessionStorage for consistency
+        sessionStorage.setItem("lawnhq_authenticated", "true");
+      } else {
+        // Try to get session as fallback
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          setUserEmail(session.user.email);
+          sessionStorage.setItem("lawnhq_authenticated", "true");
+        }
       }
     };
     getUser();

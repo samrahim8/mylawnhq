@@ -73,8 +73,16 @@ export function useProfile() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        // Check if user is authenticated
-        const { data: { user } } = await supabase.auth.getUser();
+        // Check if user is authenticated - try getSession first (more reliable client-side)
+        let user = null;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          user = session.user;
+        } else {
+          // Fallback to getUser
+          const { data } = await supabase.auth.getUser();
+          user = data.user;
+        }
 
         if (user) {
           setIsAuthenticated(true);
