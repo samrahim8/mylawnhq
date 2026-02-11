@@ -1637,7 +1637,7 @@ function HomePageContent() {
               </div>
 
               {/* Quick Actions Row */}
-              <div className="grid grid-cols-2 gap-4 mt-auto">
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={handleOpenActivityModal}
