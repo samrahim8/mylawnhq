@@ -67,6 +67,12 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaid(invoice);
+        break;
+      }
+
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         await handlePaymentFailed(invoice);
@@ -196,6 +202,24 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .eq("stripe_customer_id", customerId);
 
   console.log(`Subscription canceled for customer ${customerId}`);
+}
+
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const customerId = invoice.customer as string;
+
+  // Confirm the subscription is active after successful renewal payment
+  const { data } = await getSupabaseAdmin()
+    .from("subscriptions")
+    .update({
+      status: "active",
+    })
+    .eq("stripe_customer_id", customerId)
+    .eq("plan", "pro")
+    .select("user_id");
+
+  if (data?.length) {
+    console.log(`Invoice paid — subscription confirmed active for customer ${customerId}`);
+  }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {

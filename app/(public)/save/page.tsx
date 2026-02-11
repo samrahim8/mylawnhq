@@ -167,10 +167,13 @@ function SaveFlow() {
               ))}
             </ul>
             <p className="text-sm font-semibold text-deep-brown mb-4">
-              $9/month or $79/year{" "}
-              <span className="text-ochre font-normal">(save 27%)</span>
+              $9/month or $80/year{" "}
+              <span className="text-ochre font-normal">(save $28)</span>
             </p>
-            <button className="w-full bg-terracotta text-white font-semibold py-3 rounded-lg text-sm hover:bg-terracotta/90 transition-colors">
+            <button
+              onClick={() => router.push("/pricing")}
+              className="w-full bg-terracotta text-white font-semibold py-3 rounded-lg text-sm hover:bg-terracotta/90 transition-colors"
+            >
               START 7-DAY FREE TRIAL &rarr;
             </button>
             <p className="text-xs text-deep-brown/40 text-center mt-2">

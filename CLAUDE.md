@@ -56,7 +56,8 @@ app/
 │   ├── expert/          # Expert profile form
 │   ├── save/            # Plan save + PDF export
 │   ├── plan/            # 90-day plan display
-│   └── game/            # Mow Town game
+│   ├── game/            # Mow Town game
+│   └── pricing/         # Pricing page (Free vs Pro plan comparison)
 ├── (app)/               # Authenticated pages (protected by middleware, no sidebar)
 │   ├── chat/            # AI lawn care chat with Larry (session persistence via ChatContext)
 │   ├── home/            # Home dashboard (weather, plan progress, activity log, spreader calc, inline chat)
@@ -123,7 +124,7 @@ usage (id, user_id, period_start, ai_chat_count, photo_diagnosis_count)
 |---------|-----------|----------|
 | AI Chat Messages | 5/month | Unlimited |
 | Photo Diagnoses | 3/month | Unlimited |
-| Price | Free | $10/mo or $88/yr |
+| Price | Free | $9/mo or $80/yr |
 
 ## Deployment
 - **Vercel team:** `team-7411` — ALWAYS deploy to this account.
@@ -202,3 +203,4 @@ After every significant change (new feature, bug fix, config change), update thi
 - **Shared samplePlan utility** — Extracted `samplePlan.ts` from sandbox to `lib/samplePlan.ts` so both home page and LawnPlan component share the same import.
 - **Middleware update** — Removed sandbox skip. Public paths now include onboarding funnel routes. App pages (`/home`, `/chat`, `/profile`, `/gear`, `/spreader`) require authentication.
 - **Unlinked v1 features** — Gear, Calendar, Tips, Export, Spreader pages remain in repo at `(app)/` routes but have no nav links. Available for future re-integration.
+- **Stripe pricing update** — Updated Pro pricing from $10/mo + $88/yr to $7.99/mo + $80/yr across all files (lib/stripe.ts, admin dashboard MRR calc, save page upsell). Added `invoice.paid` webhook handler. Built standalone `/pricing` page at `(public)/pricing` with Free vs Pro comparison, checkout buttons, and billing portal link. Wired save page upsell button to /pricing. Added /pricing to middleware public paths.

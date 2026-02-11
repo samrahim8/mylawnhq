@@ -42,8 +42,8 @@ async function getStats(): Promise<DashboardStats> {
   // Calculate MRR (Monthly Recurring Revenue)
   const monthlyPro = subs.filter(s => s.plan === "pro" && s.billing_interval === "month").length;
   const yearlyPro = subs.filter(s => s.plan === "pro" && s.billing_interval === "year").length;
-  const monthlyRevenue = monthlyPro * 10;
-  const yearlyRevenue = (yearlyPro * 88) / 12; // Spread yearly over months
+  const monthlyRevenue = monthlyPro * 9;
+  const yearlyRevenue = (yearlyPro * 80) / 12; // Spread yearly over months
 
   // Get current month usage totals
   const currentMonth = new Date().toISOString().slice(0, 7) + "-01";

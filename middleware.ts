@@ -16,6 +16,7 @@ const PUBLIC_PATHS = [
   "/save",
   "/plan",
   "/game",
+  "/pricing",
 ];
 
 export async function middleware(request: NextRequest) {
