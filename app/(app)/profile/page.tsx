@@ -9,7 +9,13 @@ import Link from "next/link";
 export default function ProfilePage() {
   const router = useRouter();
   const { profile, saveProfile, isAuthenticated } = useProfile();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  // Initialize from cache to prevent "Loading..." flash
+  const [userEmail, setUserEmail] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("lawnhq_user_email");
+    }
+    return null;
+  });
   const [showLawnProfile, setShowLawnProfile] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -31,18 +37,14 @@ export default function ProfilePage() {
   useEffect(() => {
     const getUser = async () => {
       const supabase = createClient();
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (user?.email) {
-        setUserEmail(user.email);
-        // Sync sessionStorage for consistency
+      // Try getSession first (more reliable client-side)
+      const { data: { session } } = await supabase.auth.getSession();
+      const email = session?.user?.email;
+
+      if (email) {
+        setUserEmail(email);
+        sessionStorage.setItem("lawnhq_user_email", email);
         sessionStorage.setItem("lawnhq_authenticated", "true");
-      } else {
-        // Try to get session as fallback
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.email) {
-          setUserEmail(session.user.email);
-          sessionStorage.setItem("lawnhq_authenticated", "true");
-        }
       }
     };
     getUser();
@@ -71,6 +73,9 @@ export default function ProfilePage() {
     setSigningOut(true);
     const supabase = createClient();
     await supabase.auth.signOut();
+    // Clear cached auth state
+    sessionStorage.removeItem("lawnhq_authenticated");
+    sessionStorage.removeItem("lawnhq_user_email");
     router.push("/");
   };
 
