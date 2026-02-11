@@ -430,6 +430,9 @@ function OnboardingFlow() {
         })
       );
 
+      // Set a cookie so the server middleware lets guest users through to app pages
+      document.cookie = "lawnhq_guest=1; path=/; max-age=31536000; SameSite=Lax";
+
       track("onboarding_email_submitted", { email });
 
       // Fade out then navigate to the real dashboard

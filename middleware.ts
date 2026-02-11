@@ -67,8 +67,11 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/api/game") || // Game leaderboard API is public
     request.nextUrl.pathname.startsWith("/admin"); // Admin routes are protected by admin layout
 
-  // Redirect unauthenticated users to login for protected pages
-  if (!user && !isPublicPath) {
+  // Allow guest users who completed onboarding (email submitted) to access app pages
+  const isGuest = request.cookies.has("lawnhq_guest");
+
+  // Redirect unauthenticated users to login for protected pages (unless they're a guest)
+  if (!user && !isGuest && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
