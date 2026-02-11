@@ -1666,17 +1666,6 @@ function HomePageContent() {
 
             {/* Right Column - Plan Progress & Stats (1/3 width) */}
             <div className="flex flex-col gap-4">
-              {/* Account Completion Card (Guests Only) */}
-              {showAccountCard && (
-                <AccountCompletionCard
-                  guestEmail={guestData?.email || ""}
-                  zipCode={profile?.zipCode || guestData?.zipCode || ""}
-                  grassType={profile?.grassType || guestData?.grassType || ""}
-                  onCreateAccount={() => setShowCreateAccountModal(true)}
-                  onDismiss={handleDismissAccountCard}
-                />
-              )}
-
               {/* Progress Card */}
               {nextTask && nextTask.totalTasks > 0 && (
                 <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
@@ -1733,6 +1722,17 @@ function HomePageContent() {
                     View Full Plan →
                   </button>
                 </div>
+              )}
+
+              {/* Account Completion Card (Guests Only) */}
+              {showAccountCard && (
+                <AccountCompletionCard
+                  guestEmail={guestData?.email || ""}
+                  zipCode={profile?.zipCode || guestData?.zipCode || ""}
+                  grassType={profile?.grassType || guestData?.grassType || ""}
+                  onCreateAccount={() => setShowCreateAccountModal(true)}
+                  onDismiss={handleDismissAccountCard}
+                />
               )}
 
               {/* Recent Activity Preview */}
