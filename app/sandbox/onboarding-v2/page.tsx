@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { LogoIcon, LogoWordmark } from "@/components/Logo";
 import { getRegionInfo } from "@/lib/zip-climate";
 import type { RegionInfo } from "@/lib/zip-climate";
+import { useLocation } from "@/hooks/useLocation";
 import zipGrassZones from "@/lib/zip-grass-zones.json";
 
 /* ═══════════════════════════════════════════
@@ -20,6 +21,7 @@ interface OnboardingState {
   grassLabel: string;
   email: string;
   region: RegionInfo | null;
+  cityName: string | null;
 }
 
 /* ═══════════════════════════════════════════
@@ -243,6 +245,7 @@ function OnboardingFlow() {
     grassLabel: "",
     email: "",
     region: null,
+    cityName: null,
   });
   const [showNotSure, setShowNotSure] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -253,6 +256,16 @@ function OnboardingFlow() {
   const [optInSaved, setOptInSaved] = useState(false);
 
   const upsellTriggerRef = useRef<HTMLDivElement>(null);
+
+  /* ── Accurate city name from full 5-digit zip ── */
+  const { location: accurateCity } = useLocation(state.zip || undefined);
+  useEffect(() => {
+    if (accurateCity) {
+      setState((prev) => ({ ...prev, cityName: accurateCity }));
+    }
+  }, [accurateCity]);
+
+  const displayCity = state.cityName || state.region?.region || "your area";
 
   /* ── Filter grass options by zip zone ── */
   const filteredGrassOptions = useMemo(() => {
@@ -434,7 +447,7 @@ function OnboardingFlow() {
   /* ── Task data for dashboard ── */
   const weeklyData = getWeeklyTasks(
     state.grassType || "bermuda",
-    state.region?.region || "your area"
+    displayCity
   );
 
   /* ═══════════════════════════════════
@@ -503,7 +516,7 @@ function OnboardingFlow() {
 
                   {/* Region line */}
                   <p className="text-deep-brown/60 text-sm text-center mt-2">
-                    📍 {state.region?.region} ·{" "}
+                    📍 {displayCity} ·{" "}
                     {state.region?.zone
                       ? state.region.zone.charAt(0).toUpperCase() +
                         state.region.zone.slice(1)
@@ -635,12 +648,12 @@ function OnboardingFlow() {
                             {state.region?.suggestedGrass}
                           </p>
                           <p className="text-sm text-deep-brown/50">
-                            Most common in {state.region?.region}
+                            Most common in {displayCity}
                           </p>
                         </div>
                       </div>
                       <p className="text-deep-brown/70 text-sm leading-relaxed">
-                        Most lawns in {state.region?.region} have{" "}
+                        Most lawns in {displayCity} have{" "}
                         <span className="font-semibold text-deep-brown">
                           {state.region?.suggestedGrass}
                         </span>
