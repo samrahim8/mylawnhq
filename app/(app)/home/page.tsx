@@ -19,13 +19,15 @@ import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
+import { AccountCompletionCard } from "@/components/home/AccountCompletionCard";
+import { CreateAccountModal } from "@/components/CreateAccountModal";
 import { getSamplePlan, type PlanMonth } from "@/lib/samplePlan";
 import { getHardinessZone } from "@/lib/zip-climate";
 
 type MobileView = "home" | "plan" | "activity" | "spreader" | "chat";
 
 function HomePageContent() {
-  const { profile, isSetUp, saveProfile } = useProfile();
+  const { profile, isSetUp, saveProfile, isAuthenticated } = useProfile();
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
   const { activities, addActivity, deleteActivity, updateActivity } = useCalendar();
   const { weather, loading: weatherLoading } = useWeather(profile?.zipCode);
@@ -51,6 +53,8 @@ function HomePageContent() {
   const [onboardingData, setOnboardingData] = useState<{ zipCode?: string; grassType?: string } | null>(null);
   const [showSignupSheet, setShowSignupSheet] = useState(false);
   const [signupDismissed, setSignupDismissed] = useState(false);
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+  const [accountCardDismissed, setAccountCardDismissed] = useState(false);
 
   useEffect(() => {
     if (showOnboarding) {
@@ -208,7 +212,11 @@ function HomePageContent() {
   }, [initialQuery, router]);
 
   // Show signup prompt after browsing
+  // Show signup prompt after browsing (only for guests)
   useEffect(() => {
+    // Don't show for authenticated users
+    if (isAuthenticated) return;
+
     const dismissed = localStorage.getItem("lawnhq_signup_dismissed");
     if (dismissed) {
       setSignupDismissed(true);
@@ -218,7 +226,7 @@ function HomePageContent() {
       setShowSignupSheet(true);
     }, 8000); // Show after 8 seconds
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthenticated]);
 
   // Track scroll position to show/hide the down arrow
   useEffect(() => {
@@ -253,6 +261,36 @@ function HomePageContent() {
       localStorage.setItem("lawnhq_signup_dismissed", "true");
       setSignupDismissed(true);
     }
+  };
+
+  // Account card helpers
+  const handleDismissAccountCard = () => {
+    setAccountCardDismissed(true);
+    sessionStorage.setItem("lawnhq_account_card_dismissed", "true");
+  };
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("lawnhq_account_card_dismissed");
+    if (dismissed) setAccountCardDismissed(true);
+  }, []);
+
+  // Get guest data from localStorage
+  const guestData = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const data = localStorage.getItem("lawnhq_guest");
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Show account card for guests with saved data
+  const showAccountCard = !isAuthenticated && !accountCardDismissed && guestData?.email;
+
+  const handleAccountCreated = () => {
+    setShowCreateAccountModal(false);
+    // Page will auto-refresh due to auth state change
   };
 
   const handleOpenActivityModal = useCallback(() => {
@@ -654,6 +692,17 @@ function HomePageContent() {
                 </div>
               )}
             </div>
+
+            {/* === Account Completion Card (Guests Only) === */}
+            {showAccountCard && (
+              <AccountCompletionCard
+                guestEmail={guestData?.email || ""}
+                zipCode={profile?.zipCode || guestData?.zipCode || ""}
+                grassType={profile?.grassType || guestData?.grassType || ""}
+                onCreateAccount={() => setShowCreateAccountModal(true)}
+                onDismiss={handleDismissAccountCard}
+              />
+            )}
 
             {/* === Profile Completion CTA === */}
             {isProfileIncomplete && !profileCtaDismissed && (
@@ -1501,6 +1550,17 @@ function HomePageContent() {
                 </Link>
               )}
 
+              {/* Account Completion Card (Guests Only) - Desktop */}
+              {showAccountCard && (
+                <AccountCompletionCard
+                  guestEmail={guestData?.email || ""}
+                  zipCode={profile?.zipCode || guestData?.zipCode || ""}
+                  grassType={profile?.grassType || guestData?.grassType || ""}
+                  onCreateAccount={() => setShowCreateAccountModal(true)}
+                  onDismiss={handleDismissAccountCard}
+                />
+              )}
+
               {/* Profile Completion CTA - Desktop inline banner */}
               {isProfileIncomplete && !profileCtaDismissed && (
                 <Link
@@ -1908,6 +1968,11 @@ function HomePageContent() {
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
         initialData={onboardingData || undefined}
+      />
+      <CreateAccountModal
+        isOpen={showCreateAccountModal}
+        onClose={() => setShowCreateAccountModal(false)}
+        onSuccess={handleAccountCreated}
       />
 
       {/* Who's Larry? Popup */}
