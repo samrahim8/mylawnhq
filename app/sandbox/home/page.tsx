@@ -19,6 +19,7 @@ import TodoModal from "@/components/home/TodoModal";
 import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
 import { getSamplePlan, type PlanMonth } from "@/app/sandbox/plan/samplePlan";
+import { getHardinessZone } from "@/lib/zip-climate";
 
 type MobileView = "home" | "plan" | "activity" | "chat";
 
@@ -1198,7 +1199,7 @@ function HomePageContent() {
                   <h3 className="font-display font-bold text-deep-brown">90-Day Progress</h3>
                   {(profile?.grassType || profile?.zipCode) && (
                     <p className="text-xs text-deep-brown/50 mt-0.5 mb-4">
-                      {[formatGrassType(profile?.grassType), profile?.zipCode].filter(Boolean).join(" · ")}
+                      {[formatGrassType(profile?.grassType), profile?.zipCode ? `Zone ${getHardinessZone(profile.zipCode).toUpperCase()}` : null].filter(Boolean).join(" · ")}
                     </p>
                   )}
                   {!(profile?.grassType || profile?.zipCode) && <div className="mb-4" />}
