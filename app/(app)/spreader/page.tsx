@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSpreaderSettings } from "@/hooks/useSpreaderSettings";
 import { useProducts } from "@/hooks/useProducts";
@@ -227,6 +227,15 @@ export default function SpreaderPage() {
   };
 
   const displayValues = getDisplayValues();
+
+  // Recalculate result when the selected spreader changes
+  useEffect(() => {
+    if (selectedProduct && userSpreader) {
+      const sqFt = customSqFt ? parseInt(customSqFt) : undefined;
+      const newResult = calculateApplication(selectedProduct, sqFt);
+      if (newResult) setResult(newResult);
+    }
+  }, [userSpreader]);
 
   // Handle spreader selection from inline dropdown
   const handleSpreaderChange = (spreaderId: string) => {

@@ -597,6 +597,15 @@ function HomePageContent() {
 
   const spreaderDisplayValues = getSpreaderDisplayValues();
 
+  // Recalculate spreader result when the selected spreader changes
+  useEffect(() => {
+    if (spreaderSelectedProduct && userSpreader) {
+      const sqFt = spreaderCustomSqFt ? parseInt(spreaderCustomSqFt) : undefined;
+      const newResult = calculateApplication(spreaderSelectedProduct, sqFt);
+      if (newResult) setSpreaderResult(newResult);
+    }
+  }, [userSpreader]);
+
   return (
     <>
       {/* Mobile Layout - Lawn Status Dashboard */}
