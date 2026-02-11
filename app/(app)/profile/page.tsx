@@ -134,11 +134,13 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-deep-brown truncate">
-                {userEmail || "Loading..."}
+                {userEmail || "Your Account"}
               </p>
-              <p className="text-sm text-deep-brown/50">
-                {isAuthenticated ? "Signed in" : "Guest"}
-              </p>
+              {userEmail && (
+                <p className="text-sm text-deep-brown/50">
+                  {isAuthenticated ? "Signed in" : "Guest"}
+                </p>
+              )}
             </div>
           </div>
         </div>
