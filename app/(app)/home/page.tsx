@@ -40,7 +40,7 @@ function HomePageContent() {
     calculateApplication,
     searchCuratedProducts,
     getAllProducts,
-  } = useSpreaderSettings();
+  } = useSpreaderSettings(profile);
 
   const searchParams = useSearchParams();
   const router = useRouter();

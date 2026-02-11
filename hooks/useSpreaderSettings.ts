@@ -120,8 +120,9 @@ function interpolateSetting(
   return { setting: "N/A", confidence: "estimated" };
 }
 
-export function useSpreaderSettings() {
-  const { profile } = useProfile();
+export function useSpreaderSettings(externalProfile?: { spreaderType?: string; lawnSize?: string } | null) {
+  const { profile: internalProfile } = useProfile();
+  const profile = externalProfile !== undefined ? externalProfile : internalProfile;
 
   // Get user's selected spreader
   const userSpreader = useMemo(() => {
