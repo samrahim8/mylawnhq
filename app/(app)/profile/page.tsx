@@ -3,12 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { SubscriptionCard } from "@/components/SubscriptionCard";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { profile, saveProfile, isAuthenticated } = useProfile();
+  const { subscription, loading: subscriptionLoading, isPro, mockUpgrade, openBillingPortal, refresh: refreshSubscription } = useSubscription();
   // Initialize from cache to prevent "Loading..." flash
   const [userEmail, setUserEmail] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
@@ -18,6 +22,7 @@ export default function ProfilePage() {
   });
   const [showLawnProfile, setShowLawnProfile] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const [formData, setFormData] = useState({
     zipCode: "",
@@ -151,6 +156,15 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Subscription Card */}
+        <SubscriptionCard
+          subscription={subscription}
+          loading={subscriptionLoading}
+          isPro={isPro}
+          onUpgrade={() => setShowUpgradeModal(true)}
+          onManageBilling={openBillingPortal}
+        />
 
         {/* Lawn Summary Card */}
         <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
@@ -401,6 +415,18 @@ export default function ProfilePage() {
           LawnHQ v1.0
         </p>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        limitType="ai_chat"
+        onUpgrade={async (interval) => {
+          await mockUpgrade(interval);
+          setShowUpgradeModal(false);
+          refreshSubscription();
+        }}
+      />
     </div>
   );
 }

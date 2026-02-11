@@ -95,15 +95,16 @@ export async function POST(request: NextRequest) {
         if (!usageCheck.allowed) {
           return NextResponse.json(
             {
-              error: "usage_limit_exceeded",
+              error: "limit_reached",
+              limitType: "ai_chat",
               message: `You've used all ${FREE_TIER_LIMITS.AI_CHAT} free AI chat messages this month. Upgrade to Pro for unlimited access.`,
               usage: {
-                current: usageCheck.currentCount,
+                used: usageCheck.currentCount,
                 limit: usageCheck.limit,
                 plan: usageCheck.plan,
               },
             },
-            { status: 429 }
+            { status: 402 } // Payment Required
           );
         }
       }

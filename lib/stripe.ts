@@ -34,8 +34,8 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    monthlyPrice: 9,
-    yearlyPrice: 80, // ~$28 savings vs monthly
+    monthlyPrice: 7.99,
+    yearlyPrice: 80, // save vs monthly
     features: [
       "Unlimited AI chat messages",
       "Unlimited photo diagnoses",

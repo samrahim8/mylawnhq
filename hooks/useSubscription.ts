@@ -126,6 +126,32 @@ export function useSubscription() {
     }
   };
 
+  /**
+   * Mock upgrade - directly updates database without Stripe
+   * Use this for testing the upgrade UX flow
+   */
+  const mockUpgrade = async (interval: "month" | "year") => {
+    try {
+      const response = await fetch("/api/subscription/mock-upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to upgrade");
+      }
+
+      // Refresh subscription status after upgrade
+      await fetchSubscription();
+      return true;
+    } catch (err) {
+      console.error("Mock upgrade error:", err);
+      throw err;
+    }
+  };
+
   return {
     subscription,
     loading,
@@ -137,6 +163,7 @@ export function useSubscription() {
     photoDiagnosisRemaining,
     startCheckout,
     openBillingPortal,
+    mockUpgrade,
     refresh: fetchSubscription,
   };
 }

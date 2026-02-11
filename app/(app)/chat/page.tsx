@@ -4,7 +4,11 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ChatMessage, ChatImage } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useChatContext } from "@/contexts/ChatContext";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { UsageIndicator } from "@/components/UsageIndicator";
+import { FREE_TIER_LIMITS } from "@/lib/stripe";
 
 function ChatContent() {
   const router = useRouter();
@@ -14,6 +18,7 @@ function ChatContent() {
   const sessionParam = searchParams.get("session");
 
   const { profile } = useProfile();
+  const { subscription, isPro, mockUpgrade, refresh: refreshSubscription } = useSubscription();
   const {
     createSession,
     updateSession,
@@ -26,6 +31,7 @@ function ChatContent() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [pendingImages, setPendingImages] = useState<ChatImage[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -180,6 +186,16 @@ function ChatContent() {
         }),
       });
 
+      // Handle 402 Payment Required (usage limit reached)
+      if (response.status === 402) {
+        setShowUpgradeModal(true);
+        // Remove the user message we just added since it wasn't processed
+        setMessages(messages);
+        persistMessages(messages);
+        setIsLoading(false);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.error) {
@@ -196,6 +212,8 @@ function ChatContent() {
       const finalMessages = [...updatedMessages, assistantMessage];
       setMessages(finalMessages);
       persistMessages(finalMessages);
+      // Refresh subscription to update usage counts
+      refreshSubscription();
     } catch (error) {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -390,6 +408,14 @@ function ChatContent() {
                 rows={1}
                 className="flex-1 bg-transparent text-base resize-none focus:outline-none min-h-[24px] max-h-[120px]"
               />
+              {!isPro && (
+                <UsageIndicator
+                  used={subscription?.usage?.aiChatCount ?? 0}
+                  limit={FREE_TIER_LIMITS.AI_CHAT}
+                  type="chat"
+                  compact
+                />
+              )}
             </div>
 
             <button
@@ -405,6 +431,18 @@ function ChatContent() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        limitType="ai_chat"
+        onUpgrade={async (interval) => {
+          await mockUpgrade(interval);
+          setShowUpgradeModal(false);
+          refreshSubscription();
+        }}
+      />
     </div>
   );
 }

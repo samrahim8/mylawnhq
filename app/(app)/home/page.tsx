@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CalendarActivity, ChatImage, ChatMessage, LawnProduct, ApplicationResult } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useTodos } from "@/hooks/useTodos";
 import { useCalendar } from "@/hooks/useCalendar";
 import { useWeather } from "@/hooks/useWeather";
@@ -14,6 +15,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useSpreaderSettings } from "@/hooks/useSpreaderSettings";
 import YardPhotoModal from "@/components/home/YardPhotoModal";
 import RecentActivities from "@/components/home/RecentActivities";
+import ActivityCard from "@/components/home/ActivityCard";
 import TodoList from "@/components/home/TodoList";
 import ActivityModal from "@/components/home/ActivityModal";
 import TodoModal from "@/components/home/TodoModal";
@@ -21,13 +23,17 @@ import OnboardingModal from "@/components/home/OnboardingModal";
 import { LawnPlan } from "@/components/home/LawnPlan";
 import { AccountCompletionCard } from "@/components/home/AccountCompletionCard";
 import { CreateAccountModal } from "@/components/CreateAccountModal";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { UsageIndicator } from "@/components/UsageIndicator";
 import { getSamplePlan, type PlanMonth } from "@/lib/samplePlan";
+import { FREE_TIER_LIMITS } from "@/lib/stripe";
 import { getHardinessZone } from "@/lib/zip-climate";
 
 type MobileView = "home" | "plan" | "activity" | "spreader" | "chat";
 
 function HomePageContent() {
   const { profile, isSetUp, saveProfile, isAuthenticated, loading: profileLoading } = useProfile();
+  const { subscription, isPro, aiChatRemaining, mockUpgrade, refresh: refreshSubscription } = useSubscription();
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
   const { activities, addActivity, deleteActivity, updateActivity } = useCalendar();
   const { weather, loading: weatherLoading } = useWeather(profile?.zipCode);
@@ -55,6 +61,8 @@ function HomePageContent() {
   const [signupDismissed, setSignupDismissed] = useState(false);
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
   const [accountCardDismissed, setAccountCardDismissed] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeLimitType, setUpgradeLimitType] = useState<"ai_chat" | "photo_diagnosis">("ai_chat");
 
   useEffect(() => {
     if (showOnboarding) {
@@ -425,6 +433,17 @@ function HomePageContent() {
         }),
       });
 
+      // Handle 402 Payment Required (usage limit reached)
+      if (response.status === 402) {
+        const data = await response.json();
+        setUpgradeLimitType(data.limitType || "ai_chat");
+        setShowUpgradeModal(true);
+        // Remove the user message we just added since it wasn't processed
+        setChatMessages((prev) => prev.slice(0, -1));
+        setIsChatLoading(false);
+        return;
+      }
+
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
@@ -435,6 +454,8 @@ function HomePageContent() {
         timestamp: new Date().toISOString(),
       };
       setChatMessages((prev) => [...prev, assistantMessage]);
+      // Refresh subscription to update usage counts
+      refreshSubscription();
     } catch {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -899,25 +920,14 @@ function HomePageContent() {
               />
             )}
 
-            {/* === Log Activity Button === */}
-            <button
-              type="button"
-              onClick={handleOpenActivityModal}
-              className="w-full bg-white rounded-2xl border border-deep-brown/10 p-4 flex items-center gap-3 active:scale-[0.98] transition-transform"
-            >
-              <div className="w-10 h-10 bg-lawn rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
-              <div className="text-left flex-1">
-                <span className="text-sm font-semibold text-deep-brown">Log Activity</span>
-                <p className="text-xs text-deep-brown/50">Track what you&apos;ve done — it all adds up.</p>
-              </div>
-              <svg className="w-5 h-5 text-deep-brown/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            {/* === Activity Card === */}
+            <ActivityCard
+              activities={activities}
+              onAddActivity={handleOpenActivityModal}
+              onEditActivity={handleEditActivity}
+              onViewAll={() => setMobileView("activity")}
+              maxVisible={3}
+            />
 
             {/* Bottom padding for nav */}
             <div className="h-20" />
@@ -1399,6 +1409,14 @@ function HomePageContent() {
                       rows={1}
                       className="flex-1 bg-transparent text-base resize-none focus:outline-none min-h-[24px] max-h-[120px]"
                     />
+                    {!isPro && (
+                      <UsageIndicator
+                        used={subscription?.usage?.aiChatCount ?? 0}
+                        limit={FREE_TIER_LIMITS.AI_CHAT}
+                        type="chat"
+                        compact
+                      />
+                    )}
                   </div>
                   <button
                     type="button"
@@ -2068,6 +2086,18 @@ function HomePageContent() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Modal for usage limits */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        limitType={upgradeLimitType}
+        onUpgrade={async (interval) => {
+          await mockUpgrade(interval);
+          setShowUpgradeModal(false);
+          refreshSubscription();
+        }}
+      />
     </>
   );
 }
