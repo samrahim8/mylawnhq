@@ -25,7 +25,7 @@ import { getHardinessZone } from "@/lib/zip-climate";
 type MobileView = "home" | "plan" | "activity" | "spreader" | "chat";
 
 function HomePageContent() {
-  const { profile, isSetUp } = useProfile();
+  const { profile, isSetUp, saveProfile } = useProfile();
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
   const { activities, addActivity, deleteActivity, updateActivity } = useCalendar();
   const { weather, loading: weatherLoading } = useWeather(profile?.zipCode);
@@ -924,18 +924,83 @@ function HomePageContent() {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
+              {/* Spreader Selector - always visible */}
+              <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 mb-4">
+                <label className="block text-xs font-medium text-deep-brown/60 mb-1.5">
+                  {hasSpreader ? "Your Spreader" : "Select Your Spreader"}
+                </label>
+                <select
+                  value={profile?.spreaderType || ""}
+                  onChange={(e) => {
+                    if (e.target.value) saveProfile({ spreaderType: e.target.value });
+                  }}
+                  className={`w-full px-3 py-2.5 text-sm border rounded-xl outline-none transition-colors ${
+                    hasSpreader
+                      ? "bg-cream border-deep-brown/10 text-deep-brown focus:border-lawn"
+                      : "bg-cream border-lawn text-deep-brown focus:border-lawn ring-2 ring-lawn/20"
+                  }`}
+                >
+                  <option value="">Select spreader...</option>
+                  <optgroup label="The Andersons">
+                    <option value="andersons-lco-1000">The Andersons LCO-1000</option>
+                    <option value="andersons-pacer-pro">The Andersons Pacer Pro</option>
+                    <option value="andersons-yard-star-2150">The Andersons Yard Star 2150</option>
+                    <option value="andersons-2000">The Andersons Model 2000</option>
+                    <option value="andersons-sr">The Andersons SR</option>
+                  </optgroup>
+                  <optgroup label="Agri-Fab">
+                    <option value="agri-fab-broadcast">Agri-Fab Broadcast (1-10)</option>
+                    <option value="agri-fab-rotary">Agri-Fab Rotary</option>
+                  </optgroup>
+                  <optgroup label="Brinly">
+                    <option value="brinly-broadcast">Brinly 20 Series Push Broadcast (0-30)</option>
+                  </optgroup>
+                  <optgroup label="Chapin">
+                    <option value="chapin-broadcast">Chapin Broadcast (0-30)</option>
+                  </optgroup>
+                  <optgroup label="Craftsman">
+                    <option value="craftsman-broadcast">Craftsman Broadcast (1-10)</option>
+                  </optgroup>
+                  <optgroup label="EarthWay">
+                    <option value="earthway-3400-hand">EarthWay 3400 Hand Spreader (1-3)</option>
+                    <option value="earthway-broadcast">EarthWay Broadcast (0-30)</option>
+                    <option value="earthway-drop">Earthway Drop</option>
+                    <option value="earthway-rotary">Earthway Rotary</option>
+                  </optgroup>
+                  <optgroup label="Echo">
+                    <option value="echo-broadcast">Echo Broadcast</option>
+                  </optgroup>
+                  <optgroup label="Lesco">
+                    <option value="lesco-broadcast">Lesco Broadcast</option>
+                    <option value="lesco-rotary-numbers">Lesco Rotary (numbers)</option>
+                    <option value="lesco-rotary-letters">Lesco Rotary (letters)</option>
+                  </optgroup>
+                  <optgroup label="Precision">
+                    <option value="precision-broadcast">Precision Broadcast (1-10)</option>
+                  </optgroup>
+                  <optgroup label="Prizelawn">
+                    <option value="prizelawn-bf1-cbr">Prizelawn BF1/CBR/III/CBR IV</option>
+                    <option value="prizelawn-lf-ii">Prizelawn LF II</option>
+                  </optgroup>
+                  <optgroup label="Scotts">
+                    <option value="scotts-broadcast">Scotts Broadcast (2-15)</option>
+                    <option value="scotts-hand-held-broadcast">Scotts Hand-Held Broadcast</option>
+                    <option value="scotts-wizz">Scotts Wizz Hand Broadcast Spreader</option>
+                    <option value="scotts-rotary-consumer">Scotts Rotary (Consumer)</option>
+                    <option value="scotts-drop-consumer">Scotts Drop (Consumer)</option>
+                    <option value="scotts-easygreen">Scotts EasyGreen (Consumer)</option>
+                    <option value="scotts-rba-pro-rotary">Scotts RBA Pro Rotary</option>
+                  </optgroup>
+                  <optgroup label="Spyker">
+                    <option value="spyker-broadcast">Spyker Broadcast</option>
+                    <option value="spyker-rotary">Spyker Rotary</option>
+                  </optgroup>
+                </select>
+              </div>
+
               {!hasSpreader ? (
                 <div className="bg-white rounded-2xl border border-deep-brown/10 p-6 text-center">
-                  <div className="w-14 h-14 bg-deep-brown/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-7 h-7 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </div>
-                  <h3 className="font-display font-bold text-deep-brown mb-2">No Spreader Selected</h3>
-                  <p className="text-sm text-deep-brown/60 mb-5">Select your spreader type in your profile to use the calculator.</p>
-                  <a href="/sandbox/profile" className="inline-flex items-center px-6 py-3 bg-lawn text-white font-bold rounded-xl hover:bg-lawn/90 transition-colors">
-                    Go to Profile
-                  </a>
+                  <p className="text-sm text-deep-brown/50">Pick your spreader above to get started.</p>
                 </div>
               ) : spreaderViewMode === "result" && spreaderResult ? (
                 <div className="space-y-4">

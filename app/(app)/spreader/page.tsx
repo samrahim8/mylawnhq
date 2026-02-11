@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSpreaderSettings } from "@/hooks/useSpreaderSettings";
 import { useProducts } from "@/hooks/useProducts";
@@ -10,9 +9,92 @@ import { LawnProduct, ApplicationResult } from "@/types";
 
 type ViewMode = "search" | "manual" | "result";
 
+// Group spreaders by brand for the dropdown
+const SPREADER_GROUPS: { label: string; spreaders: { id: string; name: string }[] }[] = [
+  {
+    label: "The Andersons",
+    spreaders: [
+      { id: "andersons-lco-1000", name: "The Andersons LCO-1000" },
+      { id: "andersons-pacer-pro", name: "The Andersons Pacer Pro" },
+      { id: "andersons-yard-star-2150", name: "The Andersons Yard Star 2150" },
+      { id: "andersons-2000", name: "The Andersons Model 2000" },
+      { id: "andersons-sr", name: "The Andersons SR" },
+    ],
+  },
+  {
+    label: "Agri-Fab",
+    spreaders: [
+      { id: "agri-fab-broadcast", name: "Agri-Fab Broadcast (1-10)" },
+      { id: "agri-fab-rotary", name: "Agri-Fab Rotary" },
+    ],
+  },
+  {
+    label: "Brinly",
+    spreaders: [{ id: "brinly-broadcast", name: "Brinly 20 Series Push Broadcast (0-30)" }],
+  },
+  {
+    label: "Chapin",
+    spreaders: [{ id: "chapin-broadcast", name: "Chapin Broadcast (0-30)" }],
+  },
+  {
+    label: "Craftsman",
+    spreaders: [{ id: "craftsman-broadcast", name: "Craftsman Broadcast (1-10)" }],
+  },
+  {
+    label: "EarthWay",
+    spreaders: [
+      { id: "earthway-3400-hand", name: "EarthWay 3400 Hand Spreader (1-3)" },
+      { id: "earthway-broadcast", name: "EarthWay Broadcast (0-30)" },
+      { id: "earthway-drop", name: "Earthway Drop" },
+      { id: "earthway-rotary", name: "Earthway Rotary" },
+    ],
+  },
+  {
+    label: "Echo",
+    spreaders: [{ id: "echo-broadcast", name: "Echo Broadcast" }],
+  },
+  {
+    label: "Lesco",
+    spreaders: [
+      { id: "lesco-broadcast", name: "Lesco Broadcast" },
+      { id: "lesco-rotary-numbers", name: "Lesco Rotary (numbers)" },
+      { id: "lesco-rotary-letters", name: "Lesco Rotary (letters)" },
+    ],
+  },
+  {
+    label: "Precision",
+    spreaders: [{ id: "precision-broadcast", name: "Precision Broadcast (1-10)" }],
+  },
+  {
+    label: "Prizelawn",
+    spreaders: [
+      { id: "prizelawn-bf1-cbr", name: "Prizelawn BF1/CBR/III/CBR IV" },
+      { id: "prizelawn-lf-ii", name: "Prizelawn LF II" },
+    ],
+  },
+  {
+    label: "Scotts",
+    spreaders: [
+      { id: "scotts-broadcast", name: "Scotts Broadcast (2-15)" },
+      { id: "scotts-hand-held-broadcast", name: "Scotts Hand-Held Broadcast" },
+      { id: "scotts-wizz", name: "Scotts Wizz Hand Broadcast Spreader" },
+      { id: "scotts-rotary-consumer", name: "Scotts Rotary (Consumer)" },
+      { id: "scotts-drop-consumer", name: "Scotts Drop (Consumer)" },
+      { id: "scotts-easygreen", name: "Scotts EasyGreen (Consumer)" },
+      { id: "scotts-rba-pro-rotary", name: "Scotts RBA Pro Rotary" },
+    ],
+  },
+  {
+    label: "Spyker",
+    spreaders: [
+      { id: "spyker-broadcast", name: "Spyker Broadcast" },
+      { id: "spyker-rotary", name: "Spyker Rotary" },
+    ],
+  },
+];
+
 export default function SpreaderPage() {
-  const router = useRouter();
-  const { profile } = useProfile();
+  const { profile, saveProfile } = useProfile();
   const {
     userSpreader,
     hasSpreader,
@@ -146,66 +228,59 @@ export default function SpreaderPage() {
 
   const displayValues = getDisplayValues();
 
-  // No spreader selected - prompt to set one
-  if (!hasSpreader) {
-    return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-8 text-center">
-          <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-neutral-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-neutral-900 mb-2">
-            No Spreader Selected
-          </h1>
-          <p className="text-neutral-600 mb-6">
-            Please select your spreader type in your profile to use the spreader
-            settings calculator.
-          </p>
-          <Link
-            href="/profile"
-            className="inline-flex items-center px-6 py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-medium rounded-lg transition-colors"
-          >
-            Go to Profile Settings
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Handle spreader selection from inline dropdown
+  const handleSpreaderChange = (spreaderId: string) => {
+    if (spreaderId) {
+      saveProfile({ spreaderType: spreaderId });
+    }
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-neutral-900">
-              Spreader Settings Calculator
-            </h1>
-            <p className="text-neutral-600 mt-1">
-              Using: <span className="font-medium">{userSpreader?.spreaderName}</span>
-            </p>
+        <h1 className="text-2xl font-bold text-neutral-900">
+          Spreader Settings Calculator
+        </h1>
+        {/* Spreader Selector */}
+        <div className="mt-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-sm text-neutral-600 whitespace-nowrap">
+              {hasSpreader ? "Using:" : "Select your spreader:"}
+            </label>
+            <select
+              value={profile?.spreaderType || ""}
+              onChange={(e) => handleSpreaderChange(e.target.value)}
+              className={`px-3 py-1.5 text-sm border rounded-lg outline-none transition-colors ${
+                hasSpreader
+                  ? "bg-white border-neutral-200 text-neutral-900 focus:border-neutral-400"
+                  : "bg-white border-[#7a8b6e] text-neutral-900 focus:border-[#5a6950] ring-2 ring-[#7a8b6e]/20"
+              }`}
+            >
+              <option value="">Select spreader...</option>
+              {SPREADER_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.spreaders.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
           </div>
-          <Link
-            href="/profile"
-            className="text-sm text-neutral-500 hover:text-neutral-700 underline"
-          >
-            Change spreader
-          </Link>
         </div>
       </div>
 
+      {!hasSpreader ? (
+        /* Prompt to pick a spreader - shown below the dropdown */
+        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 text-center">
+          <p className="text-neutral-500 text-sm">
+            Pick your spreader above to get started.
+          </p>
+        </div>
+      ) : (
+      <>
       {/* Lawn Size Override */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 mb-6">
         <div className="flex items-center justify-between gap-3">
@@ -610,6 +685,8 @@ export default function SpreaderPage() {
             </div>
           )}
         </div>
+      )}
+      </>
       )}
     </div>
   );
