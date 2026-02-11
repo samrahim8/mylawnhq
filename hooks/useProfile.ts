@@ -58,7 +58,13 @@ function dbToFrontend(dbProfile: DbProfile): UserProfile {
 export function useProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize from sessionStorage to prevent flash during re-renders
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("lawnhq_authenticated") === "true";
+    }
+    return false;
+  });
   const [userId, setUserId] = useState<string | null>(null);
 
   const supabase = createClient();
@@ -72,6 +78,7 @@ export function useProfile() {
 
         if (user) {
           setIsAuthenticated(true);
+          sessionStorage.setItem("lawnhq_authenticated", "true");
           setUserId(user.id);
 
           // Fetch profile from database
@@ -108,6 +115,7 @@ export function useProfile() {
         } else {
           // Not authenticated - use localStorage
           setIsAuthenticated(false);
+          sessionStorage.removeItem("lawnhq_authenticated");
           loadFromLocalStorage();
         }
       } catch (error) {
@@ -159,6 +167,7 @@ export function useProfile() {
       async (event: AuthChangeEvent, session: Session | null) => {
         if (event === "SIGNED_IN" && session?.user) {
           setIsAuthenticated(true);
+          sessionStorage.setItem("lawnhq_authenticated", "true");
           setUserId(session.user.id);
           // Reload profile from database
           const { data: dbProfile } = await supabase
@@ -172,6 +181,7 @@ export function useProfile() {
           }
         } else if (event === "SIGNED_OUT") {
           setIsAuthenticated(false);
+          sessionStorage.removeItem("lawnhq_authenticated");
           setUserId(null);
           setProfile(null);
         }

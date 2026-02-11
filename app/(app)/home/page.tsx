@@ -27,7 +27,7 @@ import { getHardinessZone } from "@/lib/zip-climate";
 type MobileView = "home" | "plan" | "activity" | "spreader" | "chat";
 
 function HomePageContent() {
-  const { profile, isSetUp, saveProfile, isAuthenticated } = useProfile();
+  const { profile, isSetUp, saveProfile, isAuthenticated, loading: profileLoading } = useProfile();
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
   const { activities, addActivity, deleteActivity, updateActivity } = useCalendar();
   const { weather, loading: weatherLoading } = useWeather(profile?.zipCode);
