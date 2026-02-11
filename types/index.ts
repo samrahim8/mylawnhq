@@ -1,4 +1,5 @@
 export interface UserProfile {
+  email?: string;
   zipCode: string;
   grassType: "bermuda" | "zoysia" | "fescue-kbg" | "st-augustine";
   lawnSize: "small" | "medium" | "large";

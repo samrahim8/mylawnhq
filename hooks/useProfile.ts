@@ -39,6 +39,7 @@ interface DbProfile {
 // Convert database profile to frontend format
 function dbToFrontend(dbProfile: DbProfile): UserProfile {
   return {
+    email: dbProfile.email || undefined,
     zipCode: dbProfile.zip_code || "",
     grassType: (dbProfile.grass_type as UserProfile["grassType"]) || "bermuda",
     lawnSize: (dbProfile.lawn_size as UserProfile["lawnSize"]) || "medium",

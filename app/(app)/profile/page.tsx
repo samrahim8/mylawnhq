@@ -33,11 +33,18 @@ export default function ProfilePage() {
     knownIssues: [] as string[],
   });
 
-  // Get user email and sync auth state
+  // Get user email from profile or session
   useEffect(() => {
+    // First try from profile (already loaded)
+    if (profile?.email) {
+      setUserEmail(profile.email);
+      sessionStorage.setItem("lawnhq_user_email", profile.email);
+      return;
+    }
+
+    // Fallback to session
     const getUser = async () => {
       const supabase = createClient();
-      // Try getSession first (more reliable client-side)
       const { data: { session } } = await supabase.auth.getSession();
       const email = session?.user?.email;
 
@@ -48,7 +55,7 @@ export default function ProfilePage() {
       }
     };
     getUser();
-  }, []);
+  }, [profile?.email]);
 
   // Pre-populate from existing profile
   useEffect(() => {
