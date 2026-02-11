@@ -617,36 +617,31 @@ function HomePageContent() {
                     {profile?.grassType ? `Your ${formatGrassType(profile.grassType)}` : "Your Lawn"}
                   </h1>
                 </div>
-                {/* Weather badge */}
-                {weather && !weatherLoading ? (
-                  <div className="flex items-center gap-2 bg-cream rounded-xl px-3 py-2">
-                    <svg className="w-5 h-5 text-ochre" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={getWeatherIcon(weather.current?.condition)} />
-                    </svg>
-                    <span className="font-semibold text-deep-brown">{weather.current?.temp}°</span>
-                  </div>
-                ) : weatherLoading ? (
-                  <div className="w-16 h-10 bg-deep-brown/10 rounded-xl animate-pulse" />
-                ) : null}
+                {/* Weather + Zone badge */}
+                <div className="flex flex-col items-end gap-1">
+                  {weather && !weatherLoading ? (
+                    <div className="flex items-center gap-2 bg-cream rounded-xl px-3 py-2">
+                      <svg className="w-5 h-5 text-ochre" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d={getWeatherIcon(weather.current?.condition)} />
+                      </svg>
+                      <span className="font-semibold text-deep-brown">{weather.current?.temp}°</span>
+                    </div>
+                  ) : weatherLoading ? (
+                    <div className="w-16 h-10 bg-deep-brown/10 rounded-xl animate-pulse" />
+                  ) : null}
+                  {profile?.zipCode && (
+                    <span className="text-xs text-deep-brown/50">Zone {getHardinessZone(profile.zipCode).toUpperCase()}</span>
+                  )}
+                </div>
               </div>
 
-              {/* Soil temp + Zone inline */}
-              {(soilTemp && !soilTempLoading || profile?.zipCode) && (
+              {/* Soil temp inline */}
+              {soilTemp && !soilTempLoading && (
                 <div className="mt-3 flex items-center gap-2 text-sm text-deep-brown/70">
-                  {soilTemp && !soilTempLoading && (
-                    <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
-                      </svg>
-                      <span>Soil: {soilTemp.current}°F</span>
-                    </>
-                  )}
-                  {profile?.zipCode && (
-                    <>
-                      {soilTemp && !soilTempLoading && <span className="text-deep-brown/30">·</span>}
-                      <span>Zone {getHardinessZone(profile.zipCode).toUpperCase()}</span>
-                    </>
-                  )}
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
+                  </svg>
+                  <span>Soil: {soilTemp.current}°F</span>
                 </div>
               )}
             </div>
