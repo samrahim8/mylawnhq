@@ -1007,6 +1007,29 @@ function HomePageContent() {
                 </select>
               </div>
 
+              {/* Lawn Size Override - always visible when spreader selected */}
+              {hasSpreader && (
+                <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 mb-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-deep-brown/70">
+                      Lawn: <span className="font-medium text-deep-brown">{spreaderCustomSqFt || lawnSqFt.toLocaleString()} sq ft</span>
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={spreaderCustomSqFt}
+                        onChange={(e) => setSpreaderCustomSqFt(e.target.value)}
+                        placeholder={lawnSqFt.toString()}
+                        className="w-24 px-3 py-1.5 text-sm bg-cream border border-deep-brown/10 rounded-lg outline-none focus:border-lawn"
+                      />
+                      {spreaderCustomSqFt && (
+                        <button onClick={() => setSpreaderCustomSqFt("")} className="text-xs text-deep-brown/50">Reset</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {!hasSpreader ? (
                 <div className="bg-white rounded-2xl border border-deep-brown/10 p-6 text-center">
                   <p className="text-sm text-deep-brown/50">Pick your spreader above to get started.</p>
@@ -1086,27 +1109,6 @@ function HomePageContent() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Lawn Size Override */}
-                  <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm text-deep-brown/70">
-                        Lawn: <span className="font-medium text-deep-brown">{spreaderCustomSqFt || lawnSqFt.toLocaleString()} sq ft</span>
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={spreaderCustomSqFt}
-                          onChange={(e) => setSpreaderCustomSqFt(e.target.value)}
-                          placeholder={lawnSqFt.toString()}
-                          className="w-24 px-3 py-1.5 text-sm bg-cream border border-deep-brown/10 rounded-lg outline-none focus:border-lawn"
-                        />
-                        {spreaderCustomSqFt && (
-                          <button onClick={() => setSpreaderCustomSqFt("")} className="text-xs text-deep-brown/50">Reset</button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Tab Buttons */}
                   <div className="flex gap-2">
                     <button
