@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, Suspense } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CalendarActivity, ChatImage, ChatMessage } from "@/types";
+import { CalendarActivity, ChatImage, ChatMessage, LawnProduct, ApplicationResult } from "@/types";
 import { useProfile } from "@/hooks/useProfile";
 import { useTodos } from "@/hooks/useTodos";
 import { useCalendar } from "@/hooks/useCalendar";
@@ -11,6 +11,7 @@ import { useWeather } from "@/hooks/useWeather";
 import { useSoilTemp } from "@/hooks/useSoilTemp";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useProducts } from "@/hooks/useProducts";
+import { useSpreaderSettings } from "@/hooks/useSpreaderSettings";
 import YardPhotoModal from "@/components/home/YardPhotoModal";
 import RecentActivities from "@/components/home/RecentActivities";
 import TodoList from "@/components/home/TodoList";
@@ -21,7 +22,7 @@ import { LawnPlan } from "@/components/home/LawnPlan";
 import { getSamplePlan, type PlanMonth } from "@/app/sandbox/plan/samplePlan";
 import { getHardinessZone } from "@/lib/zip-climate";
 
-type MobileView = "home" | "plan" | "activity" | "chat";
+type MobileView = "home" | "plan" | "activity" | "spreader" | "chat";
 
 function HomePageContent() {
   const { profile, isSetUp } = useProfile();
@@ -31,6 +32,15 @@ function HomePageContent() {
   const { soilTemp, loading: soilTempLoading } = useSoilTemp(profile?.zipCode);
   const { photos, addPhoto } = usePhotos();
   const { products, addProduct } = useProducts();
+  const { userProducts, addUserProduct } = useProducts();
+  const {
+    userSpreader,
+    hasSpreader,
+    lawnSqFt,
+    calculateApplication,
+    searchCuratedProducts,
+    getAllProducts,
+  } = useSpreaderSettings();
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -93,6 +103,20 @@ function HomePageContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollArrow, setShowScrollArrow] = useState(true);
+
+  // Spreader calculator state
+  const [spreaderViewMode, setSpreaderViewMode] = useState<"search" | "manual" | "result">("search");
+  const [spreaderSearchQuery, setSpreaderSearchQuery] = useState("");
+  const [spreaderSelectedProduct, setSpreaderSelectedProduct] = useState<LawnProduct | null>(null);
+  const [spreaderResult, setSpreaderResult] = useState<ApplicationResult | null>(null);
+  const [spreaderCustomSqFt, setSpreaderCustomSqFt] = useState<string>("");
+  const [spreaderSelectedRate, setSpreaderSelectedRate] = useState<"low" | "high">("low");
+  const [spreaderManualName, setSpreaderManualName] = useState("");
+  const [spreaderManualBrand, setSpreaderManualBrand] = useState("");
+  const [spreaderManualRate, setSpreaderManualRate] = useState("");
+  const [spreaderManualCategory, setSpreaderManualCategory] = useState<LawnProduct["category"]>("fertilizer");
+  const [spreaderManualBagSize, setSpreaderManualBagSize] = useState("");
+  const [spreaderManualNpk, setSpreaderManualNpk] = useState("");
 
   // Inline chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -496,6 +520,83 @@ function HomePageContent() {
     return names[type] || type.charAt(0).toUpperCase() + type.slice(1).replace(/[-_]/g, " ");
   };
 
+  // Spreader calculator helpers
+  const spreaderSearchResults = useMemo(() => {
+    if (!spreaderSearchQuery.trim()) return [];
+    const curated = searchCuratedProducts(spreaderSearchQuery);
+    const userMatches = userProducts.filter(
+      (p) =>
+        p.name.toLowerCase().includes(spreaderSearchQuery.toLowerCase()) ||
+        p.brand.toLowerCase().includes(spreaderSearchQuery.toLowerCase())
+    );
+    const all = [...curated, ...userMatches];
+    const seen = new Set<string>();
+    return all.filter((p) => {
+      if (seen.has(p.name)) return false;
+      seen.add(p.name);
+      return true;
+    });
+  }, [spreaderSearchQuery, searchCuratedProducts, userProducts]);
+
+  const allSpreaderProducts = useMemo(() => getAllProducts(), [getAllProducts]);
+
+  const handleSpreaderSelectProduct = (product: LawnProduct) => {
+    setSpreaderSelectedProduct(product);
+    const sqFt = spreaderCustomSqFt ? parseInt(spreaderCustomSqFt) : undefined;
+    const calcResult = calculateApplication(product, sqFt);
+    setSpreaderResult(calcResult);
+    setSpreaderViewMode("result");
+  };
+
+  const handleSpreaderManualCalculate = () => {
+    const rate = parseFloat(spreaderManualRate);
+    if (isNaN(rate) || rate <= 0) return;
+    const sqFt = spreaderCustomSqFt ? parseInt(spreaderCustomSqFt) : undefined;
+    const manualProduct: LawnProduct = {
+      id: `manual-${Date.now()}`,
+      name: spreaderManualName || "Custom Product",
+      brand: spreaderManualBrand || "Unknown",
+      category: spreaderManualCategory,
+      applicationRate: {
+        lbsPer1000sqft: rate,
+        bagSize: spreaderManualBagSize ? parseFloat(spreaderManualBagSize) : undefined,
+      },
+      npk: spreaderManualNpk || undefined,
+      source: "user",
+    };
+    const calcResult = calculateApplication(manualProduct, sqFt);
+    setSpreaderSelectedProduct(manualProduct);
+    setSpreaderResult(calcResult);
+    setSpreaderViewMode("result");
+  };
+
+  const handleSpreaderReset = () => {
+    setSpreaderViewMode("search");
+    setSpreaderSelectedProduct(null);
+    setSpreaderResult(null);
+    setSpreaderSearchQuery("");
+    setSpreaderManualName("");
+    setSpreaderManualBrand("");
+    setSpreaderManualRate("");
+    setSpreaderManualBagSize("");
+    setSpreaderManualNpk("");
+    setSpreaderSelectedRate("low");
+  };
+
+  const getSpreaderDisplayValues = () => {
+    if (!spreaderResult || !spreaderSelectedProduct) return null;
+    const sqFt = spreaderCustomSqFt ? parseInt(spreaderCustomSqFt) : lawnSqFt;
+    const rate = spreaderSelectedRate === "low" ? spreaderResult.lbsPer1000sqftLow : spreaderResult.lbsPer1000sqftHigh;
+    const totalLbsNeeded = Math.round((rate * sqFt) / 1000 * 10) / 10;
+    let bagsNeeded: number | undefined;
+    if (spreaderSelectedProduct.applicationRate.bagSize) {
+      bagsNeeded = Math.ceil(totalLbsNeeded / spreaderSelectedProduct.applicationRate.bagSize);
+    }
+    return { rate, totalLbsNeeded, bagsNeeded };
+  };
+
+  const spreaderDisplayValues = getSpreaderDisplayValues();
+
   return (
     <>
       {/* Mobile Layout - Lawn Status Dashboard */}
@@ -810,6 +911,248 @@ function HomePageContent() {
           </>
         )}
 
+        {/* SPREADER: Spreader Calculator view */}
+        {mobileView === "spreader" && (
+          <>
+            <div className="bg-white border-b border-deep-brown/10">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => setMobileView("home")}
+                  className="p-2 -ml-2 rounded-xl active:bg-deep-brown/5"
+                >
+                  <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <h1 className="font-display text-lg font-bold text-deep-brown">Spreader Calculator</h1>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {!hasSpreader ? (
+                <div className="bg-white rounded-2xl border border-deep-brown/10 p-6 text-center">
+                  <div className="w-14 h-14 bg-deep-brown/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-7 h-7 text-deep-brown/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <h3 className="font-display font-bold text-deep-brown mb-2">No Spreader Selected</h3>
+                  <p className="text-sm text-deep-brown/60 mb-5">Select your spreader type in your profile to use the calculator.</p>
+                  <a href="/sandbox/profile" className="inline-flex items-center px-6 py-3 bg-lawn text-white font-bold rounded-xl hover:bg-lawn/90 transition-colors">
+                    Go to Profile
+                  </a>
+                </div>
+              ) : spreaderViewMode === "result" && spreaderResult ? (
+                <div className="space-y-4">
+                  {/* Result Card */}
+                  <div className="bg-white rounded-2xl border border-deep-brown/10 p-5">
+                    <p className="text-xs text-deep-brown/50 uppercase tracking-wide text-center mb-4">
+                      {userSpreader?.spreaderName} Settings
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                      <button
+                        onClick={() => setSpreaderSelectedRate("low")}
+                        className={`bg-lawn/10 rounded-xl p-4 transition-all ${
+                          spreaderSelectedRate === "low"
+                            ? "border-2 border-lawn ring-2 ring-lawn/20 shadow-lg"
+                            : "border border-lawn/30"
+                        }`}
+                      >
+                        <p className="text-xs font-medium text-lawn uppercase tracking-wide mb-1">Low Rate</p>
+                        <div className="text-3xl font-bold text-lawn mb-1">{spreaderResult.spreaderSettingLow}</div>
+                        <p className="text-xs text-lawn/70">{spreaderResult.lbsPer1000sqftLow} lbs/1k sq ft</p>
+                        {spreaderSelectedRate === "low" && <p className="text-xs text-lawn font-medium mt-1">✓ Selected</p>}
+                      </button>
+                      <button
+                        onClick={() => setSpreaderSelectedRate("high")}
+                        className={`bg-terracotta/10 rounded-xl p-4 transition-all ${
+                          spreaderSelectedRate === "high"
+                            ? "border-2 border-terracotta ring-2 ring-terracotta/20 shadow-lg"
+                            : "border border-terracotta/30"
+                        }`}
+                      >
+                        <p className="text-xs font-medium text-terracotta uppercase tracking-wide mb-1">High Rate</p>
+                        <div className="text-3xl font-bold text-terracotta mb-1">{spreaderResult.spreaderSettingHigh}</div>
+                        <p className="text-xs text-terracotta/70">{spreaderResult.lbsPer1000sqftHigh} lbs/1k sq ft</p>
+                        {spreaderSelectedRate === "high" && <p className="text-xs text-terracotta font-medium mt-1">✓ Selected</p>}
+                      </button>
+                    </div>
+                    <p className="text-xs text-deep-brown/50 text-center mt-3">
+                      Use <span className="text-lawn font-medium">Low</span> for light feeding. <span className="text-terracotta font-medium">High</span> for established lawns.
+                    </p>
+
+                    {/* Product Info */}
+                    <div className="border-t border-deep-brown/10 mt-4 pt-4">
+                      <h3 className="font-medium text-deep-brown text-center text-sm mb-3">{spreaderSelectedProduct?.name}</h3>
+                      <div className="flex justify-center gap-6 text-xs">
+                        <div className="text-center">
+                          <p className="text-deep-brown/50">Rate</p>
+                          <p className="font-medium text-deep-brown">{spreaderDisplayValues?.rate} lbs/1k</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-deep-brown/50">Total</p>
+                          <p className="font-medium text-deep-brown">{spreaderDisplayValues?.totalLbsNeeded} lbs</p>
+                        </div>
+                        {spreaderDisplayValues?.bagsNeeded && (
+                          <div className="text-center">
+                            <p className="text-deep-brown/50">Bags</p>
+                            <p className="font-medium text-deep-brown">{spreaderDisplayValues.bagsNeeded}</p>
+                          </div>
+                        )}
+                        {spreaderSelectedProduct?.npk && (
+                          <div className="text-center">
+                            <p className="text-deep-brown/50">NPK</p>
+                            <p className="font-medium text-deep-brown">{spreaderSelectedProduct.npk}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSpreaderReset}
+                    className="w-full py-3 bg-lawn text-white font-bold rounded-xl hover:bg-lawn/90 active:scale-[0.98] transition-all"
+                  >
+                    Calculate Another
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Lawn Size Override */}
+                  <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm text-deep-brown/70">
+                        Lawn: <span className="font-medium text-deep-brown">{spreaderCustomSqFt || lawnSqFt.toLocaleString()} sq ft</span>
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={spreaderCustomSqFt}
+                          onChange={(e) => setSpreaderCustomSqFt(e.target.value)}
+                          placeholder={lawnSqFt.toString()}
+                          className="w-24 px-3 py-1.5 text-sm bg-cream border border-deep-brown/10 rounded-lg outline-none focus:border-lawn"
+                        />
+                        {spreaderCustomSqFt && (
+                          <button onClick={() => setSpreaderCustomSqFt("")} className="text-xs text-deep-brown/50">Reset</button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tab Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSpreaderViewMode("search")}
+                      className={`flex-1 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors ${
+                        spreaderViewMode === "search"
+                          ? "bg-lawn text-white"
+                          : "bg-white border border-deep-brown/10 text-deep-brown/70"
+                      }`}
+                    >
+                      Search Products
+                    </button>
+                    <button
+                      onClick={() => setSpreaderViewMode("manual")}
+                      className={`flex-1 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors ${
+                        spreaderViewMode === "manual"
+                          ? "bg-lawn text-white"
+                          : "bg-white border border-deep-brown/10 text-deep-brown/70"
+                      }`}
+                    >
+                      Manual Entry
+                    </button>
+                  </div>
+
+                  {spreaderViewMode === "search" ? (
+                    <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+                      <input
+                        type="text"
+                        value={spreaderSearchQuery}
+                        onChange={(e) => setSpreaderSearchQuery(e.target.value)}
+                        placeholder="Search products (e.g., Milorganite...)"
+                        className="w-full px-4 py-3 bg-cream border border-deep-brown/10 rounded-xl text-deep-brown placeholder-deep-brown/40 outline-none focus:border-lawn mb-3"
+                      />
+                      {spreaderSearchQuery && spreaderSearchResults.length > 0 ? (
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                          {spreaderSearchResults.map((product) => (
+                            <button
+                              key={product.id}
+                              onClick={() => handleSpreaderSelectProduct(product)}
+                              className="w-full p-3 bg-cream hover:bg-cream/70 rounded-xl text-left transition-colors"
+                            >
+                              <p className="font-medium text-deep-brown text-sm">{product.name}</p>
+                              <p className="text-xs text-deep-brown/50">{product.brand}{product.npk && ` · ${product.npk}`}</p>
+                            </button>
+                          ))}
+                        </div>
+                      ) : spreaderSearchQuery ? (
+                        <p className="text-center text-deep-brown/50 py-6 text-sm">
+                          No products found. Try{" "}
+                          <button onClick={() => setSpreaderViewMode("manual")} className="text-lawn underline">manual entry</button>.
+                        </p>
+                      ) : (
+                        <div>
+                          <p className="text-xs text-deep-brown/50 mb-2">Popular products:</p>
+                          <div className="space-y-2 max-h-72 overflow-y-auto">
+                            {allSpreaderProducts.slice(0, 15).map((product) => (
+                              <button
+                                key={product.id}
+                                onClick={() => handleSpreaderSelectProduct(product)}
+                                className="w-full p-3 bg-cream hover:bg-cream/70 rounded-xl text-left transition-colors"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <p className="font-medium text-deep-brown text-sm">{product.name}</p>
+                                    <p className="text-xs text-deep-brown/50">{product.brand}</p>
+                                  </div>
+                                  <p className="text-xs text-deep-brown/50">{product.applicationRate.lbsPer1000sqft} lbs/1k</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-2xl border border-deep-brown/10 p-4">
+                      <p className="text-xs text-deep-brown/60 mb-3">Enter the application rate from your product label.</p>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-deep-brown/70 mb-1">Rate (lbs/1,000 sq ft) *</label>
+                          <input
+                            type="number" step="0.1" value={spreaderManualRate}
+                            onChange={(e) => setSpreaderManualRate(e.target.value)}
+                            placeholder="e.g., 3.5"
+                            className="w-full px-3 py-2.5 bg-cream border border-deep-brown/10 rounded-xl text-deep-brown placeholder-deep-brown/40 outline-none focus:border-lawn text-sm"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-deep-brown/70 mb-1">Product Name</label>
+                            <input type="text" value={spreaderManualName} onChange={(e) => setSpreaderManualName(e.target.value)} placeholder="Optional"
+                              className="w-full px-3 py-2.5 bg-cream border border-deep-brown/10 rounded-xl text-deep-brown placeholder-deep-brown/40 outline-none focus:border-lawn text-sm" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-deep-brown/70 mb-1">Bag Size (lbs)</label>
+                            <input type="number" step="0.1" value={spreaderManualBagSize} onChange={(e) => setSpreaderManualBagSize(e.target.value)} placeholder="Optional"
+                              className="w-full px-3 py-2.5 bg-cream border border-deep-brown/10 rounded-xl text-deep-brown placeholder-deep-brown/40 outline-none focus:border-lawn text-sm" />
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleSpreaderManualCalculate}
+                          disabled={!spreaderManualRate || parseFloat(spreaderManualRate) <= 0}
+                          className="w-full py-3 bg-lawn hover:bg-lawn/90 disabled:bg-deep-brown/20 text-white font-bold rounded-xl transition-colors active:scale-[0.98]"
+                        >
+                          Calculate Setting
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         {/* CHAT: Inline chat view */}
         {mobileView === "chat" && (
           <>
@@ -949,8 +1292,9 @@ function HomePageContent() {
           <div className="flex">
             {[
               { id: "home" as MobileView, label: "Home", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-              { id: "plan" as MobileView, label: "Plan", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
               { id: "activity" as MobileView, label: "Activity", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { id: "plan" as MobileView, label: "Plan", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
+              { id: "spreader" as MobileView, label: "Spreader", icon: "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" },
               { id: "chat" as MobileView, label: "Chat", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
             ].map((nav) => {
               const isActive = mobileView === nav.id;
