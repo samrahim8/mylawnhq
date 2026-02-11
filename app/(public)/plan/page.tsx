@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import jsPDF from "jspdf";
-import { getSamplePlan, type PlanMonth } from "./samplePlan";
+import { getSamplePlan, type PlanMonth } from "@/lib/samplePlan";
 
 const loadingSteps = [
   "Chip is analyzing your climate zone",
@@ -901,7 +901,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                     const params = new URLSearchParams(searchParams.toString());
                     params.set("email", email);
                     params.set("upgrade", "pro");
-                    router.push(`/sandbox/save?${params.toString()}`);
+                    router.push(`/save?${params.toString()}`);
                   }}
                   className="w-full bg-lawn text-white font-bold py-3 px-6 rounded-lg text-sm hover:bg-lawn/90 transition-colors"
                 >
@@ -917,7 +917,7 @@ Cover 3 months. Include specific products when recommending fertilizers or treat
                 onClick={() => {
                   const params = new URLSearchParams(searchParams.toString());
                   params.set("email", email);
-                  router.push(`/sandbox/save?${params.toString()}`);
+                  router.push(`/save?${params.toString()}`);
                 }}
                 className="w-full text-center text-xs text-deep-brown/40 hover:text-deep-brown/60 transition-colors"
               >

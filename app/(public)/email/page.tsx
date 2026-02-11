@@ -38,7 +38,7 @@ function EmailCapture() {
       grassType: grass === "st-augustine" ? "st-augustine" : "other",
     }));
 
-    router.push(`/sandbox/path?zip=${zip}&grass=${grass}`);
+    router.push(`/path?zip=${zip}&grass=${grass}`);
   };
 
   return (

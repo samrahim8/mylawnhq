@@ -43,18 +43,29 @@ App runs at http://localhost:3000
 
 ```
 app/
+├── page.tsx             # Public landing page (hero + zip code entry)
 ├── (auth)/              # Public auth pages
 │   ├── login/           # Login (email/password + Google OAuth)
 │   └── signup/          # Signup (email/password + Google OAuth)
-├── (app)/               # Authenticated pages (protected by middleware)
-│   ├── chat/            # AI lawn care chat
-│   ├── gear/            # My Gear (equipment management)
+├── (public)/            # Public pages (no auth required)
+│   ├── onboarding-v2/   # Main onboarding flow (zip + grass selection)
+│   ├── onboarding/      # Quick 3-step onboarding
+│   ├── grass/           # Grass type selector
+│   ├── email/           # Email capture
+│   ├── path/            # Path selection (quick vs expert)
+│   ├── expert/          # Expert profile form
+│   ├── save/            # Plan save + PDF export
+│   ├── plan/            # 90-day plan display
+│   └── game/            # Mow Town game
+├── (app)/               # Authenticated pages (protected by middleware, no sidebar)
+│   ├── chat/            # AI lawn care chat with Larry (session persistence via ChatContext)
+│   ├── home/            # Home dashboard (weather, plan progress, activity log, spreader calc, inline chat)
 │   ├── profile/         # User profile
-│   ├── calendars/       # Lawn care calendar
-│   ├── tips/            # Lawn care tips
-│   ├── spreader/        # Spreader calculator
-│   ├── export/          # Data export
-│   └── home/            # Home page (main app entry point)
+│   ├── gear/            # My Gear (equipment management) — unlinked, future feature
+│   ├── calendars/       # Lawn care calendar — unlinked, future feature
+│   ├── tips/            # Lawn care tips — unlinked, future feature
+│   ├── spreader/        # Spreader calculator — unlinked, future feature
+│   └── export/          # Data export — unlinked, future feature
 ├── (admin)/             # Admin dashboard (role-protected)
 │   └── admin/           # Admin pages
 │       ├── page.tsx     # Dashboard with stats
@@ -184,3 +195,10 @@ After every significant change (new feature, bug fix, config change), update thi
 
 ### 2026-02-08
 - **Lawn Love blog KB integration** — Enriched AI chat system prompt (`lib/lawn-knowledge.ts`) with knowledge from lawnlove.com/blog covering watering guidelines, aeration, overseeding, dethatching, pre-emergent timing, lawn diseases (dollar spot, brown patch, summer patch, leaf spot, iron chlorosis), lawn pests (grubs, armyworms, chinch bugs, sod webworms, voles), and expanded soil pH management. Created reference doc at `docs/lawnlove-blog-knowledge-base.md`.
+
+### 2026-02-11
+- **V2 migration — sandbox becomes the app** — Moved all sandbox pages to be the main app pages. Sandbox hero replaces the root landing page. Onboarding funnel (`/onboarding-v2`, `/onboarding`, `/grass`, `/email`, `/path`, `/expert`, `/save`, `/plan`, `/game`) moved to `(public)` route group (no auth). App pages (`/home`, `/chat`, `/profile`) now auth-required with sandbox UX (no sidebar, cream background, mobile-first dashboard). Removed old sidebar layout.
+- **Chat session persistence** — Wired ChatContext into the chat page so conversations are saved to localStorage and persist across page refreshes. Uses `createSession()` and `updateSession()` from ChatContext.
+- **Shared samplePlan utility** — Extracted `samplePlan.ts` from sandbox to `lib/samplePlan.ts` so both home page and LawnPlan component share the same import.
+- **Middleware update** — Removed sandbox skip. Public paths now include onboarding funnel routes. App pages (`/home`, `/chat`, `/profile`, `/gear`, `/spreader`) require authentication.
+- **Unlinked v1 features** — Gear, Calendar, Tips, Export, Spreader pages remain in repo at `(app)/` routes but have no nav links. Available for future re-integration.

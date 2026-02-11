@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
+import Link from "next/link";
 
-export default function ProfilePage() {
+export default function SandboxProfilePage() {
   const router = useRouter();
   const { profile, saveProfile, isSetUp } = useProfile();
 
@@ -22,6 +23,7 @@ export default function ProfilePage() {
     knownIssues: [] as string[],
   });
 
+  // Pre-populate from existing profile (zip code and grass type will already be there)
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -42,7 +44,6 @@ export default function ProfilePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Convert empty strings to undefined for optional fields
     saveProfile({
       ...formData,
       mowerType: formData.mowerType || undefined,
@@ -53,45 +54,99 @@ export default function ProfilePage() {
     router.push("/home");
   };
 
-  // Selected button style with sage green
+  // Count how many optional fields are filled
+  const filledCount = [
+    formData.lawnGoal,
+    formData.mowerType,
+    formData.spreaderType,
+    formData.irrigationSystem,
+    formData.lawnAge,
+    formData.soilType,
+    formData.knownIssues.length > 0 ? "filled" : "",
+  ].filter(Boolean).length;
+  const totalOptional = 7;
+
   const selectedClass = "bg-[#7a8b6e]/20 border-[#7a8b6e] text-[#5a6b4e]";
   const unselectedClass = "bg-white border-neutral-200 text-neutral-600 hover:border-[#7a8b6e]/50";
 
   return (
-    <div className="min-h-full pb-8">
-      <div className="p-4 sm:p-6 max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 sm:p-6">
+    <div className="min-h-screen bg-cream">
+      {/* Header */}
+      <div className="bg-white border-b border-deep-brown/10 sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link
+            href="/home"
+            className="p-2 -ml-2 rounded-xl hover:bg-deep-brown/5 active:bg-deep-brown/10 transition-colors"
+          >
+            <svg className="w-5 h-5 text-deep-brown" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <h1 className="font-display text-lg font-bold text-deep-brown">Finish Your Profile</h1>
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-6 max-w-2xl mx-auto pb-12">
+        {/* Progress indicator */}
+        <div className="bg-white rounded-2xl border border-deep-brown/10 p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-deep-brown">Profile completeness</span>
+            <span className="text-sm font-semibold text-lawn">
+              {Math.round(((filledCount + 3) / (totalOptional + 3)) * 100)}%
+            </span>
+          </div>
+          <div className="w-full h-2 bg-deep-brown/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-lawn rounded-full transition-all duration-500"
+              style={{ width: `${((filledCount + 3) / (totalOptional + 3)) * 100}%` }}
+            />
+          </div>
+          <p className="text-xs text-deep-brown/50 mt-2">
+            The more we know, the better your recommendations get.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-deep-brown/10 shadow-sm p-4 sm:p-6">
           <div className="mb-5">
-            <h1 className="text-xl font-bold text-neutral-900 mb-1">
-              10-Second Setup
-            </h1>
-            <p className="text-sm text-neutral-600">
-              Personalized recommendations all season long.
+            <h2 className="text-xl font-bold text-deep-brown mb-1 font-display">
+              Dial It In
+            </h2>
+            <p className="text-sm text-deep-brown/60">
+              A few more details so Larry can give you spot-on advice.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Zip Code */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Zip Code - Pre-populated, shown as confirmed */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Zip Code *
               </label>
-              <input
-                type="text"
-                value={formData.zipCode}
-                onChange={(e) =>
-                  setFormData({ ...formData, zipCode: e.target.value })
-                }
-                placeholder="Enter your zip code"
-                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm placeholder-neutral-400 outline-none focus:border-[#7a8b6e]"
-                required
-                maxLength={10}
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.zipCode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, zipCode: e.target.value })
+                  }
+                  placeholder="Enter your zip code"
+                  className="w-full px-3 py-2.5 bg-lawn/5 border border-lawn/20 rounded-xl text-deep-brown text-sm placeholder-deep-brown/30 outline-none focus:border-lawn focus:ring-2 focus:ring-lawn/10"
+                  required
+                  maxLength={10}
+                />
+                {formData.zipCode && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <svg className="w-4 h-4 text-lawn" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Grass Type */}
+            {/* Grass Type - Pre-populated, shown as confirmed */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Grass Type *
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -110,22 +165,41 @@ export default function ProfilePage() {
                         grassType: option.value as "bermuda" | "zoysia" | "fescue-kbg" | "st-augustine",
                       })
                     }
-                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                       formData.grassType === option.value
                         ? selectedClass
                         : unselectedClass
                     }`}
                   >
-                    <p className="font-medium text-sm">{option.label}</p>
-                    <p className="text-xs text-neutral-400">{option.desc}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-sm">{option.label}</p>
+                      {formData.grassType === option.value && (
+                        <svg className="w-4 h-4 text-[#5a6b4e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <p className="text-xs text-neutral-400 mt-0.5">{option.desc}</p>
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Divider - "Almost there" section */}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-deep-brown/10" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-3 text-xs text-deep-brown/40 font-medium">
+                  FILL THESE IN FOR BETTER RESULTS
+                </span>
+              </div>
+            </div>
+
             {/* Lawn Size */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Lawn Size
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -143,7 +217,7 @@ export default function ProfilePage() {
                         lawnSize: option.value as "small" | "medium" | "large",
                       })
                     }
-                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                       formData.lawnSize === option.value
                         ? selectedClass
                         : unselectedClass
@@ -158,7 +232,7 @@ export default function ProfilePage() {
 
             {/* Sun Exposure */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Sun Exposure
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -176,7 +250,7 @@ export default function ProfilePage() {
                         sunExposure: option.value as "full" | "partial" | "shade",
                       })
                     }
-                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                       formData.sunExposure === option.value
                         ? selectedClass
                         : unselectedClass
@@ -191,7 +265,7 @@ export default function ProfilePage() {
 
             {/* Lawn Goal */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Lawn Goal
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -209,7 +283,7 @@ export default function ProfilePage() {
                         lawnGoal: option.value as "low-maintenance" | "healthy-green" | "golf-course",
                       })
                     }
-                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                       formData.lawnGoal === option.value
                         ? selectedClass
                         : unselectedClass
@@ -224,7 +298,7 @@ export default function ProfilePage() {
 
             {/* Mower Type */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Mower Type
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -242,7 +316,7 @@ export default function ProfilePage() {
                         mowerType: option.value as "rotary" | "reel" | "riding",
                       })
                     }
-                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                       formData.mowerType === option.value
                         ? selectedClass
                         : unselectedClass
@@ -257,7 +331,7 @@ export default function ProfilePage() {
 
             {/* Spreader Type */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Spreader Type
               </label>
               <select
@@ -265,7 +339,7 @@ export default function ProfilePage() {
                 onChange={(e) =>
                   setFormData({ ...formData, spreaderType: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
+                className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-deep-brown text-sm outline-none focus:border-[#7a8b6e] focus:ring-2 focus:ring-lawn/10"
               >
                 <option value="">Select spreader</option>
                 <optgroup label="The Andersons">
@@ -331,7 +405,7 @@ export default function ProfilePage() {
 
             {/* Irrigation System */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Irrigation System
               </label>
               <select
@@ -342,7 +416,7 @@ export default function ProfilePage() {
                     irrigationSystem: e.target.value as "" | "none" | "manual" | "in-ground" | "drip",
                   })
                 }
-                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
+                className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-deep-brown text-sm outline-none focus:border-[#7a8b6e] focus:ring-2 focus:ring-lawn/10"
               >
                 <option value="">Select irrigation system</option>
                 <option value="none">None</option>
@@ -354,7 +428,7 @@ export default function ProfilePage() {
 
             {/* Lawn Age */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Lawn Age
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -371,7 +445,7 @@ export default function ProfilePage() {
                         lawnAge: option.value as "new" | "established",
                       })
                     }
-                    className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
                       formData.lawnAge === option.value
                         ? selectedClass
                         : unselectedClass
@@ -386,7 +460,7 @@ export default function ProfilePage() {
 
             {/* Known Issues (multi-select) */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Known Issues
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -428,10 +502,8 @@ export default function ProfilePage() {
                       key={option.value}
                       type="button"
                       onClick={handleToggle}
-                      className={`px-3 py-2 rounded-lg border text-left transition-all ${
-                        isSelected
-                          ? selectedClass
-                          : unselectedClass
+                      className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
+                        isSelected ? selectedClass : unselectedClass
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -466,7 +538,7 @@ export default function ProfilePage() {
 
             {/* Soil Type */}
             <div>
-              <label className="block text-sm font-medium text-neutral-600 mb-1.5">
+              <label className="block text-sm font-medium text-deep-brown/70 mb-1.5">
                 Soil Type
               </label>
               <select
@@ -474,7 +546,7 @@ export default function ProfilePage() {
                 onChange={(e) =>
                   setFormData({ ...formData, soilType: e.target.value })
                 }
-                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 text-sm outline-none focus:border-[#7a8b6e]"
+                className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-deep-brown text-sm outline-none focus:border-[#7a8b6e] focus:ring-2 focus:ring-lawn/10"
               >
                 <option value="">Select soil type</option>
                 <option value="clay">Clay</option>
@@ -489,19 +561,16 @@ export default function ProfilePage() {
             <div className="flex gap-3 pt-3">
               <button
                 type="submit"
-                className="flex-1 px-4 py-2.5 bg-[#c17f59] hover:bg-[#a86d4a] text-white text-sm font-medium rounded-lg transition-colors"
+                className="flex-1 px-4 py-3 bg-terracotta hover:bg-terracotta/90 active:scale-[0.98] text-white text-sm font-semibold rounded-xl transition-all"
               >
-                {isSetUp ? "Update Profile" : "Save Profile"}
+                Save & Go Back
               </button>
-              {isSetUp && (
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-sm font-medium rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-              )}
+              <Link
+                href="/home"
+                className="px-4 py-3 bg-deep-brown/5 hover:bg-deep-brown/10 text-deep-brown/60 text-sm font-medium rounded-xl transition-colors text-center"
+              >
+                Skip for now
+              </Link>
             </div>
           </form>
         </div>

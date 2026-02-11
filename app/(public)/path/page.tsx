@@ -35,7 +35,7 @@ function PathSelection() {
             <div className="space-y-3">
               {/* Primary CTA */}
               <button
-                onClick={() => router.push(`/sandbox/onboarding?zip=${zip}&grass=${grass}`)}
+                onClick={() => router.push(`/onboarding?zip=${zip}&grass=${grass}`)}
                 className="w-full bg-lawn text-white rounded-2xl p-5 text-left transition-all active:scale-[0.97] duration-100 shadow-lg"
               >
                 <div className="flex items-center justify-between">
@@ -51,7 +51,7 @@ function PathSelection() {
 
               {/* Secondary option */}
               <button
-                onClick={() => router.push(`/sandbox/expert?zip=${zip}&grass=${grass}`)}
+                onClick={() => router.push(`/expert?zip=${zip}&grass=${grass}`)}
                 className="w-full bg-white border-2 border-deep-brown/10 rounded-2xl p-4 text-left transition-all active:scale-[0.97] duration-100"
               >
                 <div className="flex items-center justify-between">
@@ -94,7 +94,7 @@ function PathSelection() {
 
           <div className="mt-8 space-y-3">
             <button
-              onClick={() => router.push(`/sandbox/onboarding?zip=${zip}&grass=${grass}`)}
+              onClick={() => router.push(`/onboarding?zip=${zip}&grass=${grass}`)}
               className="w-full bg-lawn text-white rounded-2xl p-6 text-left transition-all hover:bg-lawn/90 shadow-lg"
             >
               <div className="flex items-center justify-between">
@@ -109,7 +109,7 @@ function PathSelection() {
             </button>
 
             <button
-              onClick={() => router.push(`/sandbox/expert?zip=${zip}&grass=${grass}`)}
+              onClick={() => router.push(`/expert?zip=${zip}&grass=${grass}`)}
               className="w-full bg-white border-2 border-deep-brown/10 rounded-2xl p-4 text-left transition-all hover:border-deep-brown/20 hover:shadow-md"
             >
               <div className="flex items-center justify-between">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import jsPDF from "jspdf";
-import { getSamplePlan } from "../plan/samplePlan";
+import { getSamplePlan } from "@/lib/samplePlan";
 
 function SaveFlow() {
   const router = useRouter();
@@ -196,7 +196,7 @@ function SaveFlow() {
             Download My Plan (PDF)
           </button>
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/home")}
             className="w-full bg-lawn text-white font-semibold py-3 rounded-lg text-sm hover:bg-lawn/90 transition-colors"
           >
             GO TO MY DASHBOARD &rarr;

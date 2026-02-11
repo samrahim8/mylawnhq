@@ -435,7 +435,7 @@ function OnboardingFlow() {
       // Fade out then navigate to the real dashboard
       setAnimating(true);
       setTimeout(() => {
-        window.location.href = "/sandbox/home";
+        window.location.href = "/home";
       }, 300);
     },
     [state.zip, state.grassType]
@@ -699,7 +699,7 @@ function OnboardingFlow() {
             {/* Real dashboard preview (blurred) */}
             <div className="absolute inset-0 overflow-hidden" style={{ filter: "blur(6px)", opacity: 0.3 }}>
               <iframe
-                src="/sandbox/home"
+                src="/home"
                 className="w-full h-full border-0"
                 tabIndex={-1}
                 aria-hidden="true"

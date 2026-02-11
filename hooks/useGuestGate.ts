@@ -77,8 +77,8 @@ export function useGuestGate() {
       return false; // Show gate, don't proceed
     }
 
-    // Not authenticated and not a guest - redirect to signup
-    window.location.href = "/sandbox";
+    // Not authenticated and not a guest - redirect to home/landing
+    window.location.href = "/";
     return false;
   }, [isAuthenticated, isGuest]);
 

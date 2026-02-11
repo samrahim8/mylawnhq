@@ -9,7 +9,7 @@ function GrassSelection() {
   const zip = searchParams.get("zip") || "";
 
   const selectGrass = (type: "st-augustine" | "other") => {
-    router.push(`/sandbox/email?zip=${zip}&grass=${type}`);
+    router.push(`/email?zip=${zip}&grass=${type}`);
   };
 
   return (
@@ -74,7 +74,7 @@ function GrassSelection() {
         {/* Back button - fixed to bottom thumb zone */}
         <div className="px-5 pb-[max(16px,env(safe-area-inset-bottom))]">
           <button
-            onClick={() => router.push("/sandbox")}
+            onClick={() => router.push("/")}
             className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 min-h-[44px] active:text-deep-brown transition-colors duration-100"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -127,7 +127,7 @@ function GrassSelection() {
 
           <div className="mt-12 text-center">
             <button
-              onClick={() => router.push("/sandbox")}
+              onClick={() => router.push("/")}
               className="inline-flex items-center gap-1.5 text-sm text-deep-brown/50 hover:text-deep-brown py-2 px-4 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -1,10 +1,26 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Public routes that don't require authentication
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/signup",
+  // Onboarding funnel (public acquisition flow)
+  "/onboarding-v2",
+  "/onboarding",
+  "/grass",
+  "/email",
+  "/path",
+  "/expert",
+  "/save",
+  "/plan",
+  "/game",
+];
+
 export async function middleware(request: NextRequest) {
-  // Skip auth entirely for sandbox and auth callback routes
-  if (request.nextUrl.pathname.startsWith("/sandbox") ||
-      request.nextUrl.pathname.startsWith("/auth")) {
+  // Skip auth for auth callback routes
+  if (request.nextUrl.pathname.startsWith("/auth")) {
     return NextResponse.next();
   }
 
@@ -46,13 +62,12 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect unauthenticated users to login (except for public pages)
-  const publicPaths = ["/", "/login", "/signup", "/home", "/chat", "/spreader", "/profile", "/gear"];
-  const isPublicPath = publicPaths.includes(request.nextUrl.pathname) ||
-    request.nextUrl.pathname.startsWith("/sandbox") ||
+  // Check if path is public
+  const isPublicPath = PUBLIC_PATHS.includes(request.nextUrl.pathname) ||
     request.nextUrl.pathname.startsWith("/api/game") || // Game leaderboard API is public
     request.nextUrl.pathname.startsWith("/admin"); // Admin routes are protected by admin layout
 
+  // Redirect unauthenticated users to login for protected pages
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

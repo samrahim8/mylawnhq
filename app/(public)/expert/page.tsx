@@ -98,7 +98,7 @@ function ExpertFlow() {
       ...planData,
     }));
 
-    // Go to dashboard
+    // Go to home dashboard
     router.push("/home");
   };
 
@@ -107,7 +107,7 @@ function ExpertFlow() {
       <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
         {/* Header */}
         <button
-          onClick={() => router.push("/sandbox")}
+          onClick={() => router.push("/")}
           className="text-sm text-deep-brown/50 hover:text-deep-brown transition-colors flex items-center gap-1 mb-8"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

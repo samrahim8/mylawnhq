@@ -56,7 +56,7 @@ function OnboardingFlow() {
         ...planData,
       }));
 
-      router.push("/sandbox/home");
+      router.push("/home");
     },
     [zip, router]
   );
@@ -103,7 +103,7 @@ function OnboardingFlow() {
       return;
     }
     if (step === initialStep) {
-      router.push(`/sandbox/path?zip=${zip}&grass=${grassFromUrl}`);
+      router.push(`/path?zip=${zip}&grass=${grassFromUrl}`);
     } else {
       setStep((s) => s - 1);
     }

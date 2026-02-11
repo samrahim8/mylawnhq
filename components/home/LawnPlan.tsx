@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSamplePlan, type PlanMonth } from "@/app/sandbox/plan/samplePlan";
+import { getSamplePlan, type PlanMonth } from "@/lib/samplePlan";
 
 interface PlanParams {
   zip: string;
@@ -106,7 +106,7 @@ export function LawnPlan({ onTaskToggle }: LawnPlanProps = {}) {
             Personalized 90-day lawn care schedule
           </p>
           <a
-            href="/sandbox"
+            href="/"
             className="inline-flex items-center justify-center gap-2 bg-lawn text-white font-bold w-full py-4 rounded-xl hover:bg-lawn/90 active:scale-[0.98] transition-all text-base"
           >
             Get Started
